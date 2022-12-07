@@ -1,7 +1,8 @@
 {
   "expo": {
     "name": "calendarAPP",
-    "slug": "calendarAPP",
+    "slug": "calendar-app",
+    "scheme": "com.gruzservices.calendarAPP",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -28,6 +29,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "3bb9de14-47df-4341-8e8d-f41892c9b84c"
+      }
+    },
+    "owner": "stephen10121"
   }
 }
