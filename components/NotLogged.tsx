@@ -3,16 +3,17 @@ import React, { useState } from 'react';
 import { googleLoginOrRegister } from '../functions/backendFetch';
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from 'expo-web-browser';
+import { EXPO_CLIENT_ID, WEB_CLIENT_ID } from '../functions/variables';
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function LoggedIn({ loggedIn }: { loggedIn: (arg0: any, arg1: string) => any }) {
     const [error, setError] = useState("");
     const [request, _response, googlePromptAsync] = Google.useAuthRequest({
-        expoClientId: "664653035536-rskmjba0jmich63i4g8omtk4u66lvbjq.apps.googleusercontent.com",
+        expoClientId: EXPO_CLIENT_ID,
         iosClientId: "",
         androidClientId: "",
-        webClientId: "664653035536-gtdi5ba5hjq11e3ljoknc5955lkab2rt.apps.googleusercontent.com"
+        webClientId: WEB_CLIENT_ID
     });
 
     async function googleRegister() {
