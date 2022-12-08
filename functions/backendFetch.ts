@@ -132,10 +132,12 @@ export async function groupInfo(groupId: string, token: string): Promise<GroupIn
     }
 }
 
-interface AcceptParticapantResponse {
+interface ParticapantResponse {
   message?: string;
   error?: string;
 }
+
+interface AcceptParticapantResponse extends ParticapantResponse {}
 
 export async function acceptParticapant(groupId: string, token: string, particapant: string): Promise<AcceptParticapantResponse> {
     try {
@@ -159,6 +161,60 @@ export async function acceptParticapant(groupId: string, token: string, particap
     } catch (err) {
       console.error(err);
       return {error: "Error Accepting Particapant."};
+    }
+}
+
+interface AcceptParticapantResponse extends ParticapantResponse {}
+
+export async function declineParticapant(groupId: string, token: string, particapant: string): Promise<AcceptParticapantResponse> {
+    try {
+      const groups = await fetch(`${POST_SERVER}/rejectUser`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        credentials: "omit",
+        body: JSON.stringify({
+            "id": groupId,
+            "particapant": particapant
+        })
+      })
+      const groupsJson = await groups.json();
+      if (groupsJson.error) {
+        return {error: groupsJson.error}
+      }
+      return {error: "", message: groupsJson}
+    } catch (err) {
+      console.error(err);
+      return {error: "Error Rejecting Particapant."};
+    }
+}
+
+interface RemoveParticapantResponse extends ParticapantResponse {}
+
+export async function removeParticapant(groupId: string, token: string, particapant: string): Promise<RemoveParticapantResponse> {
+    try {
+      const groups = await fetch(`${POST_SERVER}/kickUser`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        credentials: "omit",
+        body: JSON.stringify({
+            "id": groupId,
+            "particapant": particapant
+        })
+      })
+      const groupsJson = await groups.json();
+      if (groupsJson.error) {
+        return {error: groupsJson.error}
+      }
+      return {error: "", message: groupsJson}
+    } catch (err) {
+      console.error(err);
+      return {error: "Error Deleting Particapant."};
     }
 }
 
@@ -196,6 +252,7 @@ export async function googleLoginOrRegister(accessToken: string): Promise<Google
 export interface JoinGroupResponse {
   error: string;
   message?: string;
+  groupName?: string;
 }
 
 export async function joinGroup(groupId: string, password: string, token: string): Promise<JoinGroupResponse> {
@@ -216,9 +273,104 @@ export async function joinGroup(groupId: string, password: string, token: string
     if (groupsJson.error) {
       return {error: groupsJson.error}
     }
-    return {error: "", message: groupsJson.message}
+    return {error: "", message: groupsJson.message, groupName: groupsJson.groupName}
   } catch (err) {
     console.error(err);
     return {error: "Error Joining Group."};
+  }
+}
+
+interface NewGroupData {
+  groupName: string;
+  groupOwner: string;
+  groupId: string;
+  aboutGroup: string;
+  particapants: Array<{
+    name: string;
+    id: number;
+  }>;
+}
+interface CreateGroupResponse {
+  error?: string;
+  data?: NewGroupData;
+}
+
+export async function createGroup(groupId: string, groupName: string, password: string, othersCanAdd: boolean, about_group: string, token: string): Promise<CreateGroupResponse> {
+  try {
+    const groups = await fetch(`${POST_SERVER}/createGroup`, {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+      },
+      credentials: "omit",
+      body: JSON.stringify({
+          "name": groupName,
+          "id": groupId,
+          "password": password,
+          "othersCanAdd": othersCanAdd,
+          "aboutGroup": about_group
+      })
+    })
+    const groupsJson = await groups.json();
+    if (groupsJson.error) {
+      return {error: groupsJson.error}
+    }
+    return {error: "", data: groupsJson}
+  } catch (err) {
+    console.error(err);
+    return {error: "Error Joining Group."};
+  }
+}
+
+interface LeaveGroupResponse extends ParticapantResponse {}
+
+export async function leaveGroup(groupId: string, token: string): Promise<LeaveGroupResponse> {
+  try {
+    const groups = await fetch(`${POST_SERVER}/leaveGroup`, {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+      },
+      credentials: "omit",
+      body: JSON.stringify({
+          "id": groupId,
+      })
+    })
+    const groupsJson = await groups.json();
+    if (groupsJson.error) {
+      return {error: groupsJson.error}
+    }
+    return {error: "", message: groupsJson.message}
+  } catch (err) {
+    console.error(err);
+    return {error: "Error leaving Group."};
+  }
+}
+
+interface CancelRequestResponse extends ParticapantResponse {}
+
+export async function cancelRequest(groupId: string, token: string): Promise<CancelRequestResponse> {
+  try {
+    const groups = await fetch(`${POST_SERVER}/cancelRequest`, {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+      },
+      credentials: "omit",
+      body: JSON.stringify({
+          "id": groupId,
+      })
+    })
+    const groupsJson = await groups.json();
+    if (groupsJson.error) {
+      return {error: groupsJson.error}
+    }
+    return {error: "", message: groupsJson.message}
+  } catch (err) {
+    console.error(err);
+    return {error: "Error leaving Group."};
   }
 }

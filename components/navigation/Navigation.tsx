@@ -1,4 +1,4 @@
-import { View, StyleSheet, Image, TouchableOpacity } from 'react-native'
+import { View, StyleSheet, Image, TouchableOpacity, Platform } from 'react-native'
 import React from 'react'
 
 export type Selected = "home" | "calendar" | "groups" | "addJob" | "account";
@@ -66,9 +66,7 @@ export default function Navigation({ selected, clicked, profilePic }: { selected
         />
       </TouchableOpacity>
       <TouchableOpacity onPress={() => clicked("account")}>
-        <Image style={styles.avatar}
-            source={{uri:profilePic}}
-        />
+        {Platform.OS === "web" ? <img src={profilePic} referrerPolicy="no-referrer" style={styles.avatar} alt="Profile Picture"/> : <Image style={styles.avatar} source={{uri:profilePic}} />}
       </TouchableOpacity>
     </View>
   )

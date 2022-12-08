@@ -7,8 +7,10 @@ import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import React from "react";
 import GroupIcon from "./GroupIcon";
 import JoinGroup from "./JoinGroup";
+import { RemoveGroup, RemovePendingGroup } from "./loggedIn/LoggedIn";
+import CreateGroup from "./CreateGroup";
 
-export default function GroupSection({ groups, pendingGroups, token, error, addGroup }: { groups: GroupsType[], pendingGroups: PendingGroupsType[], token: string, error: any, addGroup: (group: GroupsType) => any }) {
+export default function GroupSection({ groups, pendingGroups, token, error, addGroup, addPendingGroup, removeGroup, removePendingGroup }: { groups: GroupsType[], pendingGroups: PendingGroupsType[], token: string, error: any, addGroup: (group: GroupsType) => any, addPendingGroup: (group: PendingGroupsType) => any, removeGroup: RemoveGroup, removePendingGroup: RemovePendingGroup }) {
     const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null, border:"black"});
 
     useEffect(() => {
@@ -17,15 +19,19 @@ export default function GroupSection({ groups, pendingGroups, token, error, addG
     }, []);
 
     function groupClicked(groupId: string, name: string, othersCanAdd: boolean) {
-        setShowSlideUp({ show: true, header: name, children: <GroupInfo token={token} groupId={groupId} othersCanAdd={othersCanAdd}/>, border: "black" });
+        setShowSlideUp({ show: true, header: name, children: <GroupInfo removeGroup={removeGroup} token={token} groupId={groupId} othersCanAdd={othersCanAdd}/>, border: "black" });
     }
 
     function pendingGroupClicked(groupId: string, name: string, _othersCanAdd: boolean) {
-        setShowSlideUp({ show: true, header: name, children: <PendingGroupInfo groupId={groupId} />, border: "black" });
+        setShowSlideUp({ show: true, header: name, children: <PendingGroupInfo removePendingGroup={removePendingGroup} name={name} token={token} groupId={groupId} />, border: "black" });
     }
 
     function joinGroupClicked() {
-        setShowSlideUp({ show: true, header: "Join Group", children: <JoinGroup addGroup={addGroup} />, border: "black" });
+        setShowSlideUp({ show: true, header: "Join Group", children: <JoinGroup token={token} addPendingGroup={addPendingGroup} />, border: "blue" });
+    }
+
+    function createGroupClicked() {
+        setShowSlideUp({ show: true, header: "Create Group", children: <CreateGroup token={token} addGroup={addGroup} />, border: "red" });
     }
 
     return (
@@ -36,7 +42,7 @@ export default function GroupSection({ groups, pendingGroups, token, error, addG
                 {error.length !== 0 ? <View style={styles.error}><Text style={styles.errorText}>{error}</Text></View> : null}
             </View>
             <View style={styles.comingUp}>
-                <Text style={styles.title}>Joined</Text>
+                <Text style={styles.title}>Joined/Created</Text>
                 { groups.length === 0 ? <View style={styles.nogroup}><Text style={styles.nogroupText}>No Groups</Text></View> : null }
                 <View style={styles.comingUpList}>
                     {groups ? groups.map((group) => <GroupIcon key={group.groupId} id={group.groupId} name={group.groupName} owner={group.groupOwner} othersCanAdd={group.othersCanAdd} click={groupClicked}/>) : <div style={styles.nogroup}><p>No Groups</p></div>}
@@ -51,7 +57,7 @@ export default function GroupSection({ groups, pendingGroups, token, error, addG
             </View> : null }
             <View style={styles.groupButtons}>
                 <TouchableOpacity onPress={joinGroupClicked} style={styles.joinGroup}><Text style={styles.buttonText}>Join Group</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.createGroup}><Text style={styles.buttonText}>Create Group</Text></TouchableOpacity>
+                <TouchableOpacity onPress={createGroupClicked} style={styles.createGroup}><Text style={styles.buttonText}>Create Group</Text></TouchableOpacity>
             </View>
         </View>
     )

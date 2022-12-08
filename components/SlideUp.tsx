@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Animated, StyleSheet, Text, TouchableOpacity, View, Image, Dimensions } from "react-native";
+import React from "react";
+import { StyleSheet, Text, TouchableOpacity, View, Image, Dimensions } from "react-native";
 
 type Border = "black" | "red" | "blue";
 
@@ -12,17 +12,7 @@ export interface SlideUpData {
 
 export default function SlideUp({ header, children, close, border }: { header: string, children: any, close: () => void, border: Border}) {
     const win = Dimensions.get('window');
-    const [open, setOpen] = useState(true);
 
-    const openAnimation = {
-      '0%': { top: win.height },
-      '100%': { top: 20 },
-    }
-
-    const closeAnimation = {
-      '0%': { top: 20 },
-      '100%': { top: win.height },
-    }
     // style={{ top, border: `2px solid ${borderColor}` }}
 const styles = StyleSheet.create({
     cover: {
@@ -37,12 +27,13 @@ const styles = StyleSheet.create({
         backgroundColor: "#f3f3f3",
         borderTopLeftRadius: 35,
         borderTopRightRadius: 35,
+        borderWidth: 2,
+        borderStyle: "solid",
+        borderColor: border === "red" ? "#EE3F3f" : border === "blue" ? "#3A9FE9" : "#000000",
+        borderBottomWidth: 0,
         position: "absolute",
         left: 0,
         top: 20,
-        animationKeyframes: open ? openAnimation : closeAnimation,
-        animationDuration: "0.25s",
-        animationFillMode: "forwards",
         zIndex: 105
     },
     header: {
@@ -60,6 +51,10 @@ const styles = StyleSheet.create({
         fontFamily: "Poppins-SemiBold"
     },
     closeButton: {
+      width: 30,
+      height: 30,
+      alignItems: "center",
+      justifyContent: "center"
     },
     main2: {
         width: "100%",
@@ -76,10 +71,7 @@ const styles = StyleSheet.create({
     <View style={styles.main}>
         <View style={styles.header}>
             <Text style={styles.headerTitle}>{header}</Text>
-            <TouchableOpacity onPress={() => {
-              setOpen(false);
-              setTimeout(close, 250);
-            }} style={styles.closeButton}>
+            <TouchableOpacity style={styles.closeButton} onPress={close}>
               <Image style={styles.image} source={require('../assets/closecircle.png')} />
             </TouchableOpacity>
         </View>

@@ -1,80 +1,144 @@
 import { useEffect, useState } from "react";
-import { acceptParticapant, groupInfo, Particapant } from "../functions/backendFetch";
+import { acceptParticapant, declineParticapant, groupInfo, GroupInfoData, leaveGroup, Particapant, removeParticapant } from "../functions/backendFetch";
 import React from "react";
-import { View, StyleSheet, Text, TouchableOpacity, ScrollView } from "react-native";
-import PopDown from "./PopDown";
+import { View, StyleSheet, Text, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
+import PopDown, { MessageType } from "./PopDown";
+import { RemoveGroup } from "./loggedIn/LoggedIn";
 
-export default function GroupInfo({ groupId, token, othersCanAdd }: { groupId: string, token: string, othersCanAdd: boolean }) {
-    const [data, setData] = useState<any>(<View style={styles.cloader}><View style={styles.loader}></View></View>);
-    const daytostring = ["N/A", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    const montostring = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+export default function GroupInfo({ groupId, token, othersCanAdd, removeGroup }: { groupId: string, token: string, othersCanAdd: boolean, removeGroup: RemoveGroup }) {
+    const [data, setData] = useState<null | GroupInfoData>(null);
+    const [date, setDate] = useState<string | null>(null);
+    const [error, setError] = useState<any>(null);
+    const [showPopdown, setShowPopdown] = useState<{ show: boolean, message: string, type?: MessageType }>({ show: false, message: "" })
 
-    async function particapantAccept(id: string) {
-        const data = await acceptParticapant(groupId, token, id);
-        if (data.error || !data.message) {
-            console.log(data.error);
+    async function particapantAccept(id: string, name: string) {
+        const datares = await acceptParticapant(groupId, token, id);
+        if (datares.error || !datares.message) {
+            console.log(datares.error);
+            setShowPopdown({message: datares.error, type: "alert", show: true});
             return;
         }
-        console.log(data.message);
+        let newParticapants = [];
+        for (let i=0;i<data.yourowner.pending_particapants.length;i++) {
+            if (data.yourowner.pending_particapants[i].id !== parseInt(id)) {
+                newParticapants.push(data.yourowner.pending_particapants[i]);
+            }
+        }
+        setData({...data, particapants: [...data.particapants, {id: parseInt(id), name}], yourowner: {...data.yourowner, pending_particapants: newParticapants}});
+        setShowPopdown({ show: true, message: "Success", type: "success" });
+    }
+
+    async function particapantDecline(id: string) {
+        const datares = await declineParticapant(groupId, token, id);
+        if (datares.error || !datares.message) {
+            console.log(datares.error);
+            setShowPopdown({message: datares.error, type: "alert", show: true});
+            return;
+        }
+        let newParticapants = [];
+        for (let i=0;i<data.yourowner.pending_particapants.length;i++) {
+            if (data.yourowner.pending_particapants[i].id !== parseInt(id)) {
+                newParticapants.push(data.yourowner.pending_particapants[i]);
+            }
+        }
+        setData({...data, yourowner: {...data.yourowner, pending_particapants: newParticapants}});
+        setShowPopdown({ show: true, message: "Success", type: "success" });
+    }
+
+    async function removeParticapantFunc(id: string) {
+        const removeParticapantData = await removeParticapant(groupId, token, id);
+        if (removeParticapantData.error || !removeParticapantData.message) {
+            console.log(removeParticapantData.error);
+            setShowPopdown({message: removeParticapantData.error, type: "alert", show: true});
+            return;
+        }
+        if (!data) return
+        let newParticapants = [];
+        for (let i=0;i<data.particapants.length;i++) {
+            if (data.particapants[i].id !== parseInt(id)) {
+                newParticapants.push(data.particapants[i]);
+            }
+        }
+        setData({...data, particapants: newParticapants});
+        setShowPopdown({ show: true, message: "Success", type: "success" });
+    }
+
+    async function leaveGroupPrompt() {
+        const response = await leaveGroup(data.group_id, token);
+        if (response.error || !response.message) {
+            setShowPopdown({message: response.error, type: "alert", show: true});
+            return;
+        }
+        removeGroup(data.group_id);
+        setShowPopdown({message: response.message, type: "success", show: true});
     }
 
     useEffect(() => {
         groupInfo(groupId, token).then((data) => {
             if (data.error || !data.data) {
-                console.log(data.error);
-                setData(<View style={styles.error}>
-                    <Text>Error: {data.error}</Text>
-                </View>)
+                setError(data.error);
             } else {
-                const date = new Date(data.data.created);
-                const newDate = `${daytostring[date.getDay()]}, ${montostring[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}.`;
-                setData(
-                <ScrollView style={styles.groupInfo}>
-                    <Text style={styles.info}>Info</Text>
-                    <View style={styles.infoList}>
-                        <Text style={styles.li}>• Owner: <Text style={styles.span}>{data.data.owner}{data.data.yourowner ? " (you)" : null}</Text></Text>
-                        <Text style={styles.li}>• Particapants: </Text>
-                        <View style={styles.users}>
-                            {data.data.particapants.map((particapant: Particapant) => <View key={particapant.id}>
-                                <View style={styles.particapantListItem} >
-                                    <Text style={styles.span}>• {particapant.name}{particapant.id === data.data?.yourowner?.ownerId? " (you)":null}</Text>
-                                    {data.data?.yourowner && data.data.yourowner.ownerId !== particapant.id ? <TouchableOpacity><Text>Remove</Text></TouchableOpacity>:null}
-                                </View>
-                            </View>)}
-                        </View>
-                        {data.data.yourowner && data.data.yourowner.pending_particapants ? <View style={styles.li}>
-                            <Text style={styles.li}>Pending Particapants: </Text>
-                            <View style={styles.users}>
-                                {data.data.yourowner.pending_particapants.map((particapant: Particapant) => <View key={particapant.id}>
-                                    <View style={styles.particapantListItem} >
-                                        <Text style={styles.span}>• {particapant.name}</Text>
-                                        {data.data?.yourowner ? <View style={styles.acceptDecline}><TouchableOpacity style={styles.acceptButton} onPress={() => particapantAccept(particapant.id.toString())}><Text style={styles.acceptButtonText}>Accept</Text></TouchableOpacity><TouchableOpacity style={styles.declineButton}><Text style={styles.acceptButtonText}>Decline</Text></TouchableOpacity></View> :null}
-                                    </View>
-                                </View>)}
-                            </View>
-                        </View> : null}
-                        <Text style={styles.li2}>• Date Created: <Text style={styles.span}>{newDate}</Text></Text>
-                        <Text style={styles.li}>• Group Id: <Text style={styles.span}>{data.data.group_id}</Text></Text>
-                        <Text style={styles.li}>• Particapants can add jobs: <Text style={styles.span}>{othersCanAdd ? "Yes": "No"}</Text></Text>
-                        <Text style={styles.li}>• About Group: <Text style={styles.span}>{data.data.about_group}</Text></Text>
-                    </View>
-                    <View style={styles.buttons}>
-                        {data.data.yourowner ? <TouchableOpacity style={styles.leaveGroup}><Text style={styles.leaveText}>Delete Group</Text></TouchableOpacity> : null}
-                        <TouchableOpacity style={styles.leaveGroup2}><Text style={styles.leaveText}>Leave Group</Text></TouchableOpacity>
-                    </View>
-                </ScrollView>);
+                try {
+                    const unformattedDate = new Date(data.data.created);
+                    setDate(`${["N/A", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][unformattedDate.getDay()]}, ${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][unformattedDate.getMonth()]} ${unformattedDate.getDate()}, ${unformattedDate.getFullYear()}.`);
+                } catch (_err) {
+                    setDate("N/A");
+                } 
+                setData(data.data);
             }
         });
     }, []);
+    
+    if (error) {
+        return (
+            <View style={styles.error}>
+                <Text>Error: {error}</Text>
+            </View>);
+    }
 
-    return data;
+    if (!data) {
+        return <View style={styles.loading}><ActivityIndicator size="large" color="#3A9FE9" /></View>;
+    }
+
+    return(
+        <ScrollView style={styles.groupInfo}>
+            {showPopdown.show ? <PopDown message={showPopdown.message} type={showPopdown.type} close={() => setShowPopdown({...showPopdown, show: false})}/> : null}
+            <Text style={styles.info}>Info</Text>
+            <View style={styles.infoList}>
+                <Text style={styles.li}>• Owner: <Text style={styles.span}>{data.owner}{data.yourowner ? " (you)" : null}</Text></Text>
+                <Text style={styles.li}>• Particapants: </Text>
+                <View style={styles.users}>
+                    {data.particapants.map((particapant: Particapant) => <View key={particapant.id}>
+                        <View style={styles.particapantListItem} >
+                            <Text style={styles.span}>• {particapant.name}{particapant.id === data.yourowner?.ownerId? " (you)":null}</Text>
+                            {data?.yourowner && data.yourowner.ownerId !== particapant.id ? <TouchableOpacity style={styles.declineButton} onPress={() => removeParticapantFunc(particapant.id.toString())}><Text style={styles.acceptButtonText}>Remove</Text></TouchableOpacity>:null}
+                        </View>
+                    </View>)}
+                </View>
+                {data.yourowner && data.yourowner.pending_particapants && data.yourowner.pending_particapants.length != 0 ? <View style={styles.li}>
+                    <Text style={styles.li}>Pending Particapants: </Text>
+                    <View style={styles.users}>
+                        {data.yourowner.pending_particapants.map((particapant: Particapant) => <View key={particapant.id}>
+                            <View style={styles.particapantListItem} >
+                                <Text style={styles.span}>• {particapant.name}</Text>
+                                {data.yourowner ? <View style={styles.acceptDecline}><TouchableOpacity style={styles.acceptButton} onPress={() => particapantAccept(particapant.id.toString(), particapant.name)}><Text style={styles.acceptButtonText}>Accept</Text></TouchableOpacity><TouchableOpacity style={styles.declineButton} onPress={() => particapantDecline(particapant.id.toString())}><Text style={styles.acceptButtonText}>Decline</Text></TouchableOpacity></View> :null}
+                            </View>
+                        </View>)}
+                    </View>
+                </View> : null}
+                <Text style={styles.li2}>• Date Created: <Text style={styles.span}>{date}</Text></Text>
+                <Text style={styles.li}>• Group Id: <Text style={styles.span}>{data.group_id}</Text></Text>
+                <Text style={styles.li}>• Particapants can add jobs: <Text style={styles.span}>{othersCanAdd ? "Yes": "No"}</Text></Text>
+                <Text style={styles.li}>• About Group: <Text style={styles.span}>{data.about_group}</Text></Text>
+            </View>
+            <View style={styles.buttons}>
+                {data.yourowner ? <TouchableOpacity style={styles.leaveGroup}><Text style={styles.leaveText}>Delete Group</Text></TouchableOpacity> : null}
+                <TouchableOpacity style={styles.leaveGroup2} onPress={leaveGroupPrompt}><Text style={styles.leaveText}>Leave Group</Text></TouchableOpacity>
+            </View>
+    </ScrollView>);
 }
 
 const styles = StyleSheet.create({
-    cloader: {
-
-    },
-    loader: {},
     error: {
         width: "100%",
         height: "100%",
@@ -85,7 +149,8 @@ const styles = StyleSheet.create({
         padding: 25,
         overflow: "scroll",
         width: "100%",
-        height: "100%"
+        height: "100%",
+        position: "relative"
     },
     info: {
         fontSize: 20,
@@ -190,14 +255,11 @@ const styles = StyleSheet.create({
         fontWeight: "700",
         fontFamily: "Poppins-SemiBold",
         color: "#FFFFFF"
-    }
+    },
+    loading: {
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100%",
+        height: "100%"
+      }
 });
-
-
-// .cloader {
-//     width: 100%;
-//     height: 100%;
-//     display: flex;
-//     align-items: center;
-//     justify-content: center;
-// }

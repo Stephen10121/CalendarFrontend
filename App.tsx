@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, StatusBar } from "react-native";
+import { StyleSheet, StatusBar, View, ActivityIndicator } from "react-native";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import LoggedIn from './components/loggedIn/LoggedIn';
 import NotLogged from './components/NotLogged';
@@ -13,11 +13,13 @@ SplashScreen.preventAutoHideAsync();
 export default function App() {
   const [token, setToken] = useState<null | string>(null);
   const [userData, setUserData] = useState<null | GoogleLoginData>(null);
+  const [loading, setLoading] = useState(false);
   
   function loggedIn(data: GoogleLoginData, token: string) {
     setUserData(data);
     setToken(token);
     storeData(token);
+    setLoading(false);
   }
 
   function logout() {
@@ -38,13 +40,18 @@ export default function App() {
     try {
       AsyncStorage.getItem('@storage_Key').then((value) => {
         if(value !== null) {
+          setLoading(true);
           validate(value).then((data) => {
             if (data.error || !data.data) {
               storeData(null);
+              setToken(null);
+              setUserData(null);
+              setLoading(false);
               return;
             }
             setToken(value);
             setUserData(data.data.userData);
+            setLoading(false);
           });
         }
         return;
@@ -61,23 +68,32 @@ export default function App() {
   const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded) {
       await SplashScreen.hideAsync();
+      setLoading(false);
+    } else {
+      setLoading(true);
     }
   }, [fontsLoaded]);
 
-  if (!fontsLoaded) {
-    return null;
+  if (loading) {
+    return <View style={styles.loading}><ActivityIndicator size="large" color="#3A9FE9" /></View>;
   }
   
   return (
     <SafeAreaProvider style={styles.main} onLayout={onLayoutRootView}>
-      <StatusBar />
-      {userData && token ? <LoggedIn userData={userData} logout={logout} token={token} /> : <NotLogged loggedIn={loggedIn}/>}
+      <StatusBar backgroundColor="#DFDFDF"/>
+      {userData && token ? <LoggedIn userData={userData} logout={logout} token={token} /> : <NotLogged loading={setLoading} loggedIn={loggedIn}/>}
     </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
   main: {
+    width: "100%",
+    height: "100%"
+  },
+  loading: {
+    alignItems: "center",
+    justifyContent: "center",
     width: "100%",
     height: "100%"
   }

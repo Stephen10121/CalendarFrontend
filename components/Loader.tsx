@@ -1,25 +1,39 @@
-import { View, StyleSheet } from 'react-native';
-import React from 'react';
-const LottieView = require("lottie-react-native")
+import { StyleSheet, Animated, Easing } from 'react-native';
+import React, { useEffect, useRef } from 'react';
 
 export default function Loader() {
-  return (
-    <View>
-      <LottieView
-        source={require("../assets/loading.json")}
-        style={styles.animation}
-        autoPlay
-      />
-    </View>
-  )
-}
+  const degree = useRef(new Animated.Value(0)).current;
 
-const styles = StyleSheet.create({
+  useEffect(() => {
+    Animated.loop(Animated.timing(degree, {
+      toValue: 100,
+      duration: 2000,
+      easing: Easing.linear,
+      useNativeDriver: true
+    })).start();
+  }, []);
+
+  const styles = StyleSheet.create({
     animation: {
-        width: 100,
-        height: 100,
+        width: 38,
+        height: 38,
+        borderRadius: 100,
+        borderWidth: 10,
+        borderStyle: "solid",
+        borderColor: "#EE3F3F",
+        borderLeftColor: "#3A9FE9",
+        transform: [{rotate: degree.interpolate({
+          inputRange: [0, 100],
+          outputRange: ['0deg', '360deg'],
+        }) as any as string}],
       },
 });
+
+  return (
+    <Animated.View style={styles.animation}>
+    </Animated.View>
+  )
+}
 
 // .cloader {
 //     width: 100vw;

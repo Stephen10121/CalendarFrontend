@@ -6,18 +6,36 @@ import GroupSection from '../GroupSection';
 import { fetchGroups, GoogleLoginData, GroupsType, PendingGroupsType } from '../../functions/backendFetch';
 import Account from '../Account';
 
+export type RemoveGroup = (groupId: string) => void;
+export type RemovePendingGroup = (pendingGroupId: string) => void;
+
 export default function LoggedIn({ userData, logout, token }: {userData: GoogleLoginData, logout: () => void, token: string }) {
   const [groups, setGroups] = useState<Array<GroupsType>>([]);
   const [pendingGroups, setPendingGroups] = useState<Array<PendingGroupsType>>([]);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<Selected>("groups");
   const win = Dimensions.get('window');
+  
+  function removePendingGroup(groupId: string) {
+    let newGroups = [];
+    for (let i=0;i<pendingGroups.length;i++){
+      if (pendingGroups[i].groupId !== groupId) {
+        newGroups.push(groups[i]);
+      }
+    }
+    setPendingGroups(newGroups);
+  }
 
-  // useEffect(() => {
-  //   if (selected === "account") {
+  function removeGroup(groupId: string) {
+    let newGroups = [];
+    for (let i=0;i<groups.length;i++){
+      if (groups[i].groupId !== groupId) {
+        newGroups.push(groups[i]);
+      }
+    }
+    setGroups(newGroups);
+  }
 
-  //   }
-  // }, [selected]);
   useEffect(() => {
     fetchGroups(token).then((data) => {
       if (data.error != ""|| !data.data) {
@@ -91,7 +109,7 @@ export default function LoggedIn({ userData, logout, token }: {userData: GoogleL
           <Text>Calendar</Text>
         </View>
         <View style={styles.sectionGroup}>
-          <GroupSection addGroup={(group: GroupsType) => setGroups([...groups, group])} error={error} groups={groups} pendingGroups={pendingGroups} token={token}/>
+          <GroupSection removePendingGroup={removePendingGroup} addGroup={(group: GroupsType) => setGroups([...groups, group])} removeGroup={removeGroup} addPendingGroup={(group: PendingGroupsType) => setPendingGroups([...pendingGroups, group])} error={error} groups={groups} pendingGroups={pendingGroups} token={token}/>
         </View>
         <View style={styles.sectionJob}>
           <Text>Add Job</Text>

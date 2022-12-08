@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native'
 import React from 'react'
 import { Selected } from './navigation/Navigation';
 import Loader from './Loader';
@@ -9,6 +9,8 @@ export default function Account({ selected, logout }: { selected: (arg0: Selecte
             <TouchableOpacity onPress={() => selected("home")}><Text>Back</Text></TouchableOpacity>
             <TouchableOpacity onPress={logout}><Text>Logout</Text></TouchableOpacity>
             <Text>Account</Text>
+            <Loader />
+            <ActivityIndicator size="large" color="#3A9FE9" />
         </View>
     )
 }

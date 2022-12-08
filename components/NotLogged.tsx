@@ -7,7 +7,7 @@ import { EXPO_CLIENT_ID, WEB_CLIENT_ID } from '../functions/variables';
 
 WebBrowser.maybeCompleteAuthSession();
 
-export default function LoggedIn({ loggedIn }: { loggedIn: (arg0: any, arg1: string) => any }) {
+export default function LoggedIn({ loggedIn, loading }: { loggedIn: (arg0: any, arg1: string) => any, loading: (arg0: boolean) => any }) {
     const [error, setError] = useState("");
     const [request, _response, googlePromptAsync] = Google.useAuthRequest({
         expoClientId: EXPO_CLIENT_ID,
@@ -24,7 +24,7 @@ export default function LoggedIn({ loggedIn }: { loggedIn: (arg0: any, arg1: str
         }
 
         const { access_token } = response.params;
-        
+        loading(true);
         const res2 = await googleLoginOrRegister(access_token);
         if (res2.error || !res2.data) {
             setError(res2.error);
