@@ -280,19 +280,9 @@ export async function joinGroup(groupId: string, password: string, token: string
   }
 }
 
-interface NewGroupData {
-  groupName: string;
-  groupOwner: string;
-  groupId: string;
-  aboutGroup: string;
-  particapants: Array<{
-    name: string;
-    id: number;
-  }>;
-}
 interface CreateGroupResponse {
   error?: string;
-  data?: NewGroupData;
+  data?: GroupsType;
 }
 
 export async function createGroup(groupId: string, groupName: string, password: string, othersCanAdd: boolean, about_group: string, token: string): Promise<CreateGroupResponse> {

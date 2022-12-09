@@ -8,7 +8,7 @@ import { RemovePendingGroup } from "./loggedIn/LoggedIn";
 export default function PendingGroupInfo({ groupId, token, name, removePendingGroup }: { groupId: string, token: string, name: string, removePendingGroup: RemovePendingGroup }) {
     const [showPopdown, setShowPopdown] = useState<{ show: boolean, message: string, type?: MessageType }>({ show: false, message: "" })
 
-    async function leaveGroupPrompt() {
+    async function leavePendingGroupPrompt() {
         const response = await cancelRequest(groupId, token);
         if (response.error || !response.message) {
             setShowPopdown({message: response.error, type: "alert", show: true});
@@ -28,7 +28,7 @@ export default function PendingGroupInfo({ groupId, token, name, removePendingGr
                 <Text style={styles.li2}>• Group Id: <Text style={styles.span}>{groupId}</Text></Text>
             </View>
             <View style={styles.buttons}>
-                <TouchableOpacity style={styles.leaveGroup2} onPress={leaveGroupPrompt}><Text style={styles.leaveText}>Cancel Request</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.leaveGroup2} onPress={leavePendingGroupPrompt}><Text style={styles.leaveText}>Cancel Request</Text></TouchableOpacity>
             </View>
     </ScrollView>);
 }

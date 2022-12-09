@@ -27,6 +27,7 @@ export default function CreateGroup({ addGroup, token }: { addGroup: (group: Gro
     console.log(data.data);
     setError("");
     setSuccess("Success");
+    addGroup(data.data);
   }
   if (Platform.OS === "web") {
     return(

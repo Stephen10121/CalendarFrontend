@@ -20,7 +20,7 @@ export default function LoggedIn({ userData, logout, token }: {userData: GoogleL
     let newGroups = [];
     for (let i=0;i<pendingGroups.length;i++){
       if (pendingGroups[i].groupId !== groupId) {
-        newGroups.push(groups[i]);
+        newGroups.push(pendingGroups[i]);
       }
     }
     setPendingGroups(newGroups);
@@ -109,7 +109,7 @@ export default function LoggedIn({ userData, logout, token }: {userData: GoogleL
           <Text>Calendar</Text>
         </View>
         <View style={styles.sectionGroup}>
-          <GroupSection removePendingGroup={removePendingGroup} addGroup={(group: GroupsType) => setGroups([...groups, group])} removeGroup={removeGroup} addPendingGroup={(group: PendingGroupsType) => setPendingGroups([...pendingGroups, group])} error={error} groups={groups} pendingGroups={pendingGroups} token={token}/>
+          <GroupSection removePendingGroup={removePendingGroup} addGroup={(group: GroupsType) => setGroups([...groups, group])} removeGroup={removeGroup} addPendingGroup={(group: PendingGroupsType) => {const newGroup = new Object([...pendingGroups, group]) as PendingGroupsType[];setPendingGroups(newGroup)}} error={error} groups={groups} pendingGroups={pendingGroups} token={token}/>
         </View>
         <View style={styles.sectionJob}>
           <Text>Add Job</Text>

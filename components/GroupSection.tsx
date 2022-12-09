@@ -3,7 +3,7 @@ import GroupInfo from "./GroupInfo";
 import { GroupsType, PendingGroupsType } from "../functions/backendFetch";
 import PendingGroupInfo from "./PendingGroupInfo";
 import SlideUp, { SlideUpData } from "./SlideUp";
-import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { View, StyleSheet, Text, TouchableOpacity, ScrollView } from "react-native";
 import React from "react";
 import GroupIcon from "./GroupIcon";
 import JoinGroup from "./JoinGroup";
@@ -37,28 +37,31 @@ export default function GroupSection({ groups, pendingGroups, token, error, addG
     return (
         <View style={styles.home}>
             {showSlideUp.show ? <SlideUp border={showSlideUp.border} close={() => setShowSlideUp({...showSlideUp, show: false})} header={showSlideUp.header}>{showSlideUp.children}</SlideUp> : null}
-            <View style={styles.greeting}>
-                <Text style={styles.welcome}>Groups</Text>
-                {error.length !== 0 ? <View style={styles.error}><Text style={styles.errorText}>{error}</Text></View> : null}
-            </View>
-            <View style={styles.comingUp}>
-                <Text style={styles.title}>Joined/Created</Text>
-                { groups.length === 0 ? <View style={styles.nogroup}><Text style={styles.nogroupText}>No Groups</Text></View> : null }
-                <View style={styles.comingUpList}>
-                    {groups ? groups.map((group) => <GroupIcon key={group.groupId} id={group.groupId} name={group.groupName} owner={group.groupOwner} othersCanAdd={group.othersCanAdd} click={groupClicked}/>) : <div style={styles.nogroup}><p>No Groups</p></div>}
+            <ScrollView style={styles.home2}>
+                {showSlideUp.show ? <SlideUp border={showSlideUp.border} close={() => setShowSlideUp({...showSlideUp, show: false})} header={showSlideUp.header}>{showSlideUp.children}</SlideUp> : null}
+                <View style={styles.greeting}>
+                    <Text style={styles.welcome}>Groups</Text>
+                    {error.length !== 0 ? <View style={styles.error}><Text style={styles.errorText}>{error}</Text></View> : null}
                 </View>
-            </View>
-            {pendingGroups.length !== 0 ? 
-            <View style={styles.available}>
-                <Text style={styles.title}>Pending</Text>
-                <View style={styles.comingUpList}>
-                {pendingGroups.map((group) => <GroupIcon key={group.groupId} id={group.groupId} name={group.groupName} othersCanAdd={false} owner="Anonymous" click={pendingGroupClicked}/>)}
+                <View style={styles.comingUp}>
+                    <Text style={styles.title}>Joined/Created</Text>
+                    { groups.length === 0 ? <View style={styles.nogroup}><Text style={styles.nogroupText}>No Groups</Text></View> : null }
+                    <View style={styles.comingUpList}>
+                        {groups ? groups.map((group) => <GroupIcon key={group.groupId} id={group.groupId} name={group.groupName} owner={group.groupOwner} othersCanAdd={group.othersCanAdd} click={groupClicked}/>) : <div style={styles.nogroup}><p>No Groups</p></div>}
+                    </View>
                 </View>
-            </View> : null }
-            <View style={styles.groupButtons}>
-                <TouchableOpacity onPress={joinGroupClicked} style={styles.joinGroup}><Text style={styles.buttonText}>Join Group</Text></TouchableOpacity>
-                <TouchableOpacity onPress={createGroupClicked} style={styles.createGroup}><Text style={styles.buttonText}>Create Group</Text></TouchableOpacity>
-            </View>
+                {pendingGroups.length !== 0 ? 
+                <View style={styles.available}>
+                    <Text style={styles.title}>Pending</Text>
+                    <View style={styles.comingUpList}>
+                    {pendingGroups.map((group) => <GroupIcon key={group.groupId} id={group.groupId} name={group.groupName} othersCanAdd={false} owner="Anonymous" click={pendingGroupClicked}/>)}
+                    </View>
+                </View> : null }
+                <View style={styles.groupButtons}>
+                    <TouchableOpacity onPress={joinGroupClicked} style={styles.joinGroup}><Text style={styles.buttonText}>Join Group</Text></TouchableOpacity>
+                    <TouchableOpacity onPress={createGroupClicked} style={styles.createGroup}><Text style={styles.buttonText}>Create Group</Text></TouchableOpacity>
+                </View>
+            </ScrollView>
         </View>
     )
 }
@@ -67,7 +70,11 @@ const styles = StyleSheet.create({
     home: {
         width: "100%",
         height: "100%",
-        backgroundColor: "#DFDFDF",
+        backgroundColor: "#DFDFDF"
+    },
+    home2: {
+        width: "100%",
+        overflow: "scroll",
         paddingBottom: 10
     },
     greeting: {
