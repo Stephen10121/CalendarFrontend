@@ -1,10 +1,10 @@
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { createGroup, GroupsType } from '../functions/backendFetch'
 import Input from './Input'
 import Checkbox from 'expo-checkbox';
 
-export default function CreateGroup({ addGroup, token }: { addGroup: (group: GroupsType) => any, token: string }) {
+export default function CreateGroup({ addGroup, token, close }: { addGroup: (group: GroupsType) => any, token: string, close: () => any }) {
   const [isChecked, setChecked] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [groupId, setGroupId] = useState("");
@@ -13,7 +13,7 @@ export default function CreateGroup({ addGroup, token }: { addGroup: (group: Gro
   const [aboutGroup, setAboutGroup] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
+  
   async function createGroupButton() {
     if (groupPassword !== repeatGroupPassword) {
         setError("The Passwords dont match.");
@@ -28,6 +28,7 @@ export default function CreateGroup({ addGroup, token }: { addGroup: (group: Gro
     setError("");
     setSuccess("Success");
     addGroup(data.data);
+    close();
   }
   if (Platform.OS === "web") {
     return(

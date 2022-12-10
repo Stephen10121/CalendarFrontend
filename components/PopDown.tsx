@@ -6,9 +6,7 @@ export type MessageType = "alert" | "default" | "success";
 export default function PopDown({ message, close, type }: { message: string, close: () => any, type?: MessageType }) {
   const styles = StyleSheet.create({
     cover: {
-      width: "100%",
-      alignItems: "center",
-      justifyContent: "center"
+      position: "relative"
     },
     box: {
       height: 40,
@@ -18,7 +16,13 @@ export default function PopDown({ message, close, type }: { message: string, clo
       padding: 5,
       alignItems: "center",
       justifyContent: "space-between",
-      flexDirection: "row"
+      flexDirection: "row",
+      position: "absolute",
+      flex: 1,
+      top: 0,
+      zIndex: 500,
+      left: "50%",
+      transform: [{translateX: -100}, {translateY: -25}]
     },
     text: {
       color: "#FFFFFF",

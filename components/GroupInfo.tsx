@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { acceptParticapant, declineParticapant, groupInfo, GroupInfoData, leaveGroup, Particapant, removeParticapant } from "../functions/backendFetch";
 import React from "react";
-import { View, StyleSheet, Text, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
+import { View, StyleSheet, Text, TouchableOpacity, ScrollView, ActivityIndicator, Platform } from "react-native";
 import PopDown, { MessageType } from "./PopDown";
 import { RemoveGroup } from "./loggedIn/LoggedIn";
 
@@ -9,7 +9,8 @@ export default function GroupInfo({ groupId, token, othersCanAdd, removeGroup }:
     const [data, setData] = useState<null | GroupInfoData>(null);
     const [date, setDate] = useState<string | null>(null);
     const [error, setError] = useState<any>(null);
-    const [showPopdown, setShowPopdown] = useState<{ show: boolean, message: string, type?: MessageType }>({ show: false, message: "" })
+    const [showPopdown, setShowPopdown] = useState<{ show: boolean, message: string, type?: MessageType }>({ show: true, message: "Success." });
+    const [ownerLeave, setOwnerLeave] = useState(false);
 
     async function particapantAccept(id: string, name: string) {
         const datares = await acceptParticapant(groupId, token, id);
@@ -74,17 +75,17 @@ export default function GroupInfo({ groupId, token, othersCanAdd, removeGroup }:
     }
 
     useEffect(() => {
-        groupInfo(groupId, token).then((data) => {
-            if (data.error || !data.data) {
-                setError(data.error);
+        groupInfo(groupId, token).then((data2) => {
+            if (data2.error || !data2.data) {
+                setError(data2.error);
             } else {
                 try {
-                    const unformattedDate = new Date(data.data.created);
+                    const unformattedDate = new Date(data2.data.created);
                     setDate(`${["N/A", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][unformattedDate.getDay()]}, ${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][unformattedDate.getMonth()]} ${unformattedDate.getDate()}, ${unformattedDate.getFullYear()}.`);
                 } catch (_err) {
                     setDate("N/A");
                 } 
-                setData(data.data);
+                setData(data2.data);
             }
         });
     }, []);
@@ -133,8 +134,12 @@ export default function GroupInfo({ groupId, token, othersCanAdd, removeGroup }:
             </View>
             <View style={styles.buttons}>
                 {data.yourowner ? <TouchableOpacity style={styles.leaveGroup}><Text style={styles.leaveText}>Delete Group</Text></TouchableOpacity> : null}
-                <TouchableOpacity style={styles.leaveGroup2} onPress={leaveGroupPrompt}><Text style={styles.leaveText}>Leave Group</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.leaveGroup2} onPress={() => {if (data.yourowner){setOwnerLeave(true)}else{leaveGroupPrompt()}}}><Text style={styles.leaveText}>Leave Group</Text></TouchableOpacity>
             </View>
+            {ownerLeave ? <View style={styles.ownerLeaving}>
+                <Text>Are you sure?</Text>
+                <Text>Choose who will become the new owner</Text>
+            </View> : null}
     </ScrollView>);
 }
 
@@ -261,5 +266,15 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         width: "100%",
         height: "100%"
-      }
+    },
+    ownerLeaving: {
+
+    },
+    dropdown: {
+        width: 200,
+        height: 100,
+        borderColor: "#000000",
+        borderWidth: 5,
+        borderStyle: "solid"
+    }
 });

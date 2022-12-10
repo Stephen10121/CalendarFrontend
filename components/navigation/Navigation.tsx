@@ -15,7 +15,8 @@ export default function Navigation({ selected, clicked, profilePic }: { selected
         },
         button: {
             height: 50,
-            paddingTop: 5
+            paddingTop: 5,
+            position: "relative"
         },
         imageCal: {
             tintColor: selected==="calendar" ? "#767676" : "#000000",
@@ -41,7 +42,16 @@ export default function Navigation({ selected, clicked, profilePic }: { selected
             height: 50,
             width: 50,
             borderRadius: 100
-        }
+        },
+        notification: {
+          width: 10,
+          height: 10,
+          borderRadius: 100,
+          backgroundColor: "#EE3F3f",
+          position: "absolute",
+          top: 0,
+          right: -6
+      }
     });
   return (
     <View style={styles.navigation}>
@@ -56,6 +66,7 @@ export default function Navigation({ selected, clicked, profilePic }: { selected
         />
       </TouchableOpacity>
       <TouchableOpacity style={styles.button} onPress={() => clicked("groups")}>
+        <View style={styles.notification}></View>
         <Image style={styles.imageGroup}
             source={require('../../assets/navigation/groups.png')}
         />

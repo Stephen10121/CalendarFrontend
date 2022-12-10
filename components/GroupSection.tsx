@@ -12,6 +12,7 @@ import CreateGroup from "./CreateGroup";
 
 export default function GroupSection({ groups, pendingGroups, token, error, addGroup, addPendingGroup, removeGroup, removePendingGroup }: { groups: GroupsType[], pendingGroups: PendingGroupsType[], token: string, error: any, addGroup: (group: GroupsType) => any, addPendingGroup: (group: PendingGroupsType) => any, removeGroup: RemoveGroup, removePendingGroup: RemovePendingGroup }) {
     const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null, border:"black"});
+    const [closeInternal, setCloseInternal] = useState(false);
 
     useEffect(() => {
         console.log(token);
@@ -27,18 +28,16 @@ export default function GroupSection({ groups, pendingGroups, token, error, addG
     }
 
     function joinGroupClicked() {
-        setShowSlideUp({ show: true, header: "Join Group", children: <JoinGroup token={token} addPendingGroup={addPendingGroup} />, border: "blue" });
+        setShowSlideUp({ show: true, header: "Join Group", children: <JoinGroup close={() => setCloseInternal(true)} token={token} addPendingGroup={addPendingGroup} />, border: "blue" });
     }
 
     function createGroupClicked() {
-        setShowSlideUp({ show: true, header: "Create Group", children: <CreateGroup token={token} addGroup={addGroup} />, border: "red" });
+        setShowSlideUp({ show: true, header: "Create Group", children: <CreateGroup close={() => setCloseInternal(true)} token={token} addGroup={addGroup} />, border: "red" });
     }
 
     return (
         <View style={styles.home}>
-            {showSlideUp.show ? <SlideUp border={showSlideUp.border} close={() => setShowSlideUp({...showSlideUp, show: false})} header={showSlideUp.header}>{showSlideUp.children}</SlideUp> : null}
             <ScrollView style={styles.home2}>
-                {showSlideUp.show ? <SlideUp border={showSlideUp.border} close={() => setShowSlideUp({...showSlideUp, show: false})} header={showSlideUp.header}>{showSlideUp.children}</SlideUp> : null}
                 <View style={styles.greeting}>
                     <Text style={styles.welcome}>Groups</Text>
                     {error.length !== 0 ? <View style={styles.error}><Text style={styles.errorText}>{error}</Text></View> : null}
@@ -47,7 +46,7 @@ export default function GroupSection({ groups, pendingGroups, token, error, addG
                     <Text style={styles.title}>Joined/Created</Text>
                     { groups.length === 0 ? <View style={styles.nogroup}><Text style={styles.nogroupText}>No Groups</Text></View> : null }
                     <View style={styles.comingUpList}>
-                        {groups ? groups.map((group) => <GroupIcon key={group.groupId} id={group.groupId} name={group.groupName} owner={group.groupOwner} othersCanAdd={group.othersCanAdd} click={groupClicked}/>) : <div style={styles.nogroup}><p>No Groups</p></div>}
+                        {groups ? groups.map((group) => <GroupIcon notification={group.notification ? true: false} key={group.groupId} id={group.groupId} name={group.groupName} owner={group.groupOwner} othersCanAdd={group.othersCanAdd} click={groupClicked}/>) : <div style={styles.nogroup}><p>No Groups</p></div>}
                     </View>
                 </View>
                 {pendingGroups.length !== 0 ? 
@@ -62,6 +61,7 @@ export default function GroupSection({ groups, pendingGroups, token, error, addG
                     <TouchableOpacity onPress={createGroupClicked} style={styles.createGroup}><Text style={styles.buttonText}>Create Group</Text></TouchableOpacity>
                 </View>
             </ScrollView>
+            {showSlideUp.show ? <SlideUp closeInternal={closeInternal} border={showSlideUp.border} close={() => {setShowSlideUp({...showSlideUp, show: false}),setCloseInternal(false)}} header={showSlideUp.header}>{showSlideUp.children}</SlideUp> : null}
         </View>
     )
 }
@@ -70,7 +70,8 @@ const styles = StyleSheet.create({
     home: {
         width: "100%",
         height: "100%",
-        backgroundColor: "#DFDFDF"
+        backgroundColor: "#DFDFDF",
+        position: "relative"
     },
     home2: {
         width: "100%",
@@ -161,6 +162,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         flexDirection:"column",
         marginTop: 10,
+        marginBottom: 20,
         backgroundColor: "#EE3F3f"
     },
     buttonText: {

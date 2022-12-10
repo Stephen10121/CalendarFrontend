@@ -13,7 +13,7 @@ export default function LoggedIn({ userData, logout, token }: {userData: GoogleL
   const [groups, setGroups] = useState<Array<GroupsType>>([]);
   const [pendingGroups, setPendingGroups] = useState<Array<PendingGroupsType>>([]);
   const [error, setError] = useState("");
-  const [selected, setSelected] = useState<Selected>("groups");
+  const [selected, setSelected] = useState<Selected>("home");
   const win = Dimensions.get('window');
   
   function removePendingGroup(groupId: string) {
@@ -35,6 +35,14 @@ export default function LoggedIn({ userData, logout, token }: {userData: GoogleL
     }
     setGroups(newGroups);
   }
+
+  useEffect(() => {
+    console.log(groups);
+  }, [groups]);
+
+  useEffect(() => {
+    console.log(pendingGroups);
+  }, [pendingGroups]);
 
   useEffect(() => {
     fetchGroups(token).then((data) => {
@@ -109,7 +117,7 @@ export default function LoggedIn({ userData, logout, token }: {userData: GoogleL
           <Text>Calendar</Text>
         </View>
         <View style={styles.sectionGroup}>
-          <GroupSection removePendingGroup={removePendingGroup} addGroup={(group: GroupsType) => setGroups([...groups, group])} removeGroup={removeGroup} addPendingGroup={(group: PendingGroupsType) => {const newGroup = new Object([...pendingGroups, group]) as PendingGroupsType[];setPendingGroups(newGroup)}} error={error} groups={groups} pendingGroups={pendingGroups} token={token}/>
+          <GroupSection removePendingGroup={removePendingGroup} addGroup={(newGroup: GroupsType) => setGroups([...Object.create(groups), newGroup])} removeGroup={removeGroup} addPendingGroup={(group: PendingGroupsType) => {const newGroup = new Object([...pendingGroups, group]) as PendingGroupsType[];setPendingGroups(newGroup)}} error={error} groups={groups} pendingGroups={pendingGroups} token={token}/>
         </View>
         <View style={styles.sectionJob}>
           <Text>Add Job</Text>

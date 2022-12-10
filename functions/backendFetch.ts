@@ -27,6 +27,7 @@ export type GroupsType = {
     groupName: string;
     groupOwner: string;
     othersCanAdd: boolean;
+    notification?: boolean;
 }
 
 export interface FetchGroupsResponse {
@@ -306,7 +307,7 @@ export async function createGroup(groupId: string, groupName: string, password: 
     if (groupsJson.error) {
       return {error: groupsJson.error}
     }
-    return {error: "", data: groupsJson}
+    return {error: "", data: groupsJson.data}
   } catch (err) {
     console.error(err);
     return {error: "Error Joining Group."};
