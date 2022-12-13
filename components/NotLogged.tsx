@@ -36,6 +36,7 @@ export default function NotLogged({ loading }: { loading: (arg0: boolean) => any
         }
         dispatch({ type: "SET_USER_TOKEN", payload: res2.data.token });
         dispatch({ type: "SET_USER_DATA", payload: res2.data.userData });
+        storeData(res2.data.token);
         loading(false);
     }
 

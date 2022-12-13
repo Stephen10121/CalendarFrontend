@@ -182,8 +182,8 @@ export default function GroupInfo({ groupId, othersCanAdd, close }: { groupId: s
             {delete2 ? <View style={styles.deleteSection}>
                 <Text style={styles.li2}>Are You Sure?</Text>
                 <View style={styles.deleteSectionButtons}>
-                    <TouchableOpacity style={styles.declineButton} onPress={groupDelete}><Text style={styles.acceptButtonText}>Yes</Text></TouchableOpacity>
-                    <TouchableOpacity style={styles.acceptButton} onPress={() => setDelete(false)}><Text style={styles.acceptButtonText}>No</Text></TouchableOpacity>
+                    <TouchableOpacity style={styles.declineButton2} onPress={groupDelete}><Text style={styles.acceptButtonText}>Yes</Text></TouchableOpacity>
+                    <TouchableOpacity style={styles.acceptButton2} onPress={() => setDelete(false)}><Text style={styles.acceptButtonText}>No</Text></TouchableOpacity>
                 </View>
             </View>: null}
             {ownerLeave ? <View style={styles.ownerLeaving}>
@@ -352,8 +352,33 @@ const styles = StyleSheet.create({
     deleteSectionButtons: {
         alignItems: "center",
         justifyContent:"center",
-        flexDirection: "row",
-        marginTop: 10
+        marginTop: 10,
+        width: "100%",
+        paddingHorizontal: 20
+    },
+    acceptButton2: {
+        borderRadius: 2,
+        backgroundColor: "#3A9FE9",
+        fontSize: 10,
+        fontWeight: "700",
+        fontFamily: "Poppins-SemiBold",
+        padding: 5,
+        letterSpacing: 1,
+        marginRight: 5,
+        marginTop: 10,
+        width: "100%"
+    },
+    declineButton2: {
+        borderRadius: 2,
+        backgroundColor: "#EE3F3F",
+        color: "#FFFFFF",
+        fontSize: 10,
+        fontWeight: "700",
+        fontFamily: "Poppins-SemiBold",
+        padding: 5,
+        letterSpacing: 1,
+        marginRight: 5,
+        width: "100%",
     },
     leaveOption: {
         paddingHorizontal: 10,
