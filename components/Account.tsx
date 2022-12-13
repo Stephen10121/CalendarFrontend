@@ -2,12 +2,19 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'rea
 import React from 'react'
 import { Selected } from './navigation/Navigation';
 import Loader from './Loader';
+import { storeData } from '../functions/localstorage';
+import { useDispatch } from 'react-redux';
 
-export default function Account({ selected, logout }: { selected: (arg0: Selected) => any, logout: () => void }) {
+export default function Account({ selected }: { selected: (arg0: Selected) => any }) {
+    const dispatch = useDispatch();
     return (
         <View style={styles.account}>
             <TouchableOpacity onPress={() => selected("home")}><Text>Back</Text></TouchableOpacity>
-            <TouchableOpacity onPress={logout}><Text>Logout</Text></TouchableOpacity>
+            <TouchableOpacity onPress={() => {
+                storeData(null);
+                dispatch({ type: "SET_USER_TOKEN", payload: null });
+                dispatch({ type: "SET_USER_DATA", payload: null });
+            }}><Text>Logout</Text></TouchableOpacity>
             <Text>Account</Text>
             <Loader />
             <ActivityIndicator size="large" color="#3A9FE9" />

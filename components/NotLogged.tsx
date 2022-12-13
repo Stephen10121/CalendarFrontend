@@ -4,11 +4,15 @@ import { googleLoginOrRegister } from '../functions/backendFetch';
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from 'expo-web-browser';
 import { EXPO_CLIENT_ID, WEB_CLIENT_ID } from '../functions/variables';
+import { useDispatch } from 'react-redux';
+import { storeData } from '../functions/localstorage';
+import { setUserData } from '../redux/actions';
 
 WebBrowser.maybeCompleteAuthSession();
 
-export default function LoggedIn({ loggedIn, loading }: { loggedIn: (arg0: any, arg1: string) => any, loading: (arg0: boolean) => any }) {
+export default function NotLogged({ loading }: { loading: (arg0: boolean) => any }) {
     const [error, setError] = useState("");
+    const dispatch = useDispatch();
     const [request, _response, googlePromptAsync] = Google.useAuthRequest({
         expoClientId: EXPO_CLIENT_ID,
         iosClientId: "",
@@ -30,7 +34,9 @@ export default function LoggedIn({ loggedIn, loading }: { loggedIn: (arg0: any, 
             setError(res2.error);
             return
         }
-        loggedIn(res2.data.userData, res2.data.token);
+        dispatch({ type: "SET_USER_TOKEN", payload: res2.data.token });
+        dispatch({ type: "SET_USER_DATA", payload: res2.data.userData });
+        loading(false);
     }
 
   return (

@@ -5,44 +5,19 @@ import HomeSection from '../homesection/HomeSection';
 import GroupSection from '../GroupSection';
 import { fetchGroups, GoogleLoginData, GroupsType, PendingGroupsType } from '../../functions/backendFetch';
 import Account from '../Account';
+import { useDispatch, useSelector } from 'react-redux';
+import { ReduxState } from '../../redux/reducers';
 
 export type RemoveGroup = (groupId: string) => void;
 export type RemovePendingGroup = (pendingGroupId: string) => void;
 
-export default function LoggedIn({ userData, logout, token }: {userData: GoogleLoginData, logout: () => void, token: string }) {
-  const [groups, setGroups] = useState<Array<GroupsType>>([]);
-  const [pendingGroups, setPendingGroups] = useState<Array<PendingGroupsType>>([]);
+export default function LoggedIn() {
+  const userData = useSelector<ReduxState, GoogleLoginData>((state: ReduxState) => state.userData);
+  const token = useSelector<ReduxState, string>((state: ReduxState) => state.token);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<Selected>("home");
   const win = Dimensions.get('window');
-  
-  function removePendingGroup(groupId: string) {
-    let newGroups = [];
-    for (let i=0;i<pendingGroups.length;i++){
-      if (pendingGroups[i].groupId !== groupId) {
-        newGroups.push(pendingGroups[i]);
-      }
-    }
-    setPendingGroups(newGroups);
-  }
-
-  function removeGroup(groupId: string) {
-    let newGroups = [];
-    for (let i=0;i<groups.length;i++){
-      if (groups[i].groupId !== groupId) {
-        newGroups.push(groups[i]);
-      }
-    }
-    setGroups(newGroups);
-  }
-
-  useEffect(() => {
-    console.log(groups);
-  }, [groups]);
-
-  useEffect(() => {
-    console.log(pendingGroups);
-  }, [pendingGroups]);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     fetchGroups(token).then((data) => {
@@ -51,10 +26,10 @@ export default function LoggedIn({ userData, logout, token }: {userData: GoogleL
           return
       }
       if (data.data.groups !== null) {
-        setGroups(data.data.groups);
+        dispatch({ type: "SET_USER_GROUPS", payload: data.data.groups });
       }
       if (data.data.pendingGroups) {
-        setPendingGroups(data.data.pendingGroups);
+        dispatch({ type: "SET_USER_PENDING_GROUPS", payload: data.data.pendingGroups });
       }
     });
   }, []);
@@ -117,14 +92,14 @@ export default function LoggedIn({ userData, logout, token }: {userData: GoogleL
           <Text>Calendar</Text>
         </View>
         <View style={styles.sectionGroup}>
-          <GroupSection removePendingGroup={removePendingGroup} addGroup={(newGroup: GroupsType) => setGroups([...Object.create(groups), newGroup])} removeGroup={removeGroup} addPendingGroup={(group: PendingGroupsType) => {const newGroup = new Object([...pendingGroups, group]) as PendingGroupsType[];setPendingGroups(newGroup)}} error={error} groups={groups} pendingGroups={pendingGroups} token={token}/>
+          <GroupSection error={error}/>
         </View>
         <View style={styles.sectionJob}>
           <Text>Add Job</Text>
           <Text>{JSON.stringify(userData)}</Text>
         </View>
       </View>
-      {selected !== "account" ? <Navigation selected={selected} clicked={setSelected} profilePic={userData.picture}/> : <Account selected={setSelected} logout={logout}/>}
+      {selected !== "account" ? <Navigation selected={selected} clicked={setSelected} profilePic={userData.picture}/> : <Account selected={setSelected}/>}
     </View>
   );
 }

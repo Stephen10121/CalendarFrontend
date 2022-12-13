@@ -1,22 +1,25 @@
 import { useEffect, useState } from "react";
-import { acceptParticapant, declineParticapant, groupInfo, GroupInfoData, leaveGroup, Particapant, removeParticapant } from "../functions/backendFetch";
+import { acceptParticapant, declineParticapant, deleteGroup, groupInfo, GroupInfoData, leaveGroup, Particapant, removeParticapant } from "../functions/backendFetch";
 import React from "react";
-import { View, StyleSheet, Text, TouchableOpacity, ScrollView, ActivityIndicator, Platform } from "react-native";
-import PopDown, { MessageType } from "./PopDown";
-import { RemoveGroup } from "./loggedIn/LoggedIn";
+import { View, StyleSheet, Text, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { ReduxState } from "../redux/reducers";
 
-export default function GroupInfo({ groupId, token, othersCanAdd, removeGroup }: { groupId: string, token: string, othersCanAdd: boolean, removeGroup: RemoveGroup }) {
+export default function GroupInfo({ groupId, othersCanAdd, close }: { groupId: string, othersCanAdd: boolean, close: () => any }) {
+    const groups = useSelector<ReduxState, ReduxState["groups"]>((state: ReduxState) => state.groups);
+    const token = useSelector<ReduxState, string>((state: ReduxState) => state.token);
     const [data, setData] = useState<null | GroupInfoData>(null);
     const [date, setDate] = useState<string | null>(null);
     const [error, setError] = useState<any>(null);
-    const [showPopdown, setShowPopdown] = useState<{ show: boolean, message: string, type?: MessageType }>({ show: true, message: "Success." });
+    const [delete2, setDelete] = useState(false);
     const [ownerLeave, setOwnerLeave] = useState(false);
+    const [currentTransfer, setCurrentTransfer] = useState(0);
+    const dispatch = useDispatch();
 
     async function particapantAccept(id: string, name: string) {
         const datares = await acceptParticapant(groupId, token, id);
         if (datares.error || !datares.message) {
-            console.log(datares.error);
-            setShowPopdown({message: datares.error, type: "alert", show: true});
+            dispatch({ type: "SET_ERROR", payload: {message: datares.error, type: "alert", show: true} });
             return;
         }
         let newParticapants = [];
@@ -26,14 +29,13 @@ export default function GroupInfo({ groupId, token, othersCanAdd, removeGroup }:
             }
         }
         setData({...data, particapants: [...data.particapants, {id: parseInt(id), name}], yourowner: {...data.yourowner, pending_particapants: newParticapants}});
-        setShowPopdown({ show: true, message: "Success", type: "success" });
+        dispatch({ type: "SET_ERROR", payload: {message: "Success", type: "success", show: true} });
     }
 
     async function particapantDecline(id: string) {
         const datares = await declineParticapant(groupId, token, id);
         if (datares.error || !datares.message) {
-            console.log(datares.error);
-            setShowPopdown({message: datares.error, type: "alert", show: true});
+            dispatch({ type: "SET_ERROR", payload: {message: datares.error, type: "alert", show: true} });
             return;
         }
         let newParticapants = [];
@@ -43,14 +45,13 @@ export default function GroupInfo({ groupId, token, othersCanAdd, removeGroup }:
             }
         }
         setData({...data, yourowner: {...data.yourowner, pending_particapants: newParticapants}});
-        setShowPopdown({ show: true, message: "Success", type: "success" });
+        dispatch({ type: "SET_ERROR", payload: {message: "Success", type: "success", show: true} });
     }
 
     async function removeParticapantFunc(id: string) {
         const removeParticapantData = await removeParticapant(groupId, token, id);
         if (removeParticapantData.error || !removeParticapantData.message) {
-            console.log(removeParticapantData.error);
-            setShowPopdown({message: removeParticapantData.error, type: "alert", show: true});
+            dispatch({ type: "SET_ERROR", payload: {message: removeParticapantData.error, type: "alert", show: true} });
             return;
         }
         if (!data) return
@@ -61,17 +62,59 @@ export default function GroupInfo({ groupId, token, othersCanAdd, removeGroup }:
             }
         }
         setData({...data, particapants: newParticapants});
-        setShowPopdown({ show: true, message: "Success", type: "success" });
+        dispatch({ type: "SET_ERROR", payload: {message: "Success", type: "success", show: true} });
     }
 
     async function leaveGroupPrompt() {
-        const response = await leaveGroup(data.group_id, token);
+        const response = await leaveGroup(data.group_id, token, 0);
         if (response.error || !response.message) {
-            setShowPopdown({message: response.error, type: "alert", show: true});
+            dispatch({ type: "SET_ERROR", payload: {message: response.error, type: "alert", show: true} });
             return;
         }
-        removeGroup(data.group_id);
-        setShowPopdown({message: response.message, type: "success", show: true});
+        let newGroups = [];
+        for (let i=0;i<groups.length;i++){
+            if (groups[i].groupId !== groupId) {
+                newGroups.push(groups[i]);
+            }
+        }
+        dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
+        dispatch({ type: "SET_ERROR", payload: {message: response.message, type: "success", show: true} });
+        close();
+    }
+
+    async function leaveGroupPrompt2() {
+        console.log(currentTransfer);
+        const response = await leaveGroup(data.group_id, token, currentTransfer);
+        if (response.error || !response.message) {
+            dispatch({ type: "SET_ERROR", payload: {message: response.error, type: "alert", show: true} });
+            return;
+        }
+        let newGroups = [];
+        for (let i=0;i<groups.length;i++){
+            if (groups[i].groupId !== groupId) {
+                newGroups.push(groups[i]);
+            }
+        }
+        dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
+        dispatch({ type: "SET_ERROR", payload: {message: response.message, type: "success", show: true} });
+        close();
+    }
+
+    async function groupDelete() {
+        const response = await deleteGroup(data.group_id, token);
+        if (response.error || !response.message) {
+            dispatch({ type: "SET_ERROR", payload: {message: response.error, type: "alert", show: true} });
+            return;
+        }
+        let newGroups = [];
+        for (let i=0;i<groups.length;i++){
+            if (groups[i].groupId !== groupId) {
+                newGroups.push(groups[i]);
+            }
+        }
+        dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
+        dispatch({ type: "SET_ERROR", payload: {message: response.message, type: "success", show: true} });
+        close();
     }
 
     useEffect(() => {
@@ -103,10 +146,10 @@ export default function GroupInfo({ groupId, token, othersCanAdd, removeGroup }:
 
     return(
         <ScrollView style={styles.groupInfo}>
-            {showPopdown.show ? <PopDown message={showPopdown.message} type={showPopdown.type} close={() => setShowPopdown({...showPopdown, show: false})}/> : null}
             <Text style={styles.info}>Info</Text>
             <View style={styles.infoList}>
                 <Text style={styles.li}>• Owner: <Text style={styles.span}>{data.owner}{data.yourowner ? " (you)" : null}</Text></Text>
+                <Text style={styles.li}>• Owner Email: <Text style={styles.span}>{data.owner_email}</Text></Text>
                 <Text style={styles.li}>• Particapants: </Text>
                 <View style={styles.users}>
                     {data.particapants.map((particapant: Particapant) => <View key={particapant.id}>
@@ -133,12 +176,23 @@ export default function GroupInfo({ groupId, token, othersCanAdd, removeGroup }:
                 <Text style={styles.li}>• About Group: <Text style={styles.span}>{data.about_group}</Text></Text>
             </View>
             <View style={styles.buttons}>
-                {data.yourowner ? <TouchableOpacity style={styles.leaveGroup}><Text style={styles.leaveText}>Delete Group</Text></TouchableOpacity> : null}
+                {data.yourowner ? <TouchableOpacity style={styles.leaveGroup}><Text style={styles.leaveText} onPress={() => setDelete(true)}>Delete Group</Text></TouchableOpacity> : null}
                 <TouchableOpacity style={styles.leaveGroup2} onPress={() => {if (data.yourowner){setOwnerLeave(true)}else{leaveGroupPrompt()}}}><Text style={styles.leaveText}>Leave Group</Text></TouchableOpacity>
             </View>
+            {delete2 ? <View style={styles.deleteSection}>
+                <Text style={styles.li2}>Are You Sure?</Text>
+                <View style={styles.deleteSectionButtons}>
+                    <TouchableOpacity style={styles.declineButton} onPress={groupDelete}><Text style={styles.acceptButtonText}>Yes</Text></TouchableOpacity>
+                    <TouchableOpacity style={styles.acceptButton} onPress={() => setDelete(false)}><Text style={styles.acceptButtonText}>No</Text></TouchableOpacity>
+                </View>
+            </View>: null}
             {ownerLeave ? <View style={styles.ownerLeaving}>
-                <Text>Are you sure?</Text>
-                <Text>Choose who will become the new owner</Text>
+                <Text style={styles.ownerLeavingText}>Choose who will become the new owner</Text>
+                <View style={styles.ownerLeavingOptions}>
+                    {data.particapants.length !=0 ? data.particapants.map((particapant) => data.yourowner.ownerId!==particapant.id?<TouchableOpacity key={`leaving_${particapant.id}`} onPress={() => setCurrentTransfer(particapant.id)} style={{...styles.leaveOption, backgroundColor: currentTransfer===particapant.id? "#bfbfbf" : "#dfdfdf"}}><Text style={styles.leaveOptionText}>{particapant.name}</Text></TouchableOpacity>:null) : null}
+                    <TouchableOpacity onPress={leaveGroupPrompt2} style={{...styles.leaveOption, backgroundColor: "#EE3F3f", alignItems:"center"}}><Text style={{...styles.leaveOptionText, color: "#FFFFFF"}}>Transfer Ownership and leave</Text></TouchableOpacity>
+                    <TouchableOpacity onPress={() => setOwnerLeave(false)} style={{...styles.leaveOption, backgroundColor: "#3A9FE9", alignItems:"center"}}><Text style={{...styles.leaveOptionText, color: "#FFFFFF"}}>Cancel</Text></TouchableOpacity>
+                </View>
             </View> : null}
     </ScrollView>);
 }
@@ -268,7 +322,20 @@ const styles = StyleSheet.create({
         height: "100%"
     },
     ownerLeaving: {
-
+        width: "100%",
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    ownerLeavingText: {
+        fontSize: 17,
+        fontWeight: "700",
+        fontFamily: "Poppins-SemiBold",
+        color: "#000000"
+    },
+    ownerLeavingOptions: {
+        width: "100%",
+        alignItems: "center",
+        justifyContent: "flex-start"
     },
     dropdown: {
         width: 200,
@@ -276,5 +343,30 @@ const styles = StyleSheet.create({
         borderColor: "#000000",
         borderWidth: 5,
         borderStyle: "solid"
+    },
+    deleteSection: {
+        width: "100%",
+        alignItems: "center",
+        justifyContent:"center"
+    },
+    deleteSectionButtons: {
+        alignItems: "center",
+        justifyContent:"center",
+        flexDirection: "row",
+        marginTop: 10
+    },
+    leaveOption: {
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 100,
+        backgroundColor: "#dfdfdf",
+        width: "100%",
+        marginTop: 10,
+    },
+    leaveOptionText: {
+        fontSize: 15,
+        fontWeight: "700",
+        fontFamily: "Poppins-SemiBold",
+        color: "#000000"
     }
 });

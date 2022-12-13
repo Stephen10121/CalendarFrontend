@@ -9,9 +9,14 @@ import GroupIcon from "./GroupIcon";
 import JoinGroup from "./JoinGroup";
 import { RemoveGroup, RemovePendingGroup } from "./loggedIn/LoggedIn";
 import CreateGroup from "./CreateGroup";
+import { useSelector } from "react-redux";
+import { ReduxState } from "../redux/reducers";
 
-export default function GroupSection({ groups, pendingGroups, token, error, addGroup, addPendingGroup, removeGroup, removePendingGroup }: { groups: GroupsType[], pendingGroups: PendingGroupsType[], token: string, error: any, addGroup: (group: GroupsType) => any, addPendingGroup: (group: PendingGroupsType) => any, removeGroup: RemoveGroup, removePendingGroup: RemovePendingGroup }) {
+export default function GroupSection({ error }: { error: any }) {
     const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null, border:"black"});
+    const token = useSelector<ReduxState, string>((state: ReduxState) => state.token);
+    const groups = useSelector<ReduxState, ReduxState["groups"]>((state: ReduxState) => state.groups);
+    const pendingGroups = useSelector<ReduxState, ReduxState["pendingGroups"]>((state: ReduxState) => state.pendingGroups);
     const [closeInternal, setCloseInternal] = useState(false);
 
     useEffect(() => {
@@ -20,19 +25,19 @@ export default function GroupSection({ groups, pendingGroups, token, error, addG
     }, []);
 
     function groupClicked(groupId: string, name: string, othersCanAdd: boolean) {
-        setShowSlideUp({ show: true, header: name, children: <GroupInfo removeGroup={removeGroup} token={token} groupId={groupId} othersCanAdd={othersCanAdd}/>, border: "black" });
+        setShowSlideUp({ show: true, header: name, children: <GroupInfo close={() => setCloseInternal(true)} groupId={groupId} othersCanAdd={othersCanAdd}/>, border: "black" });
     }
 
     function pendingGroupClicked(groupId: string, name: string, _othersCanAdd: boolean) {
-        setShowSlideUp({ show: true, header: name, children: <PendingGroupInfo removePendingGroup={removePendingGroup} name={name} token={token} groupId={groupId} />, border: "black" });
+        setShowSlideUp({ show: true, header: name, children: <PendingGroupInfo close={() => setCloseInternal(true)} name={name} groupId={groupId} />, border: "black" });
     }
 
     function joinGroupClicked() {
-        setShowSlideUp({ show: true, header: "Join Group", children: <JoinGroup close={() => setCloseInternal(true)} token={token} addPendingGroup={addPendingGroup} />, border: "blue" });
+        setShowSlideUp({ show: true, header: "Join Group", children: <JoinGroup close={() => setCloseInternal(true)} />, border: "blue" });
     }
 
     function createGroupClicked() {
-        setShowSlideUp({ show: true, header: "Create Group", children: <CreateGroup close={() => setCloseInternal(true)} token={token} addGroup={addGroup} />, border: "red" });
+        setShowSlideUp({ show: true, header: "Create Group", children: <CreateGroup close={() => setCloseInternal(true)} />, border: "red" });
     }
 
     return (

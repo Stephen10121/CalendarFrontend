@@ -97,6 +97,7 @@ export interface GroupInfoData {
   group_id: string;
   name: string;
   owner: string;
+  owner_email: string;
   particapants: Particapant[];
   yourowner?: {
     ownerId: number;
@@ -316,9 +317,36 @@ export async function createGroup(groupId: string, groupName: string, password: 
 
 interface LeaveGroupResponse extends ParticapantResponse {}
 
-export async function leaveGroup(groupId: string, token: string): Promise<LeaveGroupResponse> {
+export async function leaveGroup(groupId: string, token: string, transfer: number): Promise<LeaveGroupResponse> {
   try {
     const groups = await fetch(`${POST_SERVER}/leaveGroup`, {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+      },
+      credentials: "omit",
+      body: JSON.stringify({
+          "id": groupId,
+          "transfer": transfer.toString()
+      })
+    })
+    const groupsJson = await groups.json();
+    if (groupsJson.error) {
+      return {error: groupsJson.error}
+    }
+    return {error: "", message: groupsJson.message}
+  } catch (err) {
+    console.error(err);
+    return {error: "Error leaving Group."};
+  }
+}
+
+interface DeleteGroupResponse extends ParticapantResponse {}
+
+export async function deleteGroup(groupId: string, token: string): Promise<DeleteGroupResponse> {
+  try {
+    const groups = await fetch(`${POST_SERVER}/deleteGroup`, {
       method: "POST",
       headers: {
           "Content-Type": "application/json",
@@ -336,7 +364,7 @@ export async function leaveGroup(groupId: string, token: string): Promise<LeaveG
     return {error: "", message: groupsJson.message}
   } catch (err) {
     console.error(err);
-    return {error: "Error leaving Group."};
+    return {error: "Error deleting Group."};
   }
 }
 

@@ -1,10 +1,15 @@
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { createGroup, GroupsType } from '../functions/backendFetch'
+import { View, Text, TouchableOpacity, StyleSheet, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform } from 'react-native'
+import React, { useState } from 'react'
+import { createGroup } from '../functions/backendFetch'
 import Input from './Input'
 import Checkbox from 'expo-checkbox';
+import { ReduxState } from '../redux/reducers';
+import { useDispatch, useSelector } from 'react-redux';
 
-export default function CreateGroup({ addGroup, token, close }: { addGroup: (group: GroupsType) => any, token: string, close: () => any }) {
+export default function CreateGroup({ close }: { close: () => any }) {
+  const groups = useSelector<ReduxState, ReduxState["groups"]>((state: ReduxState) => state.groups);
+  const token = useSelector<ReduxState, string>((state: ReduxState) => state.token);
+  const dispatch = useDispatch();
   const [isChecked, setChecked] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [groupId, setGroupId] = useState("");
@@ -12,7 +17,6 @@ export default function CreateGroup({ addGroup, token, close }: { addGroup: (gro
   const [repeatGroupPassword, setRepeatGroupPassword] = useState("");
   const [aboutGroup, setAboutGroup] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   
   async function createGroupButton() {
     if (groupPassword !== repeatGroupPassword) {
@@ -21,13 +25,12 @@ export default function CreateGroup({ addGroup, token, close }: { addGroup: (gro
     }
     const data = await createGroup(groupId, groupName, groupPassword, isChecked, aboutGroup, token);
     if (data.error || !data.data) {
-      setError(data.error);
+      dispatch({ type: "SET_ERROR", payload: { show: true, type: "alrt", message: data.error} });
       return
     }
     console.log(data.data);
-    setError("");
-    setSuccess("Success");
-    addGroup(data.data);
+    dispatch({ type: "SET_ERROR", payload: { show: true, type: "success", message: "Success"} });
+    dispatch({ type: "SET_USER_GROUPS", payload: [...groups, data.data] });
     close();
   }
   if (Platform.OS === "web") {
@@ -45,7 +48,6 @@ export default function CreateGroup({ addGroup, token, close }: { addGroup: (gro
                 </View>
                 <TouchableOpacity style={styles.acceptButton} onPress={createGroupButton}><Text style={styles.acceptButtonText}>Make Group</Text></TouchableOpacity>
                 <Text style={styles.error}>{error}</Text>
-                <Text style={styles.success}>{success}</Text>
             </View>
         </View>
     );
@@ -65,7 +67,6 @@ export default function CreateGroup({ addGroup, token, close }: { addGroup: (gro
                     </View>
                     <TouchableOpacity style={styles.acceptButton} onPress={createGroupButton}><Text style={styles.acceptButtonText}>Make Group</Text></TouchableOpacity>
                     <Text style={styles.error}>{error}</Text>
-                    <Text style={styles.success}>{success}</Text>
                 </View>
             </TouchableWithoutFeedback>
         </KeyboardAvoidingView>

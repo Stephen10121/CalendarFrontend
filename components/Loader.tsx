@@ -15,6 +15,7 @@ export default function Loader() {
 
   const styles = StyleSheet.create({
     animation: {
+      clipPath:3,
         width: 38,
         height: 38,
         borderRadius: 100,
@@ -44,14 +45,6 @@ export default function Loader() {
 //     justify-content: center;
 // }
 
-// .preloader {
-//     width: 100%;
-//     height: 100%;
-//     display: flex;
-//     align-items: center;
-//     justify-content: center;
-// }
-
 // .loader {
 //     width: 48px;
 //     height: 48px;
@@ -59,16 +52,9 @@ export default function Loader() {
 //     position: relative;
 //     animation: rotate 1s linear infinite
 // }
-// .loader2 {
-//     width: 24px;
-//     height: 24px;
-//     border-radius: 50%;
-//     position: relative;
-//     animation: rotate 1s linear infinite
-// }
 
-// .loader::before , .loader::after,
-// .loader2::before, .loader2::after {
+
+// .loader::before , .loader::after {
 //     content: "";
 //     box-sizing: border-box;
 //     position: absolute;
@@ -78,8 +64,7 @@ export default function Loader() {
 //     animation: prixClipFix 5s linear infinite ;
 // }
 
-// .loader::after,
-// .loader2::after {
+// .loader::after {
 //     border-color: #3A9FE9;
 //     animation: prixClipFix 5s linear infinite , rotate 0.5s linear infinite reverse;
 //     inset: 6px;
