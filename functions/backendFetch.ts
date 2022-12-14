@@ -86,6 +86,30 @@ export async function validate(token: string): Promise<ValidateResponse> {
     }
 }
 
+export async function addNotification(token: string, notificationToken: string): Promise<ValidateResponse> {
+    try {
+      const groups = await fetch(`${POST_SERVER}/addNotification`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        credentials: "omit",
+        body: JSON.stringify({
+          "token": notificationToken
+        })
+      })
+      const groupsJson = await groups.json();
+      if (groupsJson.error) {
+        return {error: true}
+      }
+      return {error: false}
+    } catch (err) {
+      console.error(err);
+      return {error: true};
+    }
+}
+
 export interface Particapant {
   name: string;
   id: number;

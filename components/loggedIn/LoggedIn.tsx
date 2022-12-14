@@ -3,10 +3,12 @@ import React, { useEffect, useState } from 'react';
 import Navigation, { Selected } from '../navigation/Navigation';
 import HomeSection from '../homesection/HomeSection';
 import GroupSection from '../GroupSection';
-import { fetchGroups, GoogleLoginData, GroupsType, PendingGroupsType } from '../../functions/backendFetch';
+import { addNotification, fetchGroups, GoogleLoginData } from '../../functions/backendFetch';
 import Account from '../Account';
 import { useDispatch, useSelector } from 'react-redux';
 import { ReduxState } from '../../redux/reducers';
+import * as Notifications from "expo-notifications";
+import { useNotifications } from '../../functions/useNotifications';
 
 export type RemoveGroup = (groupId: string) => void;
 export type RemovePendingGroup = (pendingGroupId: string) => void;
@@ -14,6 +16,7 @@ export type RemovePendingGroup = (pendingGroupId: string) => void;
 export default function LoggedIn() {
   const userData = useSelector<ReduxState, GoogleLoginData>((state: ReduxState) => state.userData);
   const token = useSelector<ReduxState, string>((state: ReduxState) => state.token);
+  const { registerForPushNotificationAsync, handleNotificationResponse } = useNotifications();
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<Selected>("home");
   const win = Dimensions.get('window');
@@ -32,6 +35,26 @@ export default function LoggedIn() {
         dispatch({ type: "SET_USER_PENDING_GROUPS", payload: data.data.pendingGroups });
       }
     });
+    registerForPushNotificationAsync().then((token2) => {
+      addNotification(token, token2).then((data) => {
+        console.log(data);
+      })
+    });
+  
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true
+      }),
+    });
+    const responseListener = Notifications.addNotificationResponseReceivedListener(handleNotificationResponse);
+                    
+    return () => {
+      if (responseListener) {
+        Notifications.removeNotificationSubscription(responseListener);
+      }
+    }
   }, []);
 
   const styles = StyleSheet.create({
