@@ -1,9 +1,11 @@
 import { View, StyleSheet, Image, TouchableOpacity, Platform } from 'react-native'
 import React from 'react'
+import { useDispatch } from 'react-redux';
 
 export type Selected = "home" | "calendar" | "groups" | "addJob" | "account";
 
-export default function Navigation({ selected, clicked, profilePic }: { selected: Selected, clicked: (arg0: Selected) => any, profilePic: string}) {
+export default function Navigation({ selected, profilePic }: { selected: Selected, profilePic: string}) {
+  const dispatch = useDispatch();
     const styles = StyleSheet.create({
         navigation: {
             backgroundColor: "#AAAAAA",
@@ -53,6 +55,11 @@ export default function Navigation({ selected, clicked, profilePic }: { selected
           right: -6
       }
     });
+
+    function clicked(location: Selected) {
+      dispatch({ type: "SET_SELECTED", payload: location });
+    }
+
   return (
     <View style={styles.navigation}>
       <TouchableOpacity style={styles.button} onPress={() => clicked("home")}>
@@ -66,7 +73,6 @@ export default function Navigation({ selected, clicked, profilePic }: { selected
         />
       </TouchableOpacity>
       <TouchableOpacity style={styles.button} onPress={() => clicked("groups")}>
-        <View style={styles.notification}></View>
         <Image style={styles.imageGroup}
             source={require('../../assets/navigation/groups.png')}
         />

@@ -9,20 +9,27 @@ import GroupIcon from "./GroupIcon";
 import JoinGroup from "./JoinGroup";
 import { RemoveGroup, RemovePendingGroup } from "./loggedIn/LoggedIn";
 import CreateGroup from "./CreateGroup";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { ReduxState } from "../redux/reducers";
 
 export default function GroupSection({ error }: { error: any }) {
     const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null, border:"black"});
-    const token = useSelector<ReduxState, string>((state: ReduxState) => state.token);
     const groups = useSelector<ReduxState, ReduxState["groups"]>((state: ReduxState) => state.groups);
+    const clickGroup = useSelector<ReduxState, ReduxState["clickGroup"]>((state: ReduxState) => state.clickGroup);
     const pendingGroups = useSelector<ReduxState, ReduxState["pendingGroups"]>((state: ReduxState) => state.pendingGroups);
     const [closeInternal, setCloseInternal] = useState(false);
+    const dispatch = useDispatch();
 
     useEffect(() => {
-        console.log(token);
-        console.log(groups)
-    }, []);
+        if (clickGroup) {
+            for (let i=0;i<groups.length;i++) {
+                if (groups[i].groupId === clickGroup) {
+                    setShowSlideUp({ show: true, header: groups[i].groupName, children: <GroupInfo close={() => setCloseInternal(true)} groupId={groups[i].groupId} othersCanAdd={groups[i].othersCanAdd}/>, border: "black" });
+                }
+            }
+            dispatch({ type: "SET_CLICK_GROUP", payload: null });
+        }
+    }, [clickGroup]);
 
     function groupClicked(groupId: string, name: string, othersCanAdd: boolean) {
         setShowSlideUp({ show: true, header: name, children: <GroupInfo close={() => setCloseInternal(true)} groupId={groupId} othersCanAdd={othersCanAdd}/>, border: "black" });

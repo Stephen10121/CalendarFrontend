@@ -1,6 +1,7 @@
 import { Linking, Platform } from "react-native";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
+import { useDispatch } from "react-redux";
 
 export const useNotifications = () => {
     const registerForPushNotificationAsync = async () => {
@@ -29,16 +30,7 @@ export const useNotifications = () => {
     }
 
     const handleNotification = (notification: Notifications.Notification) => {
-
     }
 
-    const handleNotificationResponse = (
-        response: Notifications.NotificationResponse
-    ) => {
-        const data: { url?: string } = response.notification.request.content.data;
-
-        if (data?.url) Linking.openURL(data.url);
-    }
-
-    return { registerForPushNotificationAsync, handleNotification, handleNotificationResponse }
+    return { registerForPushNotificationAsync, handleNotification }
 }

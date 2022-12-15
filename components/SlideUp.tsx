@@ -19,7 +19,7 @@ export default function SlideUp({ header, children, close, border, closeInternal
             toValue: -win.height+90,
             duration: 300,
             easing: Easing.linear,
-            useNativeDriver: true
+            useNativeDriver: Platform.OS==="web" ? false : true
           }).start();
     }, []);
 

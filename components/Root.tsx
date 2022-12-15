@@ -1,16 +1,17 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, StatusBar, View, ActivityIndicator } from "react-native";
+import { StyleSheet, StatusBar, View, ActivityIndicator, Linking, Platform } from "react-native";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { GoogleLoginData, GroupsType, validate } from '../functions/backendFetch';
+import { addNotification, GoogleLoginData, GroupsType, validate } from '../functions/backendFetch';
 import LoggedIn from './loggedIn/LoggedIn';
 import NotLogged from './NotLogged';
 import { useDispatch, useSelector } from 'react-redux';
 import { ReduxState } from '../redux/reducers';
 import { storeData } from '../functions/localstorage';
 import PopDown from './PopDown';
+import * as Notifications from "expo-notifications";
 import { SOCKET_SERVER } from '../functions/variables';
 import { io } from 'socket.io-client';
 import { useNotifications } from '../functions/useNotifications';
@@ -23,6 +24,7 @@ export default function Root() {
     const error = useSelector<ReduxState, ReduxState["error"]>((state: ReduxState) => state.error);
     const token = useSelector<ReduxState, string | null>((state: ReduxState) => state.token);
     const [loading, setLoading] = useState(false);
+    const { registerForPushNotificationAsync } = useNotifications();
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -38,6 +40,15 @@ export default function Root() {
                         }
                         dispatch({ type: "SET_USER_TOKEN", payload: value });
                         dispatch({ type: "SET_USER_DATA", payload: data.data.userData });
+                        if (Platform.OS !== "web") {
+                          registerForPushNotificationAsync().then((token2) => {
+                            addNotification(value, token2).then((data) => {
+                              if (!data.error) {
+                                console.log("Notifications Enabled.");
+                              }
+                            })
+                          });
+                        }
                         setLoading(false);
                     });
                 }
@@ -45,6 +56,35 @@ export default function Root() {
             });
         } catch(e) {
             return;
+        }
+      
+        if (Platform.OS !== "web") {
+        Notifications.setNotificationHandler({
+          handleNotification: async () => ({
+            shouldShowAlert: true,
+            shouldPlaySound: true,
+            shouldSetBadge: true
+          }),
+        });
+        const handleNotificationResponse = (
+          response: Notifications.NotificationResponse
+        ) => {
+            const data: { type?: string, groupId?:string} = response.notification.request.content.data;
+            if (data.type === "join" && data.groupId) {
+                dispatch({ type: "SET_SELECTED", payload: "groups" });
+                setTimeout(() => {
+                  dispatch({ type: "SET_CLICK_GROUP", payload: data.groupId });
+                }, 100);
+
+            }
+        }
+        const responseListener = Notifications.addNotificationResponseReceivedListener(handleNotificationResponse);
+                        
+        return () => {
+          if (responseListener) {
+            Notifications.removeNotificationSubscription(responseListener);
+          }
+        }
         }
     }, []);
 
@@ -66,18 +106,8 @@ export default function Root() {
 
     socket.emit("init", token);
 
-    socket.on("data", (data) => {
-      console.log(data);
-    });
-
-    socket.on("welcome", (data) => {
-      console.log(data);
-    });
-
     socket.on("deleted", (data) => {
-      console.log(`${data} is deleted`);
       let newGroups = [];
-      console.log(groups);
       let groupName: string;
       for (let i=0;i<groups.length;i++) {
         if (groups[i].groupId!=data) {
@@ -91,8 +121,6 @@ export default function Root() {
     });
 
     socket.on("pendingDeleted", (data) => {
-      console.log(`Pending group ${data} is deleted.`);
-      console.log(pendingGroups);
       let newPendingGroups = [];
       let groupName: string;
       for (let i=0;i<pendingGroups.length;i++) {
@@ -109,7 +137,6 @@ export default function Root() {
     socket.on("groupAccepted", (data) => {
       const { groupId, owner, othersCanAdd } = data;
       let currentGroup: GroupsType;
-      console.log(`Pending group ${groupId} is accepted.`);
       let newPendingGroups = [];
       for (let i=0;i<pendingGroups.length;i++) {
         if (pendingGroups[i].groupId != groupId) {
@@ -125,7 +152,6 @@ export default function Root() {
 
     socket.on("groupRemove", (data) => {
       let newGroups = [];
-      console.log(groups);
       let groupName: string;
       for (let i=0;i<groups.length;i++) {
         if (groups[i].groupId!=data) {
@@ -140,7 +166,6 @@ export default function Root() {
 
     socket.on("pendingGroupRemove", (data) => {
       let newGroups = [];
-      console.log(groups);
       let groupName: string;
       for (let i=0;i<pendingGroups.length;i++) {
         if (pendingGroups[i].groupId!=data) {
@@ -168,6 +193,7 @@ export default function Root() {
       dispatch({ type: "SET_ERROR", payload: {message: `${newOwner} is the new owner of ${groupName}`, type: "success", show: true} });
       dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
     });
+
     socket.on("newPendingUser", ({groupId, newUser}) => {
       console.log(`${newUser} wants to join ${groupId}`)
     });

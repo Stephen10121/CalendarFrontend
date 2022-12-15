@@ -41,7 +41,7 @@ export default function CreateGroup({ close }: { close: () => any }) {
                 <Input change={setGroupId} placeHolder="Set Group ID" marginTop={25}/>
                 <Input change={setGroupPassword} placeHolder="Group Password" marginTop={25}/>
                 <Input change={setRepeatGroupPassword} placeHolder="Repeat Group Password" marginTop={25}/>
-                <Input change={setAboutGroup} placeHolder="About Group" marginTop={25}/>
+                <Input change={setAboutGroup} placeHolder="About Group" marginTop={25} multiLine={true}/>
                 <View style={styles.checkboxPart}>
                     <Text style={styles.checkboxText}>Allow others to add Jobs</Text>
                     <Checkbox style={styles.checkbox} value={isChecked} onValueChange={setChecked} />

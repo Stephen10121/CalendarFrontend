@@ -48,7 +48,6 @@ export async function fetchGroups(token: string): Promise<FetchGroupsResponse> {
         credentials: "omit"
       })
       const groupsJson = await groups.json();
-      console.log(groupsJson)
       if (groupsJson.error) {
           return {error: groupsJson.error}
       }

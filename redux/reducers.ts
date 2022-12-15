@@ -1,3 +1,4 @@
+import { Selected } from "../components/navigation/Navigation";
 import { GoogleLoginData, GroupInfoData, GroupsType, PendingGroupsType } from "../functions/backendFetch";
 import { SET_USER_DATA, SET_USER_TOKEN } from "./actions";
 
@@ -14,7 +15,9 @@ export interface ReduxState {
     userData: GoogleLoginData | null;
     groups: GroupsType[];
     pendingGroups: PendingGroupsType[];
-    error: Error,
+    error: Error;
+    selected: Selected;
+    clickGroup: string;
 }
 
 const initialState: ReduxState = {
@@ -22,12 +25,14 @@ const initialState: ReduxState = {
     userData: null,
     groups: [],
     pendingGroups: [],
-    error: { show: false, message: "N/A" }
+    error: { show: false, message: "N/A" },
+    selected: "home",
+    clickGroup: null
 }
 
 
 type Action = {
-    type: "SET_USER_DATA" | "SET_USER_TOKEN" | "SET_USER_GROUPS" | "SET_USER_PENDING_GROUPS" | "SET_ERROR",
+    type: "SET_USER_DATA" | "SET_USER_TOKEN" | "SET_USER_GROUPS" | "SET_USER_PENDING_GROUPS" | "SET_ERROR" | "SET_SELECTED" | "SET_CLICK_GROUP",
     payload: any;
 }
 
@@ -43,6 +48,10 @@ export default function userReducer(state: ReduxState = initialState, action: Ac
             return {...state, pendingGroups: action.payload}
         case "SET_ERROR":
             return {...state, error: action.payload}
+        case "SET_SELECTED":
+            return {...state, selected: action.payload}
+        case "SET_CLICK_GROUP":
+            return {...state, clickGroup: action.payload}
         default:
             return state;
     }
