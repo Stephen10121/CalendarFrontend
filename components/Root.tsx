@@ -142,12 +142,12 @@ export default function Root() {
         if (pendingGroups[i].groupId != groupId) {
           newPendingGroups.push(pendingGroups[i]);
         } else {
-          currentGroup = {...pendingGroups[i], groupOwner: owner, othersCanAdd};
+          currentGroup = {...pendingGroups[i], groupOwner: owner, othersCanAdd, youOwn: false};
         }
       }
       dispatch({ type: "SET_USER_PENDING_GROUPS", payload: newPendingGroups });
       dispatch({ type: "SET_USER_GROUPS", payload: [...groups, currentGroup] });
-      dispatch({ type: "SET_ERROR", payload: {message: `You're now part of "${currentGroup}".`, type: "success", show: true} });
+      dispatch({ type: "SET_ERROR", payload: {message: `You're now part of "${currentGroup.groupName}".`, type: "success", show: true} });
     });
 
     socket.on("groupRemove", (data) => {
@@ -160,7 +160,7 @@ export default function Root() {
           groupName = groups[i].groupName;
         }
       }
-      dispatch({ type: "SET_ERROR", payload: {message: `The group: "${groupName}" was deleted`, type: "default", show: true} });
+      dispatch({ type: "SET_ERROR", payload: {message: `You are not in "${groupName}" anymore.`, type: "default", show: true} });
       dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
     });
 
@@ -174,7 +174,7 @@ export default function Root() {
           groupName = pendingGroups[i].groupName;
         }
       }
-      dispatch({ type: "SET_ERROR", payload: {message: `The group: "${groupName}" was deleted`, type: "default", show: true} });
+      dispatch({ type: "SET_ERROR", payload: {message: `You are not pending in "${groupName}" anymore.`, type: "default", show: true} });
       dispatch({ type: "SET_USER_PENDING_GROUPS", payload: newGroups });
     });
     socket.on("newGroupOwner", ({groupId, newOwner}) => {

@@ -27,6 +27,7 @@ export type GroupsType = {
     groupName: string;
     groupOwner: string;
     othersCanAdd: boolean;
+    youOwn: boolean;
     notification?: boolean;
 }
 

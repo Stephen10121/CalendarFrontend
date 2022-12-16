@@ -37,9 +37,9 @@ export default function LoggedIn() {
 
   const styles = StyleSheet.create({
     main: {
-        backgroundColor: "#f32553",
         width: "100%",
-        height: "100%"
+        height: "100%",
+        backgroundColor: "#dfdfdf"
     },
     body: {
       height: selected !== "account" ? win.height - 70 : 0,
@@ -56,26 +56,22 @@ export default function LoggedIn() {
     sectionHome: {
       width: "100%",
       height: win.height - 70,
-      backgroundColor: "green",
       display: selected === "home" ? "flex" : 'none',
       position: "relative"
     },
     sectionCal: {
       width: "100%",
       height: win.height - 70,
-      backgroundColor: "green",
       display: selected === "calendar" ? "flex" : 'none'
     },
     sectionGroup: {
       width: "100%",
       height: win.height - 70,
-      backgroundColor: "green",
       display: selected === "groups" ? "flex" : 'none'
     },
     sectionJob: {
       width: "100%",
       height: win.height - 70,
-      backgroundColor: "green",
       display: selected === "addJob" ? "flex" : 'none'
     },
     text: {

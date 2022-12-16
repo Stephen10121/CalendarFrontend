@@ -1,11 +1,16 @@
 import { View, StyleSheet, Text, ScrollView, TouchableOpacity, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Dimensions } from "react-native";
 import React, { useState } from "react";
+import { hours, minutes, months, days, years } from "../functions/dropdownInfo";
 import Input from "./Input";
 import Checkbox from "expo-checkbox";
 import DropDown from "./DropDown";
 import Counter from "./Counter";
+import { useSelector } from "react-redux";
+import { ReduxState } from "../redux/reducers";
 
 export default function AddJobSection() {
+    const groups = useSelector<ReduxState, ReduxState["groups"]>((state: ReduxState) => state.groups);
+    const validGroups = groups.map((group) => group.othersCanAdd || group.youOwn ? {value: group.groupId, label: group.groupName}: null)
     const [group, setGroup] = useState("");
     const [client, setClient] = useState("");
     const [job, setJob] = useState("");
@@ -19,7 +24,6 @@ export default function AddJobSection() {
     const [PM, setPM] = useState(false);
     const [positions, setPositions] = useState(1);
     const [notification, setNotification] = useState(true);
-
     const win = Dimensions.get('window');
     const width = (win.width - (16 + 16 + 23 + 23)) / 3;
 
@@ -30,37 +34,39 @@ export default function AddJobSection() {
     return (
             <KeyboardAvoidingView behavior="padding">
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <ScrollView style={styles.home}>
-                    <View style={styles.greeting}>
-                        <Text style={styles.welcome}>Add Job</Text>
-                    </View>
-                    <View style={styles.form}>
-                        <DropDown change={setGroup} placeHolder=" Group"/>
-                        <Input change={setClient} placeHolder=" Client (leave empty if no client)" marginTop={20}/>
-                        <Input change={setJob} placeHolder=" Job" marginTop={20}/>
-                        <Input change={setAddress} placeHolder=" Address (leave empty if no address)" marginTop={20}/>
-                        <View style={styles.dateSection}>
-                            <DropDown change={setMonth} placeHolder=" Month" width={width}/>
-                            <DropDown change={setDay} placeHolder=" Day" marginLeft={16} width={width}/>
-                            <DropDown change={setYear} placeHolder=" Year" marginLeft={16} width={width}/>
+                    <ScrollView>
+                        <View style={styles.home}>
+                            <View style={styles.greeting}>
+                                <Text style={styles.welcome}>Add Job</Text>
+                            </View>
+                            <View style={styles.form}>
+                                <DropDown values={validGroups} change={setGroup} placeHolder=" Group"/>
+                                <Input height={50} change={setClient} placeHolder=" Client (leave empty if no client)" marginTop={30}/>
+                                <Input height={50} change={setJob} placeHolder=" Job" marginTop={20}/>
+                                <Input height={50} change={setAddress} placeHolder=" Address (leave empty if no address)" marginTop={20}/>
+                                <View style={styles.dateSection}>
+                                    <DropDown values={months} change={setMonth} placeHolder=" Month" width={width}/>
+                                    <DropDown values={days} change={setDay} placeHolder=" Day" marginLeft={16} width={width}/>
+                                    <DropDown values={years} change={setYear} placeHolder=" Year" marginLeft={16} width={width}/>
+                                </View>
+                                <View style={styles.dateSection}>
+                                    <DropDown values={hours} change={setHour} placeHolder=" Hour" width={width}/>
+                                    <DropDown values={minutes} change={setMinute} placeHolder=" Minute" marginLeft={16} width={width}/>
+                                    <DropDown values={[{value: false, label: "AM"},{value: true, label: "PM"}]} change={setPM} placeHolder=" AM/PM" marginLeft={16} width={width}/>
+                                </View>
+                                <Input change={setInstructions} placeHolder="Instructions" marginTop={20} multiLine={true}/>
+                                <View>
+                                    <Counter value={positions} minLimit={1} change={setPositions} title="Positions"/>
+                                </View>
+                                <View style={styles.checkboxPart}>
+                                    <Text style={styles.checkboxText}>Send a notification</Text>
+                                    <Checkbox style={styles.checkbox} value={notification} onValueChange={setNotification} />
+                                </View>
+                                <TouchableOpacity style={styles.send} onPress={sendJob}>
+                                    <Text style={styles.sendText}>Create Job</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
-                        <View style={styles.dateSection}>
-                            <DropDown change={setHour} placeHolder=" Hour" width={width}/>
-                            <DropDown change={setMinute} placeHolder=" Minute" marginLeft={16} width={width}/>
-                            <DropDown change={setPM} placeHolder=" AM/PM" marginLeft={16} width={width}/>
-                        </View>
-                        <Input change={setInstructions} placeHolder="Instructions" marginTop={20} multiLine={true}/>
-                        <View>
-                            <Counter value={positions} minLimit={1} change={setPositions} title="Positions"/>
-                        </View>
-                        <View style={styles.checkboxPart}>
-                            <Text style={styles.checkboxText}>Send a notification</Text>
-                            <Checkbox style={styles.checkbox} value={notification} onValueChange={setNotification} />
-                        </View>
-                        <TouchableOpacity style={styles.send} onPress={sendJob}>
-                            <Text style={styles.sendText}>Create Job</Text>
-                        </TouchableOpacity>
-                    </View>
                     </ScrollView>
                 </TouchableWithoutFeedback>
             </KeyboardAvoidingView>

@@ -1,61 +1,53 @@
-import { StyleSheet, View } from 'react-native'
-import React, { useCallback, useState } from 'react'
-import DropDownPicker from "react-native-dropdown-picker";
-import {useForm, Controller} from 'react-hook-form';
+import { StyleSheet, View, Text } from 'react-native'
+import React, { useState } from 'react'
+import { Picker } from '@react-native-picker/picker';
 
-export default function DropDown({ defaultValue, change, placeHolder, marginLeft, multiLine, width }: { defaultValue?: string, change: (value: any) => any, placeHolder?: string, marginLeft?: number | string, multiLine?: boolean, width?: number }) {
-    const [genderOpen, setGenderOpen] = useState(false);
-    const [genderValue, setGenderValue] = useState(null);
-    const [gender, setGender] = useState([
-        { label: "Male", value: "male" },
-        { label: "Female", value: "female" },
-        { label: "Prefer Not to Say", value: "neutral" },
-    ]);
+export default function DropDown({ values, change, placeHolder, marginLeft, width }: { values: {label: string, value: any}[], change: (value: any) => any, placeHolder?: string, marginLeft?: number | string, width?: number }) {
+    const [selected, setSelected] = useState();
     const styles = StyleSheet.create({
-        input: {
+        cover: {
             width: width ? width : "100%",
-            height: multiLine ? 120 : 40,
+            height: 54,
+            marginLeft: marginLeft ? marginLeft : 0,
             borderWidth: 2,
             borderColor: "#000000",
             borderStyle: "solid",
             borderRadius: 10,
             paddingHorizontal: 5,
-            marginLeft,
-            alignItems: "center",
-            justifyContent: "center"
         },
         text: {
             fontSize: 13,
             fontWeight: "500",
             fontFamily: "Poppins-SemiBold",
             color: "#000000",
-        },
-        dropdownGender: {
-
+            marginLeft: marginLeft ? marginLeft : 0,
         },
         dropdown: {
-
+            height: 50,
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 13,
+            fontWeight: "500",
+            fontFamily: "Poppins-SemiBold",
+            color: "#000000",
         },
-        placeholderStyles: {
-            
+        title: {
+            fontSize: 13,
+            fontWeight: "500",
+            fontFamily: "Poppins-SemiBold",
+            color: "#000000",
+            marginLeft: marginLeft ? marginLeft : 0,
         }
     });
 
     return (
-            <DropDownPicker
-              style={styles.dropdown}
-              open={genderOpen}
-              value={genderValue} //genderValue
-              items={gender}
-              setOpen={setGenderOpen}
-              setValue={setGenderValue}
-              setItems={setGender}
-              placeholder="Select Gender"
-              placeholderStyle={styles.placeholderStyles}
-              onOpen={console.log}
-              onChangeValue={console.log}
-              zIndex={3000}
-              zIndexInverse={1000}
-            />
+        <View>
+            <Text style={styles.title}>{placeHolder}</Text>
+            <View style={styles.cover}>
+                <Picker style={styles.dropdown} selectedValue={selected} onValueChange={(itemValue, _itemIndex) => {setSelected(itemValue);change(itemValue)}}>
+                    {values.map((value) => <Picker.Item style={styles.text} key={`${placeHolder}${value.value}`} label={value.label} value={value.value}/>)}
+                </Picker>
+            </View>
+        </View>
     );
 }
