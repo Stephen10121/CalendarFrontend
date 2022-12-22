@@ -17,9 +17,8 @@ export default function Account() {
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => {
                         storeData(null);
-                        dispatch({ type: "SET_USER_TOKEN", payload: null });
-                        dispatch({ type: "SET_USER_DATA", payload: null });
-                        dispatch({ type: "SET_SELECTED", payload: "home" });
+                        dispatch({ type: "SET_LOGOUT", payload: true });
+                        console.log("Logged out.")
                     }} style={styles.logoutButton}>
                         <Image style={styles.imageGroup}
                             source={require('../assets/logout.png')}

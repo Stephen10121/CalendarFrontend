@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import GroupInfo from "./GroupInfo";
-import { GroupsType, PendingGroupsType } from "../functions/backendFetch";
 import PendingGroupInfo from "./PendingGroupInfo";
 import SlideUp, { SlideUpData } from "./SlideUp";
 import { View, StyleSheet, Text, TouchableOpacity, ScrollView } from "react-native";
 import React from "react";
 import GroupIcon from "./GroupIcon";
 import JoinGroup from "./JoinGroup";
-import { RemoveGroup, RemovePendingGroup } from "./loggedIn/LoggedIn";
 import CreateGroup from "./CreateGroup";
 import { useDispatch, useSelector } from "react-redux";
 import { ReduxState } from "../redux/reducers";

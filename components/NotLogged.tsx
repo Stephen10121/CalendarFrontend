@@ -1,43 +1,74 @@
-import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
-import React, { useState } from 'react';
-import { googleLoginOrRegister } from '../functions/backendFetch';
+import { StyleSheet, View, Text, TouchableOpacity, Image, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { addNotification, googleLoginOrRegister } from '../functions/backendFetch';
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from 'expo-web-browser';
-import { EXPO_CLIENT_ID, WEB_CLIENT_ID } from '../functions/variables';
+import { ANDROID_CLIENT_ID, EXPO_CLIENT_ID, WEB_CLIENT_ID } from '../functions/variables';
 import { useDispatch } from 'react-redux';
 import { storeData } from '../functions/localstorage';
-import { setUserData } from '../redux/actions';
+import { useNotifications } from '../functions/useNotifications';
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function NotLogged({ loading }: { loading: (arg0: boolean) => any }) {
     const [error, setError] = useState("");
+    const { registerForPushNotificationAsync } = useNotifications();
     const dispatch = useDispatch();
-    const [request, _response, googlePromptAsync] = Google.useAuthRequest({
+    const [request, response, googlePromptAsync] = Google.useAuthRequest({
         expoClientId: EXPO_CLIENT_ID,
         iosClientId: "",
-        androidClientId: "",
+        androidClientId: ANDROID_CLIENT_ID,
         webClientId: WEB_CLIENT_ID
     });
 
-    async function googleRegister() {
-        const response = await googlePromptAsync();
+    useEffect(() => {
+        if (!response) {
+            return
+        }
         if (response.type !== "success") {
             setError("Error Using Google Login");
             return
         }
-
         const { access_token } = response.params;
         loading(true);
-        const res2 = await googleLoginOrRegister(access_token);
-        if (res2.error || !res2.data) {
-            setError(res2.error);
-            return
-        }
-        dispatch({ type: "SET_USER_TOKEN", payload: res2.data.token });
-        dispatch({ type: "SET_USER_DATA", payload: res2.data.userData });
-        storeData(res2.data.token);
-        loading(false);
+        googleLoginOrRegister(access_token).then((res2) => {
+            if (res2.error) {
+                setError(res2.error);
+                loading(false);
+                return
+            }
+            if (!res2.data) {
+                setError("Error using Google Login");
+                loading(false);
+                return
+            }
+            if (Platform.OS !== "web") {
+                registerForPushNotificationAsync().then((token2) => {
+                  if (!token2) {
+                    return
+                  }
+                  addNotification(res2.data.token, token2).then((data) => {
+                    if (!data.error) {
+                      console.log("Notifications Enabled.");
+                    }
+                  }).finally(() => {
+                    dispatch({ type: "SET_USER_TOKEN", payload: res2.data.token });
+                    dispatch({ type: "SET_USER_DATA", payload: res2.data.userData });
+                    storeData(res2.data.token);
+                    loading(false);
+                  });
+                });
+            } else {
+                dispatch({ type: "SET_USER_TOKEN", payload: res2.data.token });
+                dispatch({ type: "SET_USER_DATA", payload: res2.data.userData });
+                storeData(res2.data.token);
+                loading(false);
+            }
+        });
+    }, [response]);
+
+    async function googleRegister() {
+        await googlePromptAsync();
     }
 
   return (

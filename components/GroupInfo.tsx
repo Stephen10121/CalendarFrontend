@@ -4,6 +4,7 @@ import React from "react";
 import { View, StyleSheet, Text, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { ReduxState } from "../redux/reducers";
+import { dayToLetter, monthToLetter } from "../functions/dateConversion";
 
 export default function GroupInfo({ groupId, othersCanAdd, close }: { groupId: string, othersCanAdd: boolean, close: () => any }) {
     const groups = useSelector<ReduxState, ReduxState["groups"]>((state: ReduxState) => state.groups);
@@ -124,7 +125,7 @@ export default function GroupInfo({ groupId, othersCanAdd, close }: { groupId: s
             } else {
                 try {
                     const unformattedDate = new Date(data2.data.created);
-                    setDate(`${["N/A", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][unformattedDate.getDay()]}, ${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][unformattedDate.getMonth()]} ${unformattedDate.getDate()}, ${unformattedDate.getFullYear()}.`);
+                    setDate(`${dayToLetter[unformattedDate.getDay()]}, ${monthToLetter[unformattedDate.getMonth()]} ${unformattedDate.getDate()}, ${unformattedDate.getFullYear()}.`);
                 } catch (_err) {
                     setDate("N/A");
                 } 

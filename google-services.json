@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "665789630027",
+    "project_id": "calendarapilogin",
+    "storage_bucket": "calendarapilogin.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:665789630027:android:8703db518c0958225d6fce",
+        "android_client_info": {
+          "package_name": "com.gruzservices.calendarapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "665789630027-g9gogfmb2qo3s4egs0boghfhc2so267i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJgFuXQPE1DbjR6CqSRp6EUmWKTuLQbWQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "665789630027-g9gogfmb2qo3s4egs0boghfhc2so267i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:665789630027:android:d1693f6a1374c6dd5d6fce",
+        "android_client_info": {
+          "package_name": "com.gruzservices.calendarapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "665789630027-g9gogfmb2qo3s4egs0boghfhc2so267i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJgFuXQPE1DbjR6CqSRp6EUmWKTuLQbWQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "665789630027-g9gogfmb2qo3s4egs0boghfhc2so267i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

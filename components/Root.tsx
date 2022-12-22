@@ -1,20 +1,21 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, StatusBar, View, ActivityIndicator, Linking, Platform } from "react-native";
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StyleSheet, StatusBar, View, ActivityIndicator, Platform } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFonts } from 'expo-font';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import * as Notifications from "expo-notifications";
 import * as SplashScreen from 'expo-splash-screen';
-import { addNotification, GoogleLoginData, GroupsType, validate } from '../functions/backendFetch';
+import { io } from 'socket.io-client';
+import { useFonts } from 'expo-font';
+import { addNotification, GoogleLoginData, GroupsType, PendingGroupsType, validate } from '../functions/backendFetch';
+import { useNotifications } from '../functions/useNotifications';
+import { SOCKET_SERVER } from '../functions/variables';
+import { storeData } from '../functions/localstorage';
+import { ReduxState } from '../redux/reducers';
 import LoggedIn from './loggedIn/LoggedIn';
 import NotLogged from './NotLogged';
-import { useDispatch, useSelector } from 'react-redux';
-import { ReduxState } from '../redux/reducers';
-import { storeData } from '../functions/localstorage';
 import PopDown from './PopDown';
-import * as Notifications from "expo-notifications";
-import { SOCKET_SERVER } from '../functions/variables';
-import { io } from 'socket.io-client';
-import { useNotifications } from '../functions/useNotifications';
+
 SplashScreen.preventAutoHideAsync();
 
 export default function Root() {
@@ -42,6 +43,9 @@ export default function Root() {
                         dispatch({ type: "SET_USER_DATA", payload: data.data.userData });
                         if (Platform.OS !== "web") {
                           registerForPushNotificationAsync().then((token2) => {
+                            if (!token2) {
+                              return
+                            }
                             addNotification(value, token2).then((data) => {
                               if (!data.error) {
                                 console.log("Notifications Enabled.");
@@ -137,16 +141,17 @@ export default function Root() {
     socket.on("groupAccepted", (data) => {
       const { groupId, owner, othersCanAdd } = data;
       let currentGroup: GroupsType;
-      let newPendingGroups = [];
+      let newGroups = groups;
+      let newPendingGroups: PendingGroupsType[] = [];
       for (let i=0;i<pendingGroups.length;i++) {
         if (pendingGroups[i].groupId != groupId) {
           newPendingGroups.push(pendingGroups[i]);
         } else {
-          currentGroup = {...pendingGroups[i], groupOwner: owner, othersCanAdd, youOwn: false};
+          newGroups.push({...pendingGroups[i], groupOwner: owner, othersCanAdd, youOwn: false, notification: true});
         }
       }
       dispatch({ type: "SET_USER_PENDING_GROUPS", payload: newPendingGroups });
-      dispatch({ type: "SET_USER_GROUPS", payload: [...groups, currentGroup] });
+      dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
       dispatch({ type: "SET_ERROR", payload: {message: `You're now part of "${currentGroup.groupName}".`, type: "success", show: true} });
     });
 
@@ -160,7 +165,7 @@ export default function Root() {
           groupName = groups[i].groupName;
         }
       }
-      dispatch({ type: "SET_ERROR", payload: {message: `You are not in "${groupName}" anymore.`, type: "default", show: true} });
+      dispatch({ type: "SET_ERROR", payload: {message: `You're not in "${groupName}" anymore.`, type: "default", show: true} });
       dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
     });
 

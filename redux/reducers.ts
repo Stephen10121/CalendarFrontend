@@ -1,6 +1,6 @@
 import { Selected } from "../components/navigation/Navigation";
-import { GoogleLoginData, GroupInfoData, GroupsType, PendingGroupsType } from "../functions/backendFetch";
-import { SET_USER_DATA, SET_USER_TOKEN } from "./actions";
+import { GoogleLoginData, GroupsType, PendingGroupsType } from "../functions/backendFetch";
+import { JobType } from "../functions/jobFetch";
 
 export type ErrorType = "alert" | "success" | "default";
 
@@ -10,7 +10,14 @@ export interface Error {
     message: string;
 }
 
+export interface UserJobsStore {
+    groupId: string;
+    jobs: JobType[]
+}
+
 export interface ReduxState {
+    userJobs: UserJobsStore[];
+    userAllJobs: JobType[];
     token: null | string;
     userData: GoogleLoginData | null;
     groups: GroupsType[];
@@ -27,12 +34,14 @@ const initialState: ReduxState = {
     pendingGroups: [],
     error: { show: false, message: "N/A" },
     selected: "home",
-    clickGroup: null
+    clickGroup: null,
+    userJobs: [],
+    userAllJobs: []
 }
 
 
 type Action = {
-    type: "SET_USER_DATA" | "SET_USER_TOKEN" | "SET_USER_GROUPS" | "SET_USER_PENDING_GROUPS" | "SET_ERROR" | "SET_SELECTED" | "SET_CLICK_GROUP",
+    type: "SET_USER_DATA" | "SET_USER_TOKEN" | "SET_USER_GROUPS" | "SET_USER_PENDING_GROUPS" | "SET_ERROR" | "SET_SELECTED" | "SET_CLICK_GROUP" | "SET_USER_JOBS" | "SET_USER_ALL_JOBS" | "SET_LOGOUT",
     payload: any;
 }
 
@@ -52,6 +61,25 @@ export default function userReducer(state: ReduxState = initialState, action: Ac
             return {...state, selected: action.payload}
         case "SET_CLICK_GROUP":
             return {...state, clickGroup: action.payload}
+        case "SET_USER_JOBS":
+            return {...state, userJobs: action.payload}
+        case "SET_USER_ALL_JOBS":
+            return {...state, userAllJobs: action.payload}
+        case "SET_LOGOUT":
+            if (action.payload) {
+                state =  {
+                    token: null,
+                    userData: null,
+                    groups: [],
+                    pendingGroups: [],
+                    error: { show: false, message: "N/A" },
+                    selected: "home",
+                    clickGroup: null,
+                    userJobs: [],
+                    userAllJobs: []
+                }
+            }
+            return state;
         default:
             return state;
     }

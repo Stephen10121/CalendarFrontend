@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "calendarAPP",
+    "name": "Task Giver",
     "slug": "calendar-app",
-    "scheme": "com.gruzservices.calendarAPP",
+    "scheme": "com.gruzservices.calendarapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/logo-splash2.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#dfdfdf"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -22,15 +22,15 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.gruzservices.calendarAPP",
+      "package": "com.gruzservices.calendarapp",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "foregroundImage": "./assets/logo2red.png",
+        "backgroundColor": "#EE3F3F"
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/logo-splash.png"
     },
     "extra": {
       "eas": {

@@ -6,8 +6,9 @@ import GroupSection from '../GroupSection';
 import { fetchGroups, GoogleLoginData } from '../../functions/backendFetch';
 import Account from '../Account';
 import { useDispatch, useSelector } from 'react-redux';
-import { ReduxState } from '../../redux/reducers';
+import { ReduxState, UserJobsStore } from '../../redux/reducers';
 import AddJobSection from '../AddJobSection';
+import { getJobs, JobType } from '../../functions/jobFetch';
 
 export type RemoveGroup = (groupId: string) => void;
 export type RemovePendingGroup = (pendingGroupId: string) => void;
@@ -20,18 +21,40 @@ export default function LoggedIn() {
   const win = Dimensions.get('window');
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    fetchGroups(token).then((data) => {
-      if (data.error != ""|| !data.data) {
-          setError(data.error);
+  async function fetcher() {
+    const data = await fetchGroups(token)
+    console.log("Fetched Groups");
+    if (data.error != ""|| !data.data) {
+        setError(data.error);
+        return
+    }
+    if (data.data.groups !== null) {
+      let userJobs: UserJobsStore[] = [];
+      let allJobs: JobType[] = [];
+      for (let i=0;i<data.data.groups.length;i++) {
+        const data2 = await getJobs(token, data.data.groups[i].groupId);
+        console.log(`Fetched Jobs from ${data.data.groups[i].groupId}`);
+        if (data2.error) {
+          console.log(data2.error);
           return
+        }
+        if (data2.jobs) {
+          allJobs.push(...data2.jobs);
+          userJobs.push({ groupId: data.data.groups[i].groupId, jobs: data2.jobs });
+        }
       }
-      if (data.data.groups !== null) {
-        dispatch({ type: "SET_USER_GROUPS", payload: data.data.groups });
-      }
-      if (data.data.pendingGroups) {
-        dispatch({ type: "SET_USER_PENDING_GROUPS", payload: data.data.pendingGroups });
-      }
+      dispatch({ type: "SET_USER_ALL_JOBS", payload: allJobs });
+      dispatch({ type: "SET_USER_JOBS", payload: userJobs });
+      dispatch({ type: "SET_USER_GROUPS", payload: data.data.groups });
+    }
+    if (data.data.pendingGroups) {
+      dispatch({ type: "SET_USER_PENDING_GROUPS", payload: data.data.pendingGroups });
+    }
+  }
+
+  useEffect(() => {
+    fetcher().then(() => {
+      console.log("Done Fetching.")
     });
   }, []);
 

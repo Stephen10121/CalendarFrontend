@@ -268,7 +268,7 @@ export async function googleLoginOrRegister(accessToken: string): Promise<Google
     if (groupsJson.error !== "" || !groupsJson.data) {
       return { error: "Error logging in user." }
     }
-
+    console.log(groupsJson.data.userData);
     return { data: { userData: groupsJson.data.userData, token: groupsJson.data.token} }
   } catch (err) {
     return { error: "Error logging in user." }

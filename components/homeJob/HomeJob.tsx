@@ -1,15 +1,15 @@
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'react'
 
-export default function HomeJob({ name, client, time }: { name: string, client: string, time: string }) {
+export default function HomeJob({ name, client, time, id, click }: { name: string, client: string, time: string, id: number, click: (arg0: number) => any }) {
   return (
-    <View style={styles.box}>
+    <TouchableOpacity style={styles.box} onPress={() => click(id)}>
         <View>
             <Text style={styles.name}>{name}</Text>
             <Text style={styles.client}>{client}</Text>
         </View>
         <Text style={styles.time}>{time}</Text>
-    </View>
+    </TouchableOpacity>
   )
 }
 

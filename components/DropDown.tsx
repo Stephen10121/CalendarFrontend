@@ -26,10 +26,13 @@ export default function DropDown({ values, change, placeHolder, marginLeft, widt
             height: 50,
             alignItems: "center",
             justifyContent: "center",
+            borderWidth: 0,
+            backgroundColor: "#dfdfdf",
             fontSize: 13,
             fontWeight: "500",
             fontFamily: "Poppins-SemiBold",
             color: "#000000",
+            outlineStyle: 'none'
         },
         title: {
             fontSize: 13,
