@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from 'expo-splash-screen';
-import { io } from 'socket.io-client';
+import io from 'socket.io-client/dist/socket.io';
 import { useFonts } from 'expo-font';
 import { addNotification, GoogleLoginData, GroupsType, PendingGroupsType, validate } from '../functions/backendFetch';
 import { useNotifications } from '../functions/useNotifications';
@@ -15,6 +15,7 @@ import { ReduxState } from '../redux/reducers';
 import LoggedIn from './loggedIn/LoggedIn';
 import NotLogged from './NotLogged';
 import PopDown from './PopDown';
+const socket = io(SOCKET_SERVER);
 
 SplashScreen.preventAutoHideAsync();
 
@@ -24,45 +25,66 @@ export default function Root() {
     const userData = useSelector<ReduxState, GoogleLoginData | null>((state: ReduxState) => state.userData);
     const error = useSelector<ReduxState, ReduxState["error"]>((state: ReduxState) => state.error);
     const token = useSelector<ReduxState, string | null>((state: ReduxState) => state.token);
-    const [loading, setLoading] = useState(false);
+    const [ loading, setLoading ] = useState(false);
     const { registerForPushNotificationAsync } = useNotifications();
     const dispatch = useDispatch();
 
-    useEffect(() => {
-        try {
-            AsyncStorage.getItem('@storage_Key').then((value) => {
-                if(value !== null) {
-                    setLoading(true);
-                    validate(value).then((data) => {
-                        if (data.error || !data.data) {
-                            storeData(null);
-                            setLoading(false);
-                            return;
-                        }
-                        dispatch({ type: "SET_USER_TOKEN", payload: value });
-                        dispatch({ type: "SET_USER_DATA", payload: data.data.userData });
-                        if (Platform.OS !== "web") {
-                          registerForPushNotificationAsync().then((token2) => {
-                            if (!token2) {
-                              return
-                            }
-                            addNotification(value, token2).then((data) => {
-                              if (!data.error) {
-                                console.log("Notifications Enabled.");
-                              }
-                            })
-                          });
-                        }
-                        setLoading(false);
-                    });
-                }
-                return;
-            });
-        } catch(e) {
-            return;
+    async function fetchValidation() {
+      try {
+        const value = await AsyncStorage.getItem('@storage_Key');
+        if(value === null) return false;
+
+        setLoading(true);
+        const data = await validate(value);
+
+        if (data.error || !data.data) {
+          storeData(null);
+          setLoading(false);
+          return false;
         }
-      
-        if (Platform.OS !== "web") {
+
+        dispatch({ type: "SET_USER_TOKEN", payload: value });
+        dispatch({ type: "SET_USER_DATA", payload: data.data.userData });
+
+        if (Platform.OS === "web") {
+          setLoading(false);
+          return true;
+        }
+
+        const token2 = await registerForPushNotificationAsync();
+        if (!token2) {
+          setLoading(false);
+          return true;
+        }
+
+        const data2 = await addNotification(value, token2);
+        if (!data2.error) {
+          console.log("Notifications Enabled.");
+        }
+
+        setLoading(false);
+        return true;
+      } catch(e) {
+        setLoading(false);
+        return false;
+      }
+    }
+
+    useEffect(() => {
+      if (token && userData) {
+        socket.emit("init", token);
+      }
+    }, [token, userData]);
+
+    useEffect(() => {
+      console.log(pendingGroups);
+    }, [pendingGroups]);
+
+    useEffect(() => {
+        fetchValidation().then((data) => console.log(data ? "Validation Success." : "Validation Error."));
+        if (Platform.OS === "web") {
+          return;
+        }
         Notifications.setNotificationHandler({
           handleNotification: async () => ({
             shouldShowAlert: true,
@@ -70,9 +92,8 @@ export default function Root() {
             shouldSetBadge: true
           }),
         });
-        const handleNotificationResponse = (
-          response: Notifications.NotificationResponse
-        ) => {
+
+        const handleNotificationResponse = (response: Notifications.NotificationResponse) => {
             const data: { type?: string, groupId?:string} = response.notification.request.content.data;
             if (data.type === "join" && data.groupId) {
                 dispatch({ type: "SET_SELECTED", payload: "groups" });
@@ -89,8 +110,105 @@ export default function Root() {
             Notifications.removeNotificationSubscription(responseListener);
           }
         }
-        }
     }, []);
+
+    useEffect(() => {
+      socket.on("deleted", (data) => {
+        let newGroups = [];
+        let groupName: string;
+        for (let i=0;i<groups.length;i++) {
+          if (groups[i].groupId!=data) {
+            newGroups.push(groups[i]);
+          } else {
+            groupName = groups[i].groupName;
+          }
+        }
+        dispatch({ type: "SET_ERROR", payload: {message: `The group: "${groupName}" was deleted`, type: "default", show: true} });
+        dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
+      });
+  
+      socket.on("pendingDeleted", (data) => {
+        let newPendingGroups = [];
+        let groupName: string;
+        for (let i=0;i<pendingGroups.length;i++) {
+          if (pendingGroups[i].groupId != data) {
+            newPendingGroups.push(pendingGroups[i]);
+          } else {
+            groupName = pendingGroups[i].groupName;
+          }
+        }
+        dispatch({ type: "SET_ERROR", payload: {message: `The group: "${groupName}" was deleted`, type: "default", show: true} });
+        dispatch({ type: "SET_USER_PENDING_GROUPS", payload: newPendingGroups });
+      });
+  
+      socket.on("groupAccepted", (data) => {
+        const { groupId, owner, othersCanAdd } = data;
+        let currentGroup: GroupsType;
+        let newGroups = groups;
+        let newPendingGroups: PendingGroupsType[] = [];
+        console.log(pendingGroups);
+        for (let i=0;i<pendingGroups.length;i++) {
+          console.log(pendingGroups[i].groupId, groupId);
+          if (pendingGroups[i].groupId === groupId) {
+            currentGroup = {...pendingGroups[i], groupOwner: owner, othersCanAdd, youOwn: false, notification: true};
+            newGroups.push(currentGroup);
+            continue
+          }
+          newPendingGroups.push(pendingGroups[i]);
+        }
+        dispatch({ type: "SET_USER_PENDING_GROUPS", payload: newPendingGroups });
+        dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
+        dispatch({ type: "SET_ERROR", payload: {message: `You're now part of "${currentGroup.groupName}".`, type: "success", show: true} });
+      });
+  
+      socket.on("groupRemove", (data) => {
+        let newGroups = [];
+        let groupName: string;
+        for (let i=0;i<groups.length;i++) {
+          if (groups[i].groupId!=data) {
+            newGroups.push(groups[i]);
+          } else {
+            groupName = groups[i].groupName;
+          }
+        }
+        dispatch({ type: "SET_ERROR", payload: {message: `You're not in "${groupName}" anymore.`, type: "default", show: true} });
+        dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
+      });
+  
+      socket.on("pendingGroupRemove", (data) => {
+        let newGroups = [];
+        let groupName: string;
+        for (let i=0;i<pendingGroups.length;i++) {
+          if (pendingGroups[i].groupId!=data) {
+            newGroups.push(pendingGroups[i]);
+          } else {
+            groupName = pendingGroups[i].groupName;
+          }
+        }
+        dispatch({ type: "SET_ERROR", payload: {message: `You are not pending in "${groupName}" anymore.`, type: "default", show: true} });
+        dispatch({ type: "SET_USER_PENDING_GROUPS", payload: newGroups });
+      });
+      socket.on("newGroupOwner", ({groupId, newOwner}) => {
+        let newGroups: GroupsType[] = [];
+        let groupName: string;
+        for (let i=0;i<groups.length;i++) {
+          if (groups[i].groupId==groupId) {
+            const newGroup2 = Object.create(groups[i]);
+            groupName = groups[i].groupName;
+            newGroup2.groupOwner = newOwner;
+            newGroups.push(newGroup2);
+          } else {
+            newGroups.push(groups[i]);
+          }
+        }
+        dispatch({ type: "SET_ERROR", payload: {message: `${newOwner} is the new owner of ${groupName}`, type: "success", show: true} });
+        dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
+      });
+  
+      socket.on("newPendingUser", ({groupId, newUser}) => {
+        console.log(`${newUser} wants to join ${groupId}`)
+      });
+    }, [socket]);
 
   const [fontsLoaded] = useFonts({
     'Poppins-SemiBold': require('../assets/Poppins-SemiBold.ttf'),
@@ -104,105 +222,6 @@ export default function Root() {
       setLoading(true);
     }
   }, [fontsLoaded]);
-
-  if (token && userData) {
-    const socket = io(SOCKET_SERVER);
-
-    socket.emit("init", token);
-
-    socket.on("deleted", (data) => {
-      let newGroups = [];
-      let groupName: string;
-      for (let i=0;i<groups.length;i++) {
-        if (groups[i].groupId!=data) {
-          newGroups.push(groups[i]);
-        } else {
-          groupName = groups[i].groupName;
-        }
-      }
-      dispatch({ type: "SET_ERROR", payload: {message: `The group: "${groupName}" was deleted`, type: "default", show: true} });
-      dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
-    });
-
-    socket.on("pendingDeleted", (data) => {
-      let newPendingGroups = [];
-      let groupName: string;
-      for (let i=0;i<pendingGroups.length;i++) {
-        if (pendingGroups[i].groupId != data) {
-          newPendingGroups.push(pendingGroups[i]);
-        } else {
-          groupName = pendingGroups[i].groupName;
-        }
-      }
-      dispatch({ type: "SET_ERROR", payload: {message: `The group: "${groupName}" was deleted`, type: "default", show: true} });
-      dispatch({ type: "SET_USER_PENDING_GROUPS", payload: newPendingGroups });
-    });
-
-    socket.on("groupAccepted", (data) => {
-      const { groupId, owner, othersCanAdd } = data;
-      let currentGroup: GroupsType;
-      let newGroups = groups;
-      let newPendingGroups: PendingGroupsType[] = [];
-      for (let i=0;i<pendingGroups.length;i++) {
-        if (pendingGroups[i].groupId != groupId) {
-          newPendingGroups.push(pendingGroups[i]);
-        } else {
-          newGroups.push({...pendingGroups[i], groupOwner: owner, othersCanAdd, youOwn: false, notification: true});
-        }
-      }
-      dispatch({ type: "SET_USER_PENDING_GROUPS", payload: newPendingGroups });
-      dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
-      dispatch({ type: "SET_ERROR", payload: {message: `You're now part of "${currentGroup.groupName}".`, type: "success", show: true} });
-    });
-
-    socket.on("groupRemove", (data) => {
-      let newGroups = [];
-      let groupName: string;
-      for (let i=0;i<groups.length;i++) {
-        if (groups[i].groupId!=data) {
-          newGroups.push(groups[i]);
-        } else {
-          groupName = groups[i].groupName;
-        }
-      }
-      dispatch({ type: "SET_ERROR", payload: {message: `You're not in "${groupName}" anymore.`, type: "default", show: true} });
-      dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
-    });
-
-    socket.on("pendingGroupRemove", (data) => {
-      let newGroups = [];
-      let groupName: string;
-      for (let i=0;i<pendingGroups.length;i++) {
-        if (pendingGroups[i].groupId!=data) {
-          newGroups.push(pendingGroups[i]);
-        } else {
-          groupName = pendingGroups[i].groupName;
-        }
-      }
-      dispatch({ type: "SET_ERROR", payload: {message: `You are not pending in "${groupName}" anymore.`, type: "default", show: true} });
-      dispatch({ type: "SET_USER_PENDING_GROUPS", payload: newGroups });
-    });
-    socket.on("newGroupOwner", ({groupId, newOwner}) => {
-      let newGroups: GroupsType[] = [];
-      let groupName: string;
-      for (let i=0;i<groups.length;i++) {
-        if (groups[i].groupId==groupId) {
-          const newGroup2 = Object.create(groups[i]);
-          groupName = groups[i].groupName;
-          newGroup2.groupOwner = newOwner;
-          newGroups.push(newGroup2);
-        } else {
-          newGroups.push(groups[i]);
-        }
-      }
-      dispatch({ type: "SET_ERROR", payload: {message: `${newOwner} is the new owner of ${groupName}`, type: "success", show: true} });
-      dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
-    });
-
-    socket.on("newPendingUser", ({groupId, newUser}) => {
-      console.log(`${newUser} wants to join ${groupId}`)
-    });
-  }
 
   if (loading) {
     return <View style={styles.loading}><ActivityIndicator size="large" color="#3A9FE9" /></View>;

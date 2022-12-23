@@ -1,6 +1,17 @@
-import { io } from "socket.io-client";
-import { SOCKET_SERVER } from "./variables";
+import { useEffect, useState } from "react";
+import { io, Socket } from "socket.io-client";
 
-const socket = io(SOCKET_SERVER)
-
-export default socket;
+export function useWebsocket(url: string) {
+    const [connected, setConnected] = useState(false);
+    const [socket, setSocket] = useState<any>(null);
+    useEffect(()=>{
+        const newSocket = io(url);
+        newSocket.on('connect', ()=>setConnected(true));
+        newSocket.on('disconnect', ()=>setConnected(false));
+        setSocket(newSocket);
+    }, [])
+    return {
+        connected,
+        socket,
+    }
+}

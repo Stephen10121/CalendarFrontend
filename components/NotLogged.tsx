@@ -21,61 +21,70 @@ export default function NotLogged({ loading }: { loading: (arg0: boolean) => any
         webClientId: WEB_CLIENT_ID
     });
 
-    useEffect(() => {
+    async function googleRegisterResponse() {
         if (!response) {
-            return
+            return false;
         }
+
         if (response.type !== "success") {
             setError("Error Using Google Login");
-            return
+            return false;
         }
+
         const { access_token } = response.params;
         loading(true);
-        googleLoginOrRegister(access_token).then((res2) => {
-            if (res2.error) {
-                setError(res2.error);
-                loading(false);
-                return
-            }
-            if (!res2.data) {
-                setError("Error using Google Login");
-                loading(false);
-                return
-            }
-            if (Platform.OS !== "web") {
-                registerForPushNotificationAsync().then((token2) => {
-                  if (!token2) {
-                    return
-                  }
-                  addNotification(res2.data.token, token2).then((data) => {
-                    if (!data.error) {
-                      console.log("Notifications Enabled.");
-                    }
-                  }).finally(() => {
-                    dispatch({ type: "SET_USER_TOKEN", payload: res2.data.token });
-                    dispatch({ type: "SET_USER_DATA", payload: res2.data.userData });
-                    storeData(res2.data.token);
-                    loading(false);
-                  });
-                });
-            } else {
-                dispatch({ type: "SET_USER_TOKEN", payload: res2.data.token });
-                dispatch({ type: "SET_USER_DATA", payload: res2.data.userData });
-                storeData(res2.data.token);
-                loading(false);
-            }
-        });
-    }, [response]);
 
-    async function googleRegister() {
-        await googlePromptAsync();
+        const res2 = await googleLoginOrRegister(access_token);
+
+        if (res2.error) {
+            setError(res2.error);
+            loading(false);
+            return false;
+        }
+
+        if (!res2.data) {
+            setError("Error using Google Login");
+            loading(false);
+            return false;
+        }
+
+        if (Platform.OS === "web") {
+            dispatch({ type: "SET_USER_TOKEN", payload: res2.data.token });
+            dispatch({ type: "SET_USER_DATA", payload: res2.data.userData });
+            storeData(res2.data.token);
+            loading(false);
+            return true;
+        }
+
+        const token2 = await registerForPushNotificationAsync();
+
+        if (!token2) {
+            loading(false);
+            return false;
+        }
+
+        const newData = await addNotification(res2.data.token, token2);
+        
+        if (!newData.error) {
+            console.log("Notifications Enabled.");
+        }
+
+        dispatch({ type: "SET_USER_TOKEN", payload: res2.data.token });
+        dispatch({ type: "SET_USER_DATA", payload: res2.data.userData });
+        storeData(res2.data.token);
+        loading(false);
+        return true;
     }
+
+    useEffect(() => {
+        googleRegisterResponse().then((data) => console.log(data ? "Login Success." : "Login Failure."));
+    }, [response]);
 
   return (
     <View style={styles.main}>
       <Text style={styles.welcome}>Welcome</Text>
       {error ? <Text style={styles.error}>{error}</Text> : null}
-      <TouchableOpacity disabled={!request} style={styles.googleButton} onPress={googleRegister}>
+      <TouchableOpacity disabled={!request} style={styles.googleButton} onPress={async () => await googlePromptAsync()}>
       <Image style={styles.image}
             source={require('../assets/google.png')}
         />
