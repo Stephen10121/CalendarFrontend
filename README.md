@@ -13,6 +13,7 @@ eas build -p android --profile preview
   - [ ] Notify other particapants when job is posted.
   - [ ] Job information slideup.
     - [ ] Show the job info.
+      - [ ] Fetch the volunteer info.
     - [ ] Private noted.
     - [ ] Chat section.
       - [ ] Overall chat with everyone in the group.
