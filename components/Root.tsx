@@ -4,19 +4,17 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Notifications from "expo-notifications";
-import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
-import { addNotification, GoogleLoginData, GroupsType, PendingGroupsType, validate } from '../functions/backendFetch';
+import { addNotification, GroupsType, PendingGroupsType, validate } from '../functions/backendFetch';
 import { useNotifications } from '../functions/useNotifications';
 import { storeData } from '../functions/localstorage';
 import LoggedIn from './loggedIn/LoggedIn';
 import NotLogged from './NotLogged';
 import PopDown from './PopDown';
-import socket from "../functions/socket";
 import { Store } from "../redux/types";
 import { setClickGroup, setError, setSelected, setToken, setUserData, setUserGroups, setUserPendingGroups } from "../redux/actions";
-
-SplashScreen.preventAutoHideAsync();
+import { io, Socket } from "socket.io-client";
+import { SOCKET_SERVER } from "../functions/variables";
 
 export default function Root() {
     const groups = useSelector((state: Store) => state.groups);
@@ -25,7 +23,11 @@ export default function Root() {
     const error = useSelector((state: Store) => state.error);
     const token = useSelector((state: Store) => state.token);
     const [ loading, setLoading ] = useState(false);
+    const [ socket, setSocket ] = useState<Socket>(null);
+    const [ responseListener, setResponseListener ] = useState(null);
     const { registerForPushNotificationAsync } = useNotifications();
+    const [ fontsLoaded ] = useFonts({ 'Poppins-SemiBold': require('../assets/Poppins-SemiBold.ttf') });
+    const onLayoutRootView = useCallback(async () => setLoading(fontsLoaded ? false : true), [fontsLoaded]);
     const dispatch = useDispatch();
 
     async function fetchValidation() {
@@ -37,7 +39,7 @@ export default function Root() {
         const data = await validate(value);
 
         if (data.error || !data.data) {
-          storeData(null);
+          storeData("");
           setLoading(false);
           return false;
         }
@@ -70,10 +72,10 @@ export default function Root() {
     }
 
     useEffect(() => {
-      if (token && userData) {
+      if (token && userData && socket) {
         socket.emit("init", token);
       }
-    }, [token, userData]);
+    }, [token, userData, socket]);
 
     useEffect(() => {
       console.log(pendingGroups);
@@ -109,26 +111,25 @@ export default function Root() {
       });
   
       socket.on("groupAccepted", (data) => {
+        console.log("Group Accepted");
         const { groupId, owner, othersCanAdd } = data;
         let currentGroup: GroupsType;
-        let newGroups = groups;
         let newPendingGroups: PendingGroupsType[] = [];
         console.log(pendingGroups);
         for (let i=0;i<pendingGroups.length;i++) {
           console.log(pendingGroups[i].groupId, groupId);
           if (pendingGroups[i].groupId === groupId) {
             currentGroup = {...pendingGroups[i], groupOwner: owner, othersCanAdd, youOwn: false, notification: true};
-            newGroups.push(currentGroup);
             continue
           }
           newPendingGroups.push(pendingGroups[i]);
         }
         dispatch(setUserPendingGroups(newPendingGroups));
-        dispatch(setUserGroups(newGroups));
+        dispatch(setUserGroups([...groups, currentGroup]));
         dispatch(setError({message: `You're now part of "${currentGroup.groupName}".`, type: "success", show: true}));
       });
   
-      socket.on("groupRemove", (data) => {
+      socket.on("groupRemove", (data: string) => {
         let newGroups = [];
         let groupName: string;
         for (let i=0;i<groups.length;i++) {
@@ -179,50 +180,52 @@ export default function Root() {
     }
 
     useEffect(() => {
-      socket2();
-        fetchValidation().then((data) => console.log(data ? "Validation Success." : "Validation Error."));
-        if (Platform.OS === "web") {
-          return;
-        }
-        Notifications.setNotificationHandler({
-          handleNotification: async () => ({
-            shouldShowAlert: true,
-            shouldPlaySound: true,
-            shouldSetBadge: true
-          }),
-        });
+      if (socket) {
+        socket2();
+      }
+    }, [socket]);
 
-        const handleNotificationResponse = (response: Notifications.NotificationResponse) => {
-            const data: { type?: string, groupId?:string} = response.notification.request.content.data;
-            if (data.type === "join" && data.groupId) {
-                dispatch(setSelected("groups"));
-                setTimeout(() => {
-                  dispatch(setClickGroup(data.groupId))
-                }, 100);
+    async function startup() {
+      setSocket(io(SOCKET_SERVER));
+      const data = await fetchValidation();
+      console.log(data ? "Validation Success." : "Validation Error.");
 
-            }
-        }
-        const responseListener = Notifications.addNotificationResponseReceivedListener(handleNotificationResponse);
-                        
-        return () => {
-          if (responseListener) {
-            Notifications.removeNotificationSubscription(responseListener);
+      if (Platform.OS === "web") {
+        return;
+      }
+
+      Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldPlaySound: true,
+          shouldSetBadge: true
+        }),
+      });
+
+      const handleNotificationResponse = (response: Notifications.NotificationResponse) => {
+          const data: { type?: string, groupId?:string} = response.notification.request.content.data;
+          if (data.type === "join" && data.groupId) {
+              dispatch(setSelected("groups"));
+              setTimeout(() => {
+                dispatch(setClickGroup(data.groupId))
+              }, 100);
+
           }
-        }
-    }, []);
-
-  const [fontsLoaded] = useFonts({
-    'Poppins-SemiBold': require('../assets/Poppins-SemiBold.ttf'),
-  });
-
-  const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded) {
-      await SplashScreen.hideAsync();
-      setLoading(false);
-    } else {
-      setLoading(true);
+      }
+      setResponseListener(Notifications.addNotificationResponseReceivedListener(handleNotificationResponse));
     }
-  }, [fontsLoaded]);
+
+    useEffect(() => {
+      startup();
+      return () => {
+        if (socket) {
+          socket.disconnect();
+        }
+        if (responseListener) {
+          Notifications.removeNotificationSubscription(responseListener);
+        }
+      }
+    }, []);
 
   if (loading) {
     return <View style={styles.loading}><ActivityIndicator size="large" color="#3A9FE9" /></View>;

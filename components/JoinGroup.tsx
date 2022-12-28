@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet, TouchableWithoutFeedback, KeyboardAvoidingView, Keyboard, Platform } from 'react-native'
 import React, { useState } from 'react'
-import { joinGroup } from '../functions/backendFetch'
+import { joinGroup, PendingGroupsType } from '../functions/backendFetch'
 import Input from './Input'
 import { useDispatch, useSelector } from 'react-redux';
 import { Store } from '../redux/types';
@@ -25,7 +25,9 @@ export default function JoinGroup({ close }: { close: () => any }) {
       return
     }
     setError2("");
-    dispatch(setUserPendingGroups([...pendingGroups, { groupId, groupName: data.groupName }]))
+    const newPending: PendingGroupsType[] = Object.create(pendingGroups);
+    newPending.push({ groupId, groupName: data.groupName })
+    dispatch(setUserPendingGroups(newPending));
     dispatch(setError({ show: true, type: "success", message: data.message}));
     close();
   }
