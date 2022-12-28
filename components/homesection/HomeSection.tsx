@@ -2,15 +2,15 @@ import { View, StyleSheet, ScrollView, Text } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import HomeJob from '../homeJob/HomeJob';
 import { useSelector } from 'react-redux';
-import { ReduxState } from '../../redux/reducers';
 import { dateMaker } from '../../functions/dateConversion';
 import { JobType } from '../../functions/jobFetch';
 import JobInfo from '../JobInfo';
 import SlideUp, { SlideUpData } from '../SlideUp';
+import { Store } from '../../redux/types';
 
 export default function HomeSection({ name }: {name: string}) {
-    const userAllJobs = useSelector<ReduxState, ReduxState["userAllJobs"]>((state: ReduxState) => state.userAllJobs);
-    const userData = useSelector<ReduxState, ReduxState["userData"]>((state: ReduxState) => state.userData);
+    const userAllJobs = useSelector((state: Store) => state.userAllJobs);
+    const userData = useSelector((state: Store) => state.userData);
     const [myJobs, setMyJobs] = useState<JobType[]>([]);
     const [availableJobs, setAvailableJobs] = useState<JobType[]>([]);
     const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null, border:"black"});

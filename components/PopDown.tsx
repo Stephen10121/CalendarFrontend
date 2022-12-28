@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
 import { useDispatch } from "react-redux";
+import { setError } from "../redux/actions";
 
 export type MessageType = "alert" | "default" | "success";
 
@@ -55,7 +56,7 @@ export default function PopDown({ message, type }: { message: string, type?: Mes
         <View style={styles.innerBox}>
           <Text style={styles.text}>{message}</Text>
           <TouchableOpacity onPress={() => {
-            dispatch({ type: "SET_ERROR", payload: {message: "N/A", type: "default", show: false} });
+            dispatch(setError({message: "N/A", type: "default", show: false}));
           }} style={styles.closeButton}>
             <Image style={styles.image} source={require('../assets/closecircle.png')} />
           </TouchableOpacity>

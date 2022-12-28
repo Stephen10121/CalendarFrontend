@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'rea
 import React from 'react'
 import { storeData } from '../functions/localstorage';
 import { useDispatch } from 'react-redux';
+import { setLogout, setSelected } from '../redux/actions';
 
 export default function Account() {
     const dispatch = useDispatch();
@@ -12,12 +13,12 @@ export default function Account() {
                     <Text style={styles.welcome}>My Account</Text>
                 </View>
                 <View style={styles.everythingElse}>
-                    <TouchableOpacity style={styles.goHomeButton} onPress={() => dispatch({ type: "SET_SELECTED", payload: "home" })}>
+                    <TouchableOpacity style={styles.goHomeButton} onPress={() => dispatch(setSelected("home"))}>
                         <Text style={styles.goHomeButtonText}>Go Home</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => {
                         storeData(null);
-                        dispatch({ type: "SET_LOGOUT", payload: true });
+                        dispatch(setLogout());
                         console.log("Logged out.")
                     }} style={styles.logoutButton}>
                         <Image style={styles.imageGroup}
@@ -25,7 +26,7 @@ export default function Account() {
                         />
                         <Text style={styles.logoutButtonText}>Logout</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.deleteButton} onPress={() => dispatch({ type: "SET_SELECTED", payload: "home" })}>
+                    <TouchableOpacity style={styles.deleteButton} onPress={() => dispatch(setSelected("home"))}>
                         <Text style={styles.goHomeButtonText}>Delete Account</Text>
                     </TouchableOpacity>
                 </View>

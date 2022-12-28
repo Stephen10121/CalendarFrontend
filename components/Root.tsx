@@ -5,26 +5,25 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from 'expo-splash-screen';
-import io from 'socket.io-client/dist/socket.io';
 import { useFonts } from 'expo-font';
 import { addNotification, GoogleLoginData, GroupsType, PendingGroupsType, validate } from '../functions/backendFetch';
 import { useNotifications } from '../functions/useNotifications';
-import { SOCKET_SERVER } from '../functions/variables';
 import { storeData } from '../functions/localstorage';
-import { ReduxState } from '../redux/reducers';
 import LoggedIn from './loggedIn/LoggedIn';
 import NotLogged from './NotLogged';
 import PopDown from './PopDown';
-const socket = io(SOCKET_SERVER);
+import socket from "../functions/socket";
+import { Store } from "../redux/types";
+import { setClickGroup, setError, setSelected, setToken, setUserData, setUserGroups, setUserPendingGroups } from "../redux/actions";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function Root() {
-    const groups = useSelector<ReduxState, ReduxState["groups"]>((state: ReduxState) => state.groups);
-    const pendingGroups = useSelector<ReduxState, ReduxState["pendingGroups"]>((state: ReduxState) => state.pendingGroups);
-    const userData = useSelector<ReduxState, GoogleLoginData | null>((state: ReduxState) => state.userData);
-    const error = useSelector<ReduxState, ReduxState["error"]>((state: ReduxState) => state.error);
-    const token = useSelector<ReduxState, string | null>((state: ReduxState) => state.token);
+    const groups = useSelector((state: Store) => state.groups);
+    const pendingGroups = useSelector((state: Store) => state.pendingGroups);
+    const userData = useSelector((state: Store) => state.userData);
+    const error = useSelector((state: Store) => state.error);
+    const token = useSelector((state: Store) => state.token);
     const [ loading, setLoading ] = useState(false);
     const { registerForPushNotificationAsync } = useNotifications();
     const dispatch = useDispatch();
@@ -43,8 +42,8 @@ export default function Root() {
           return false;
         }
 
-        dispatch({ type: "SET_USER_TOKEN", payload: value });
-        dispatch({ type: "SET_USER_DATA", payload: data.data.userData });
+        dispatch(setToken(value));
+        dispatch(setUserData(data.data.userData));
 
         if (Platform.OS === "web") {
           setLoading(false);
@@ -96,9 +95,9 @@ export default function Root() {
         const handleNotificationResponse = (response: Notifications.NotificationResponse) => {
             const data: { type?: string, groupId?:string} = response.notification.request.content.data;
             if (data.type === "join" && data.groupId) {
-                dispatch({ type: "SET_SELECTED", payload: "groups" });
+                dispatch(setSelected("groups"));
                 setTimeout(() => {
-                  dispatch({ type: "SET_CLICK_GROUP", payload: data.groupId });
+                  dispatch(setClickGroup(data.groupId))
                 }, 100);
 
             }
@@ -123,8 +122,8 @@ export default function Root() {
             groupName = groups[i].groupName;
           }
         }
-        dispatch({ type: "SET_ERROR", payload: {message: `The group: "${groupName}" was deleted`, type: "default", show: true} });
-        dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
+        dispatch(setError({message: `The group: "${groupName}" was deleted`, type: "default", show: true}));
+        dispatch(setUserGroups(newGroups));
       });
   
       socket.on("pendingDeleted", (data) => {
@@ -137,8 +136,8 @@ export default function Root() {
             groupName = pendingGroups[i].groupName;
           }
         }
-        dispatch({ type: "SET_ERROR", payload: {message: `The group: "${groupName}" was deleted`, type: "default", show: true} });
-        dispatch({ type: "SET_USER_PENDING_GROUPS", payload: newPendingGroups });
+        dispatch(setError({message: `The group: "${groupName}" was deleted`, type: "default", show: true}));
+        dispatch(setUserPendingGroups(newPendingGroups));
       });
   
       socket.on("groupAccepted", (data) => {
@@ -156,9 +155,9 @@ export default function Root() {
           }
           newPendingGroups.push(pendingGroups[i]);
         }
-        dispatch({ type: "SET_USER_PENDING_GROUPS", payload: newPendingGroups });
-        dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
-        dispatch({ type: "SET_ERROR", payload: {message: `You're now part of "${currentGroup.groupName}".`, type: "success", show: true} });
+        dispatch(setUserPendingGroups(newPendingGroups));
+        dispatch(setUserGroups(newGroups));
+        dispatch(setError({message: `You're now part of "${currentGroup.groupName}".`, type: "success", show: true}));
       });
   
       socket.on("groupRemove", (data) => {
@@ -171,8 +170,8 @@ export default function Root() {
             groupName = groups[i].groupName;
           }
         }
-        dispatch({ type: "SET_ERROR", payload: {message: `You're not in "${groupName}" anymore.`, type: "default", show: true} });
-        dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
+        dispatch(setError({message: `You're not in "${groupName}" anymore.`, type: "default", show: true}));
+        dispatch(setUserGroups(newGroups));
       });
   
       socket.on("pendingGroupRemove", (data) => {
@@ -185,9 +184,10 @@ export default function Root() {
             groupName = pendingGroups[i].groupName;
           }
         }
-        dispatch({ type: "SET_ERROR", payload: {message: `You are not pending in "${groupName}" anymore.`, type: "default", show: true} });
-        dispatch({ type: "SET_USER_PENDING_GROUPS", payload: newGroups });
+        dispatch(setError({message: `You are not pending in "${groupName}" anymore.`, type: "default", show: true}));
+        dispatch(setUserPendingGroups(newGroups));
       });
+
       socket.on("newGroupOwner", ({groupId, newOwner}) => {
         let newGroups: GroupsType[] = [];
         let groupName: string;
@@ -201,8 +201,8 @@ export default function Root() {
             newGroups.push(groups[i]);
           }
         }
-        dispatch({ type: "SET_ERROR", payload: {message: `${newOwner} is the new owner of ${groupName}`, type: "success", show: true} });
-        dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
+        dispatch(setError({message: `${newOwner} is the new owner of ${groupName}`, type: "success", show: true}));
+        dispatch(setUserGroups(newGroups));
       });
   
       socket.on("newPendingUser", ({groupId, newUser}) => {

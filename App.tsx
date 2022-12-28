@@ -1,11 +1,11 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import { Store } from './redux/store';
 import Root from './components/Root';
+import store from './redux/store';
 
 export default function App() {
   return (
-    <Provider store={Store}>
+    <Provider store={store}>
       <Root />
     </Provider>
   );

@@ -3,12 +3,13 @@ import React, { useState } from 'react'
 import { createGroup } from '../functions/backendFetch'
 import Input from './Input'
 import Checkbox from 'expo-checkbox';
-import { ReduxState } from '../redux/reducers';
 import { useDispatch, useSelector } from 'react-redux';
+import { Store } from '../redux/types';
+import { setError, setUserGroups } from '../redux/actions';
 
 export default function CreateGroup({ close }: { close: () => any }) {
-  const groups = useSelector<ReduxState, ReduxState["groups"]>((state: ReduxState) => state.groups);
-  const token = useSelector<ReduxState, string>((state: ReduxState) => state.token);
+  const groups = useSelector((state: Store) => state.groups);
+  const token = useSelector((state: Store) => state.token);
   const dispatch = useDispatch();
   const [isChecked, setChecked] = useState(false);
   const [groupName, setGroupName] = useState("");
@@ -16,21 +17,21 @@ export default function CreateGroup({ close }: { close: () => any }) {
   const [groupPassword, setGroupPassword] = useState("");
   const [repeatGroupPassword, setRepeatGroupPassword] = useState("");
   const [aboutGroup, setAboutGroup] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError2] = useState("");
   
   async function createGroupButton() {
     if (groupPassword !== repeatGroupPassword) {
-        setError("The Passwords dont match.");
+        setError2("The Passwords dont match.");
         return
     }
     const data = await createGroup(groupId, groupName, groupPassword, isChecked, aboutGroup, token);
     if (data.error || !data.data) {
-      dispatch({ type: "SET_ERROR", payload: { show: true, type: "alrt", message: data.error} });
+      dispatch(setError({ show: true, type: "alert", message: data.error}))
       return
     }
     console.log(data.data);
-    dispatch({ type: "SET_ERROR", payload: { show: true, type: "success", message: "Success"} });
-    dispatch({ type: "SET_USER_GROUPS", payload: [...groups, data.data] });
+    dispatch(setError({ show: true, type: "success", message: "Success"}));
+    dispatch(setUserGroups([...groups, data.data]));
     close();
   }
   if (Platform.OS === "web") {

@@ -6,14 +6,15 @@ import Checkbox from "expo-checkbox";
 import DropDown from "./DropDown";
 import Counter from "./Counter";
 import { useDispatch, useSelector } from "react-redux";
-import { ReduxState } from "../redux/reducers";
 import { addJob } from "../functions/jobFetch";
+import { Store } from "../redux/types";
+import { setError, setUserAllJobs, setUserJobs } from "../redux/actions";
 
 export default function AddJobSection() {
-    const groups = useSelector<ReduxState, ReduxState["groups"]>((state: ReduxState) => state.groups);
-    const token = useSelector<ReduxState, ReduxState["token"]>((state: ReduxState) => state.token);
-    const userAllJobs = useSelector<ReduxState, ReduxState["userAllJobs"]>((state: ReduxState) => state.userAllJobs);
-    const userJobs = useSelector<ReduxState, ReduxState["userJobs"]>((state: ReduxState) => state.userJobs);
+    const groups = useSelector((state: Store) => state.groups);
+    const token = useSelector((state: Store) => state.token);
+    const userAllJobs = useSelector((state: Store) => state.userAllJobs);
+    const userJobs = useSelector((state: Store) => state.userJobs);
     const [group, setGroup] = useState("");
     let validGroups: {value: string, label: string}[] = [{value: "", label: " "}];
     for(let i=0;i<groups.length;i++) {
@@ -81,17 +82,17 @@ export default function AddJobSection() {
                 minute: parseInt(minute)
             };
         } catch (err) {
-            dispatch({ type: "SET_ERROR", payload: { show: true, type: "alert", message: "Invalid Date or Time."} });
+            dispatch(setError({ show: true, type: "alert", message: "Invalid Date or Time."}));
             return;
         }
         console.log({group, client, job, instructions, address, date: {month, day, year}, time: {hour, minute, PM}, positions, notification})
         const results = await addJob(token, {group, client, jobTitle: job, instructions, address, month: convertData.month, day: convertData.day, year: convertData.year, hour: convertData.hour, minute: convertData.minute, pm: PM, positions, notifications: notification});
         if (results.error) {
-            dispatch({ type: "SET_ERROR", payload: { show: true, type: "alert", message: results.error} });
+            dispatch(setError({ show: true, type: "alert", message: results.error}));
             return;
         }
         if (results.message) {
-            dispatch({ type: "SET_ERROR", payload: { show: true, type: "success", message: results.message} });
+            dispatch(setError({ show: true, type: "success", message: results.message}));
         }
         if (results.return) {
             const job = results.return;
@@ -107,8 +108,8 @@ export default function AddJobSection() {
                     userJobs2.push(userJobs[i]);
                 }
             }
-            dispatch({ type: "SET_USER_ALL_JOBS", payload: allJobs });
-            dispatch({ type: "SET_USER_JOBS", payload: userJobs2 });
+            dispatch(setUserAllJobs(allJobs));
+            dispatch(setUserJobs(userJobs2))
             console.log(job);
         }
     }

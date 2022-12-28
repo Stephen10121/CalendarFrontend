@@ -2,20 +2,20 @@ import { useState } from "react";
 import { cancelRequest } from "../functions/backendFetch";
 import React from "react";
 import { View, StyleSheet, Text, TouchableOpacity, ScrollView } from "react-native";
-import PopDown, { MessageType } from "./PopDown";
 import { useDispatch, useSelector } from "react-redux";
-import { ReduxState } from "../redux/reducers";
+import { Store } from "../redux/types";
+import { setError, setUserPendingGroups } from "../redux/actions";
 
 export default function PendingGroupInfo({ groupId, name, close }: { groupId: string, name: string, close: () => any }) {
-    const pendingGroups = useSelector<ReduxState, ReduxState["pendingGroups"]>((state: ReduxState) => state.pendingGroups);
-    const token = useSelector<ReduxState, string>((state: ReduxState) => state.token);
+    const pendingGroups = useSelector((state: Store) => state.pendingGroups);
+    const token = useSelector((state: Store) => state.token);
     const dispatch = useDispatch();
 
     async function leavePendingGroupPrompt() {
         console.log(groupId, token)
         const response = await cancelRequest(groupId, token);
         if (response.error || !response.message) {
-            dispatch({ type: "SET_ERROR", payload: {message: response.error, type: "alert", show: true} });
+            dispatch(setError({message: response.error, type: "alert", show: true}));
             return;
         }
         let newGroups = [];
@@ -24,8 +24,8 @@ export default function PendingGroupInfo({ groupId, name, close }: { groupId: st
                 newGroups.push(pendingGroups[i]);
             }
         }
-        dispatch({ type: "SET_USER_PENDING_GROUPS", payload: newGroups });
-        dispatch({ type: "SET_ERROR", payload: {message: response.message, type: "success", show: true} });
+        dispatch(setUserPendingGroups(newGroups));
+        dispatch(setError({message: response.message, type: "success", show: true}));
         close();
     }
 

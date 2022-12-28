@@ -8,13 +8,14 @@ import GroupIcon from "./GroupIcon";
 import JoinGroup from "./JoinGroup";
 import CreateGroup from "./CreateGroup";
 import { useDispatch, useSelector } from "react-redux";
-import { ReduxState } from "../redux/reducers";
+import { Store } from "../redux/types";
+import { setClickGroup } from "../redux/actions";
 
 export default function GroupSection({ error }: { error: any }) {
     const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null, border:"black"});
-    const groups = useSelector<ReduxState, ReduxState["groups"]>((state: ReduxState) => state.groups);
-    const clickGroup = useSelector<ReduxState, ReduxState["clickGroup"]>((state: ReduxState) => state.clickGroup);
-    const pendingGroups = useSelector<ReduxState, ReduxState["pendingGroups"]>((state: ReduxState) => state.pendingGroups);
+    const groups = useSelector((state: Store) => state.groups);
+    const clickGroup = useSelector((state: Store) => state.clickGroup);
+    const pendingGroups = useSelector((state: Store) => state.pendingGroups);
     const [closeInternal, setCloseInternal] = useState(false);
     const dispatch = useDispatch();
 
@@ -25,7 +26,7 @@ export default function GroupSection({ error }: { error: any }) {
                     setShowSlideUp({ show: true, header: groups[i].groupName, children: <GroupInfo close={() => setCloseInternal(true)} groupId={groups[i].groupId} othersCanAdd={groups[i].othersCanAdd}/>, border: "black" });
                 }
             }
-            dispatch({ type: "SET_CLICK_GROUP", payload: null });
+            dispatch(setClickGroup(null));
         }
     }, [clickGroup]);
 

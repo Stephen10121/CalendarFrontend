@@ -1,6 +1,7 @@
 import { View, StyleSheet, Image, TouchableOpacity, Platform } from 'react-native'
 import React from 'react'
 import { useDispatch } from 'react-redux';
+import { setSelected } from '../../redux/actions';
 
 export type Selected = "home" | "calendar" | "groups" | "addJob" | "account";
 
@@ -57,7 +58,7 @@ export default function Navigation({ selected, profilePic }: { selected: Selecte
     });
 
     function clicked(location: Selected) {
-      dispatch({ type: "SET_SELECTED", payload: location });
+      dispatch(setSelected(location));
     }
 
   return (

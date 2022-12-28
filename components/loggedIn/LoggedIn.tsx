@@ -1,22 +1,23 @@
-import { Dimensions, StyleSheet, View, Text, Touchable, TouchableOpacity, Linking } from 'react-native';
+import { Dimensions, StyleSheet, View, Text } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import Navigation, { Selected } from '../navigation/Navigation';
+import Navigation from '../navigation/Navigation';
 import HomeSection from '../homesection/HomeSection';
 import GroupSection from '../GroupSection';
-import { fetchGroups, GoogleLoginData } from '../../functions/backendFetch';
+import { fetchGroups } from '../../functions/backendFetch';
 import Account from '../Account';
 import { useDispatch, useSelector } from 'react-redux';
-import { ReduxState, UserJobsStore } from '../../redux/reducers';
 import AddJobSection from '../AddJobSection';
 import { getJobs, JobType } from '../../functions/jobFetch';
+import { Store, UserJobsStore } from '../../redux/types';
+import { setUserAllJobs, setUserGroups, setUserJobs, setUserPendingGroups } from '../../redux/actions';
 
 export type RemoveGroup = (groupId: string) => void;
 export type RemovePendingGroup = (pendingGroupId: string) => void;
 
 export default function LoggedIn() {
-  const userData = useSelector<ReduxState, GoogleLoginData>((state: ReduxState) => state.userData);
-  const token = useSelector<ReduxState, string>((state: ReduxState) => state.token);
-  const selected = useSelector<ReduxState, Selected>((state: ReduxState) => state.selected);
+  const userData = useSelector((state: Store) => state.userData);
+  const token = useSelector((state: Store) => state.token);
+  const selected = useSelector((state: Store) => state.selected);
   const [error, setError] = useState("");
   const win = Dimensions.get('window');
   const dispatch = useDispatch();
@@ -43,12 +44,12 @@ export default function LoggedIn() {
           userJobs.push({ groupId: data.data.groups[i].groupId, jobs: data2.jobs });
         }
       }
-      dispatch({ type: "SET_USER_ALL_JOBS", payload: allJobs });
-      dispatch({ type: "SET_USER_JOBS", payload: userJobs });
-      dispatch({ type: "SET_USER_GROUPS", payload: data.data.groups });
+      dispatch(setUserAllJobs(allJobs));
+      dispatch(setUserJobs(userJobs));
+      dispatch(setUserGroups(data.data.groups));
     }
     if (data.data.pendingGroups) {
-      dispatch({ type: "SET_USER_PENDING_GROUPS", payload: data.data.pendingGroups });
+      dispatch(setUserPendingGroups(data.data.pendingGroups));
     }
   }
 

@@ -7,11 +7,12 @@ import { ANDROID_CLIENT_ID, EXPO_CLIENT_ID, WEB_CLIENT_ID } from '../functions/v
 import { useDispatch } from 'react-redux';
 import { storeData } from '../functions/localstorage';
 import { useNotifications } from '../functions/useNotifications';
+import { setToken, setUserData } from '../redux/actions';
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function NotLogged({ loading }: { loading: (arg0: boolean) => any }) {
-    const [error, setError] = useState("");
+    const [error, setError2] = useState("");
     const { registerForPushNotificationAsync } = useNotifications();
     const dispatch = useDispatch();
     const [request, response, googlePromptAsync] = Google.useAuthRequest({
@@ -27,7 +28,7 @@ export default function NotLogged({ loading }: { loading: (arg0: boolean) => any
         }
 
         if (response.type !== "success") {
-            setError("Error Using Google Login");
+            setError2("Error Using Google Login");
             return false;
         }
 
@@ -37,20 +38,20 @@ export default function NotLogged({ loading }: { loading: (arg0: boolean) => any
         const res2 = await googleLoginOrRegister(access_token);
 
         if (res2.error) {
-            setError(res2.error);
+            setError2(res2.error);
             loading(false);
             return false;
         }
 
         if (!res2.data) {
-            setError("Error using Google Login");
+            setError2("Error using Google Login");
             loading(false);
             return false;
         }
 
         if (Platform.OS === "web") {
-            dispatch({ type: "SET_USER_TOKEN", payload: res2.data.token });
-            dispatch({ type: "SET_USER_DATA", payload: res2.data.userData });
+            dispatch(setToken(res2.data.token));
+            dispatch(setUserData(res2.data.userData));
             storeData(res2.data.token);
             loading(false);
             return true;
@@ -69,8 +70,8 @@ export default function NotLogged({ loading }: { loading: (arg0: boolean) => any
             console.log("Notifications Enabled.");
         }
 
-        dispatch({ type: "SET_USER_TOKEN", payload: res2.data.token });
-        dispatch({ type: "SET_USER_DATA", payload: res2.data.userData });
+        dispatch(setToken(res2.data.token));
+        dispatch(setUserData(res2.data.userData));
         storeData(res2.data.token);
         loading(false);
         return true;

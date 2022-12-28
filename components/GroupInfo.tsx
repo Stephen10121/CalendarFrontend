@@ -3,15 +3,16 @@ import { acceptParticapant, declineParticapant, deleteGroup, groupInfo, GroupInf
 import React from "react";
 import { View, StyleSheet, Text, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { ReduxState } from "../redux/reducers";
 import { dayToLetter, monthToLetter } from "../functions/dateConversion";
+import { Store } from "../redux/types";
+import { setError, setUserGroups } from "../redux/actions";
 
 export default function GroupInfo({ groupId, othersCanAdd, close }: { groupId: string, othersCanAdd: boolean, close: () => any }) {
-    const groups = useSelector<ReduxState, ReduxState["groups"]>((state: ReduxState) => state.groups);
-    const token = useSelector<ReduxState, string>((state: ReduxState) => state.token);
+    const groups = useSelector((state: Store) => state.groups);
+    const token = useSelector((state: Store) => state.token);
     const [data, setData] = useState<null | GroupInfoData>(null);
     const [date, setDate] = useState<string | null>(null);
-    const [error, setError] = useState<any>(null);
+    const [error, setError2] = useState<any>(null);
     const [delete2, setDelete] = useState(false);
     const [ownerLeave, setOwnerLeave] = useState(false);
     const [currentTransfer, setCurrentTransfer] = useState(0);
@@ -20,7 +21,7 @@ export default function GroupInfo({ groupId, othersCanAdd, close }: { groupId: s
     async function particapantAccept(id: string, name: string) {
         const datares = await acceptParticapant(groupId, token, id);
         if (datares.error || !datares.message) {
-            dispatch({ type: "SET_ERROR", payload: {message: datares.error, type: "alert", show: true} });
+            dispatch(setError({message: datares.error, type: "alert", show: true}));
             return;
         }
         let newParticapants = [];
@@ -30,13 +31,13 @@ export default function GroupInfo({ groupId, othersCanAdd, close }: { groupId: s
             }
         }
         setData({...data, particapants: [...data.particapants, {id: parseInt(id), name}], yourowner: {...data.yourowner, pending_particapants: newParticapants}});
-        dispatch({ type: "SET_ERROR", payload: {message: "Success", type: "success", show: true} });
+        dispatch(setError({message: "Success", type: "success", show: true}));
     }
 
     async function particapantDecline(id: string) {
         const datares = await declineParticapant(groupId, token, id);
         if (datares.error || !datares.message) {
-            dispatch({ type: "SET_ERROR", payload: {message: datares.error, type: "alert", show: true} });
+            dispatch(setError({message: datares.error, type: "alert", show: true}));
             return;
         }
         let newParticapants = [];
@@ -46,13 +47,13 @@ export default function GroupInfo({ groupId, othersCanAdd, close }: { groupId: s
             }
         }
         setData({...data, yourowner: {...data.yourowner, pending_particapants: newParticapants}});
-        dispatch({ type: "SET_ERROR", payload: {message: "Success", type: "success", show: true} });
+        dispatch(setError({message: "Success", type: "success", show: true}));
     }
 
     async function removeParticapantFunc(id: string) {
         const removeParticapantData = await removeParticapant(groupId, token, id);
         if (removeParticapantData.error || !removeParticapantData.message) {
-            dispatch({ type: "SET_ERROR", payload: {message: removeParticapantData.error, type: "alert", show: true} });
+            dispatch(setError({message: removeParticapantData.error, type: "alert", show: true}));
             return;
         }
         if (!data) return
@@ -63,13 +64,13 @@ export default function GroupInfo({ groupId, othersCanAdd, close }: { groupId: s
             }
         }
         setData({...data, particapants: newParticapants});
-        dispatch({ type: "SET_ERROR", payload: {message: "Success", type: "success", show: true} });
+        dispatch(setError({message: "Success", type: "success", show: true}));
     }
 
     async function leaveGroupPrompt() {
         const response = await leaveGroup(data.group_id, token, 0);
         if (response.error || !response.message) {
-            dispatch({ type: "SET_ERROR", payload: {message: response.error, type: "alert", show: true} });
+            dispatch(setError({message: response.error, type: "alert", show: true}));
             return;
         }
         let newGroups = [];
@@ -78,8 +79,8 @@ export default function GroupInfo({ groupId, othersCanAdd, close }: { groupId: s
                 newGroups.push(groups[i]);
             }
         }
-        dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
-        dispatch({ type: "SET_ERROR", payload: {message: response.message, type: "success", show: true} });
+        dispatch(setUserGroups(newGroups))
+        dispatch(setError({message: response.message, type: "success", show: true}));
         close();
     }
 
@@ -87,7 +88,7 @@ export default function GroupInfo({ groupId, othersCanAdd, close }: { groupId: s
         console.log(currentTransfer);
         const response = await leaveGroup(data.group_id, token, currentTransfer);
         if (response.error || !response.message) {
-            dispatch({ type: "SET_ERROR", payload: {message: response.error, type: "alert", show: true} });
+            dispatch(setError({message: response.error, type: "alert", show: true}));
             return;
         }
         let newGroups = [];
@@ -96,15 +97,15 @@ export default function GroupInfo({ groupId, othersCanAdd, close }: { groupId: s
                 newGroups.push(groups[i]);
             }
         }
-        dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
-        dispatch({ type: "SET_ERROR", payload: {message: response.message, type: "success", show: true} });
+        dispatch(setUserGroups(newGroups));
+        dispatch(setError({message: response.message, type: "success", show: true}));
         close();
     }
 
     async function groupDelete() {
         const response = await deleteGroup(data.group_id, token);
         if (response.error || !response.message) {
-            dispatch({ type: "SET_ERROR", payload: {message: response.error, type: "alert", show: true} });
+            dispatch(setError({message: response.error, type: "alert", show: true}));
             return;
         }
         let newGroups = [];
@@ -113,15 +114,15 @@ export default function GroupInfo({ groupId, othersCanAdd, close }: { groupId: s
                 newGroups.push(groups[i]);
             }
         }
-        dispatch({ type: "SET_USER_GROUPS", payload: newGroups });
-        dispatch({ type: "SET_ERROR", payload: {message: response.message, type: "success", show: true} });
+        dispatch(setUserGroups(newGroups));
+        dispatch(setError({message: response.message, type: "success", show: true}));
         close();
     }
 
     useEffect(() => {
         groupInfo(groupId, token).then((data2) => {
             if (data2.error || !data2.data) {
-                setError(data2.error);
+                setError2(data2.error);
             } else {
                 try {
                     const unformattedDate = new Date(data2.data.created);

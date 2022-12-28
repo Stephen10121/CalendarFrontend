@@ -3,29 +3,30 @@ import React, { useState } from 'react'
 import { joinGroup } from '../functions/backendFetch'
 import Input from './Input'
 import { useDispatch, useSelector } from 'react-redux';
-import { ReduxState } from '../redux/reducers';
+import { Store } from '../redux/types';
+import { setError, setUserPendingGroups } from '../redux/actions';
 
 export default function JoinGroup({ close }: { close: () => any }) {
-  const pendingGroups = useSelector<ReduxState, ReduxState["pendingGroups"]>((state: ReduxState) => state.pendingGroups);
-  const token = useSelector<ReduxState, string>((state: ReduxState) => state.token);
+  const pendingGroups = useSelector((state: Store) => state.pendingGroups);
+  const token = useSelector((state: Store) => state.token);
   const dispatch = useDispatch();
   const [groupId, setGroupId] = useState("");
   const [groupPassword, setGroupPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError2] = useState("");
 
   async function joinGroupButton() {
     const data = await joinGroup(groupId, groupPassword, token);
     if (data.error) {
-      setError(data.error);
+      setError2(data.error);
       return
     }
     if (!data.groupName || !data.message) {
-      setError("Failed to join group.");
+      setError2("Failed to join group.");
       return
     }
-    setError("");
-    dispatch({ type: "SET_USER_PENDING_GROUPS", payload: [...pendingGroups, { groupId, groupName: data.groupName }] });
-    dispatch({ type: "SET_ERROR", payload: { show: true, type: "success", message: data.message} });
+    setError2("");
+    dispatch(setUserPendingGroups([...pendingGroups, { groupId, groupName: data.groupName }]))
+    dispatch(setError({ show: true, type: "success", message: data.message}));
     close();
   }
   if (Platform.OS === "web") {
