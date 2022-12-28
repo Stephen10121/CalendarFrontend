@@ -17,7 +17,7 @@ export default function Account() {
                         <Text style={styles.goHomeButtonText}>Go Home</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => {
-                        storeData(null);
+                        storeData("");
                         dispatch(setLogout());
                         console.log("Logged out.")
                     }} style={styles.logoutButton}>

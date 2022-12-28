@@ -79,39 +79,7 @@ export default function Root() {
       console.log(pendingGroups);
     }, [pendingGroups]);
 
-    useEffect(() => {
-        fetchValidation().then((data) => console.log(data ? "Validation Success." : "Validation Error."));
-        if (Platform.OS === "web") {
-          return;
-        }
-        Notifications.setNotificationHandler({
-          handleNotification: async () => ({
-            shouldShowAlert: true,
-            shouldPlaySound: true,
-            shouldSetBadge: true
-          }),
-        });
-
-        const handleNotificationResponse = (response: Notifications.NotificationResponse) => {
-            const data: { type?: string, groupId?:string} = response.notification.request.content.data;
-            if (data.type === "join" && data.groupId) {
-                dispatch(setSelected("groups"));
-                setTimeout(() => {
-                  dispatch(setClickGroup(data.groupId))
-                }, 100);
-
-            }
-        }
-        const responseListener = Notifications.addNotificationResponseReceivedListener(handleNotificationResponse);
-                        
-        return () => {
-          if (responseListener) {
-            Notifications.removeNotificationSubscription(responseListener);
-          }
-        }
-    }, []);
-
-    useEffect(() => {
+    function socket2() {
       socket.on("deleted", (data) => {
         let newGroups = [];
         let groupName: string;
@@ -208,7 +176,40 @@ export default function Root() {
       socket.on("newPendingUser", ({groupId, newUser}) => {
         console.log(`${newUser} wants to join ${groupId}`)
       });
-    }, [socket]);
+    }
+
+    useEffect(() => {
+      socket2();
+        fetchValidation().then((data) => console.log(data ? "Validation Success." : "Validation Error."));
+        if (Platform.OS === "web") {
+          return;
+        }
+        Notifications.setNotificationHandler({
+          handleNotification: async () => ({
+            shouldShowAlert: true,
+            shouldPlaySound: true,
+            shouldSetBadge: true
+          }),
+        });
+
+        const handleNotificationResponse = (response: Notifications.NotificationResponse) => {
+            const data: { type?: string, groupId?:string} = response.notification.request.content.data;
+            if (data.type === "join" && data.groupId) {
+                dispatch(setSelected("groups"));
+                setTimeout(() => {
+                  dispatch(setClickGroup(data.groupId))
+                }, 100);
+
+            }
+        }
+        const responseListener = Notifications.addNotificationResponseReceivedListener(handleNotificationResponse);
+                        
+        return () => {
+          if (responseListener) {
+            Notifications.removeNotificationSubscription(responseListener);
+          }
+        }
+    }, []);
 
   const [fontsLoaded] = useFonts({
     'Poppins-SemiBold': require('../assets/Poppins-SemiBold.ttf'),
