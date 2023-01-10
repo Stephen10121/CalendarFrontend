@@ -40,23 +40,18 @@ export interface FetchGroupsResponse {
 }
 
 export async function fetchGroups(token: string): Promise<FetchGroupsResponse> {
-    try {
-      const groups = await fetch(`${POST_SERVER}/myGroups`, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${token}`
-        },
-        credentials: "omit"
-      })
-      const groupsJson = await groups.json();
-      if (groupsJson.error) {
-          return {error: groupsJson.error}
-      }
-      return { error: "", data: { groups: groupsJson.groups, pendingGroups: groupsJson.pendingGroups} }
-    } catch (err) {
-      console.error(err);
-      return {error: "Failed to fetch Groups."};
-    }
+  const groups = await fetch(`${POST_SERVER}/myGroups`, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`
+    },
+    credentials: "omit"
+  })
+  const groupsJson = await groups.json();
+  if (groupsJson.error) {
+      return {error: groupsJson.error}
+  }
+  return { error: "", data: { groups: groupsJson.groups, pendingGroups: groupsJson.pendingGroups} }
 }
 
 export interface ValidateResponse {

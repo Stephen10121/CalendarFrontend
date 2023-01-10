@@ -13,9 +13,9 @@ eas build -p android --profile preview
 ### END PRIORITY
 
 - [ ] Overall.
-  - [ ] Add backup revalidation in case the socket client/server is experiencing trouble.
+  - [x] Add backup revalidation in case the socket client/server is experiencing trouble.
 - [ ] Job section.
-  - [ ] When group deleted or removed, remove the groups jobs.
+  - [x] When group deleted or removed, remove the groups jobs.
   - [ ] Notify other particapants when job is posted.
   - [ ] Job information slideup.
     - [ ] Show the job info.

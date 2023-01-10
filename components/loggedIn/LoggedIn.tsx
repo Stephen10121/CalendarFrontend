@@ -3,13 +3,14 @@ import React, { useEffect, useState } from 'react';
 import Navigation from '../navigation/Navigation';
 import HomeSection from '../homesection/HomeSection';
 import GroupSection from '../GroupSection';
-import { fetchGroups } from '../../functions/backendFetch';
+import { fetchGroups, FetchGroupsResponse } from '../../functions/backendFetch';
 import Account from '../Account';
 import { useDispatch, useSelector } from 'react-redux';
 import AddJobSection from '../AddJobSection';
 import { getJobs, JobType } from '../../functions/jobFetch';
 import { Store, UserJobsStore } from '../../redux/types';
 import { setUserAllJobs, setUserGroups, setUserJobs, setUserPendingGroups } from '../../redux/actions';
+import { useQuery } from "react-query";
 
 export type RemoveGroup = (groupId: string) => void;
 export type RemovePendingGroup = (pendingGroupId: string) => void;
@@ -17,8 +18,14 @@ export type RemovePendingGroup = (pendingGroupId: string) => void;
 export default function LoggedIn() {
   const userData = useSelector((state: Store) => state.userData);
   const token = useSelector((state: Store) => state.token);
+  const { status, error, data } = useQuery<FetchGroupsResponse, Error>(["groups"], () => {
+    return fetchGroups(token);
+  }, {
+    staleTime: 30000,
+    refetchInterval: 30000
+  });
   const selected = useSelector((state: Store) => state.selected);
-  const [error, setError] = useState("");
+  const [error2, setError] = useState("");
   const win = Dimensions.get('window');
   const dispatch = useDispatch();
 
@@ -54,10 +61,45 @@ export default function LoggedIn() {
   }
 
   useEffect(() => {
-    fetcher().then(() => {
-      console.log("Done Fetching.")
-    });
+    console.log(data, error, status);
+    // fetcher().then(() => {
+    //   console.log("Done Fetching.")
+    // });
   }, []);
+
+ async function setGroupsAndJobs() {
+  if (data.data.groups !== null) {
+    let userJobs: UserJobsStore[] = [];
+    let allJobs: JobType[] = [];
+    for (let i=0;i<data.data.groups.length;i++) {
+      const data2 = await getJobs(token, data.data.groups[i].groupId);
+      console.log(`Fetched Jobs from ${data.data.groups[i].groupId}`);
+      if (data2.error) {
+        console.log(data2.error);
+        return
+      }
+      if (data2.jobs) {
+        allJobs.push(...data2.jobs);
+        userJobs.push({ groupId: data.data.groups[i].groupId, jobs: data2.jobs });
+      }
+    }
+    dispatch(setUserAllJobs(allJobs));
+    dispatch(setUserJobs(userJobs));
+    dispatch(setUserGroups(data.data.groups));
+  }
+  if (data.data.pendingGroups) {
+    dispatch(setUserPendingGroups(data.data.pendingGroups));
+  } else {
+    dispatch(setUserPendingGroups([]));
+  }
+ }
+
+  useEffect(() => {
+    console.log(data, error, status);
+    if (status === "success") {
+      setGroupsAndJobs();
+    }
+  }, [status, data]);
 
   const styles = StyleSheet.create({
     main: {
@@ -114,7 +156,7 @@ export default function LoggedIn() {
           <Text>{JSON.stringify(userData)}</Text>
         </View>
         <View style={styles.sectionGroup}>
-          <GroupSection error={error}/>
+          <GroupSection error={error2}/>
         </View>
         <View style={styles.sectionJob}>
           <AddJobSection />

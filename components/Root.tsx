@@ -5,29 +5,30 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Notifications from "expo-notifications";
 import { useFonts } from 'expo-font';
-import { addNotification, GroupsType, PendingGroupsType, validate } from '../functions/backendFetch';
+import { addNotification, fetchGroups, GroupsType, PendingGroupsType, validate } from '../functions/backendFetch';
 import { useNotifications } from '../functions/useNotifications';
 import { storeData } from '../functions/localstorage';
 import LoggedIn from './loggedIn/LoggedIn';
 import NotLogged from './NotLogged';
 import PopDown from './PopDown';
-import { Store } from "../redux/types";
-import { setClickGroup, setError, setSelected, setToken, setUserData, setUserGroups, setUserPendingGroups } from "../redux/actions";
-import { io, Socket } from "socket.io-client";
+import { Store, UserJobsStore } from "../redux/types";
+import { setClickGroup, setError, setSelected, setToken, setUserAllJobs, setUserData, setUserGroups, setUserJobs, setUserPendingGroups } from "../redux/actions";
+// import { io, Socket } from "socket.io-client";
 import { SOCKET_SERVER } from "../functions/variables";
+import { getJobs, JobType } from "../functions/jobFetch";
 
 export default function Root() {
-    const groups = useSelector((state: Store) => state.groups);
+    // const groups = useSelector((state: Store) => state.groups);
     const pendingGroups = useSelector((state: Store) => state.pendingGroups);
     const userData = useSelector((state: Store) => state.userData);
     const error = useSelector((state: Store) => state.error);
     const token = useSelector((state: Store) => state.token);
     const [ loading, setLoading ] = useState(false);
-    const [ socket, setSocket ] = useState<Socket>(null);
+    // const [ socket, setSocket ] = useState<Socket>(null);
     const [ responseListener, setResponseListener ] = useState(null);
     const { registerForPushNotificationAsync } = useNotifications();
     const [ fontsLoaded ] = useFonts({ 'Poppins-SemiBold': require('../assets/Poppins-SemiBold.ttf') });
-    const onLayoutRootView = useCallback(async () => setLoading(fontsLoaded ? false : true), [fontsLoaded]);
+    const onLayoutRootView = useCallback(async () => console.log(fontsLoaded ? "Fonts Loaded" : "Fonts Not Loaded"), [fontsLoaded]);
     const dispatch = useDispatch();
 
     async function fetchValidation() {
@@ -71,122 +72,124 @@ export default function Root() {
       }
     }
 
-    useEffect(() => {
-      if (token && userData && socket) {
-        socket.emit("init", token);
-      }
-    }, [token, userData, socket]);
+    // useEffect(() => {
+    //   if (token && userData && socket) {
+    //     socket.emit("init", token);
+    //   }
+    // }, [token, userData, socket]);
 
     useEffect(() => {
       console.log(pendingGroups);
     }, [pendingGroups]);
 
-    function socket2() {
-      socket.on("deleted", (data) => {
-        let newGroups = [];
-        let groupName: string;
-        for (let i=0;i<groups.length;i++) {
-          if (groups[i].groupId!=data) {
-            newGroups.push(groups[i]);
-          } else {
-            groupName = groups[i].groupName;
-          }
-        }
-        dispatch(setError({message: `The group: "${groupName}" was deleted`, type: "default", show: true}));
-        dispatch(setUserGroups(newGroups));
-      });
+    // function socket2() {
+    //   socket.on("deleted", (data) => {
+    //     let newGroups = [];
+    //     let groupName: string;
+    //     for (let i=0;i<groups.length;i++) {
+    //       if (groups[i].groupId!=data) {
+    //         newGroups.push(groups[i]);
+    //       } else {
+    //         groupName = groups[i].groupName;
+    //       }
+    //     }
+    //     dispatch(setError({message: `The group: "${groupName}" was deleted`, type: "default", show: true}));
+    //     dispatch(setUserGroups(newGroups));
+    //   });
   
-      socket.on("pendingDeleted", (data) => {
-        let newPendingGroups = [];
-        let groupName: string;
-        for (let i=0;i<pendingGroups.length;i++) {
-          if (pendingGroups[i].groupId != data) {
-            newPendingGroups.push(pendingGroups[i]);
-          } else {
-            groupName = pendingGroups[i].groupName;
-          }
-        }
-        dispatch(setError({message: `The group: "${groupName}" was deleted`, type: "default", show: true}));
-        dispatch(setUserPendingGroups(newPendingGroups));
-      });
+    //   socket.on("pendingDeleted", (data) => {
+    //     let newPendingGroups = [];
+    //     let groupName: string;
+    //     for (let i=0;i<pendingGroups.length;i++) {
+    //       if (pendingGroups[i].groupId != data) {
+    //         newPendingGroups.push(pendingGroups[i]);
+    //       } else {
+    //         groupName = pendingGroups[i].groupName;
+    //       }
+    //     }
+    //     dispatch(setError({message: `The group: "${groupName}" was deleted`, type: "default", show: true}));
+    //     dispatch(setUserPendingGroups(newPendingGroups));
+    //   });
   
-      socket.on("groupAccepted", (data) => {
-        console.log("Group Accepted");
-        const { groupId, owner, othersCanAdd } = data;
-        let currentGroup: GroupsType;
-        let newPendingGroups: PendingGroupsType[] = [];
-        console.log(pendingGroups);
-        for (let i=0;i<pendingGroups.length;i++) {
-          console.log(pendingGroups[i].groupId, groupId);
-          if (pendingGroups[i].groupId === groupId) {
-            currentGroup = {...pendingGroups[i], groupOwner: owner, othersCanAdd, youOwn: false, notification: true};
-            continue
-          }
-          newPendingGroups.push(pendingGroups[i]);
-        }
-        dispatch(setUserPendingGroups(newPendingGroups));
-        dispatch(setUserGroups([...groups, currentGroup]));
-        dispatch(setError({message: `You're now part of "${currentGroup.groupName}".`, type: "success", show: true}));
-      });
+    //   socket.on("groupAccepted", (data) => {
+    //     console.log("Group Accepted");
+    //     const { groupId, owner, othersCanAdd } = data;
+    //     let currentGroup: GroupsType;
+    //     let newPendingGroups: PendingGroupsType[] = [];
+    //     console.log(pendingGroups);
+    //     for (let i=0;i<pendingGroups.length;i++) {
+    //       console.log(pendingGroups[i].groupId, groupId);
+    //       if (pendingGroups[i].groupId === groupId) {
+    //         currentGroup = {...pendingGroups[i], groupOwner: owner, othersCanAdd, youOwn: false, notification: true};
+    //         continue
+    //       }
+    //       newPendingGroups.push(pendingGroups[i]);
+    //     }
+    //     dispatch(setUserPendingGroups(newPendingGroups));
+    //     dispatch(setUserGroups([...groups, currentGroup]));
+    //     dispatch(setError({message: `You're now part of "${currentGroup.groupName}".`, type: "success", show: true}));
+    //   });
   
-      socket.on("groupRemove", (data: string) => {
-        let newGroups = [];
-        let groupName: string;
-        for (let i=0;i<groups.length;i++) {
-          if (groups[i].groupId!=data) {
-            newGroups.push(groups[i]);
-          } else {
-            groupName = groups[i].groupName;
-          }
-        }
-        dispatch(setError({message: `You're not in "${groupName}" anymore.`, type: "default", show: true}));
-        dispatch(setUserGroups(newGroups));
-      });
+    //   socket.on("groupRemove", (data: string) => {
+    //     console.log(groups);
+    //     let newGroups = [];
+    //     let groupName: string;
+    //     for (let i=0;i<groups.length;i++) {
+    //       if (groups[i].groupId!=data) {
+    //         newGroups.push(groups[i]);
+    //       } else {
+    //         groupName = groups[i].groupName;
+    //       }
+    //     }
+    //     dispatch(setError({message: `You're not in "${groupName}" anymore.`, type: "default", show: true}));
+    //     dispatch(setUserGroups(newGroups));
+    //   });
   
-      socket.on("pendingGroupRemove", (data) => {
-        let newGroups = [];
-        let groupName: string;
-        for (let i=0;i<pendingGroups.length;i++) {
-          if (pendingGroups[i].groupId!=data) {
-            newGroups.push(pendingGroups[i]);
-          } else {
-            groupName = pendingGroups[i].groupName;
-          }
-        }
-        dispatch(setError({message: `You are not pending in "${groupName}" anymore.`, type: "default", show: true}));
-        dispatch(setUserPendingGroups(newGroups));
-      });
+    //   socket.on("pendingGroupRemove", (data) => {
+    //     let newGroups = [];
+    //     let groupName: string;
+    //     for (let i=0;i<pendingGroups.length;i++) {
+    //       if (pendingGroups[i].groupId!=data) {
+    //         newGroups.push(pendingGroups[i]);
+    //       } else {
+    //         groupName = pendingGroups[i].groupName;
+    //       }
+    //     }
+    //     dispatch(setError({message: `You are not pending in "${groupName}" anymore.`, type: "default", show: true}));
+    //     dispatch(setUserPendingGroups(newGroups));
+    //   });
 
-      socket.on("newGroupOwner", ({groupId, newOwner}) => {
-        let newGroups: GroupsType[] = [];
-        let groupName: string;
-        for (let i=0;i<groups.length;i++) {
-          if (groups[i].groupId==groupId) {
-            const newGroup2 = Object.create(groups[i]);
-            groupName = groups[i].groupName;
-            newGroup2.groupOwner = newOwner;
-            newGroups.push(newGroup2);
-          } else {
-            newGroups.push(groups[i]);
-          }
-        }
-        dispatch(setError({message: `${newOwner} is the new owner of ${groupName}`, type: "success", show: true}));
-        dispatch(setUserGroups(newGroups));
-      });
+    //   socket.on("newGroupOwner", ({groupId, newOwner}) => {
+    //     let newGroups: GroupsType[] = [];
+    //     let groupName: string;
+    //     for (let i=0;i<groups.length;i++) {
+    //       if (groups[i].groupId==groupId) {
+    //         const newGroup2 = Object.create(groups[i]);
+    //         groupName = groups[i].groupName;
+    //         newGroup2.groupOwner = newOwner;
+    //         newGroups.push(newGroup2);
+    //       } else {
+    //         newGroups.push(groups[i]);
+    //       }
+    //     }
+    //     dispatch(setError({message: `${newOwner} is the new owner of ${groupName}`, type: "success", show: true}));
+    //     dispatch(setUserGroups(newGroups));
+    //   });
   
-      socket.on("newPendingUser", ({groupId, newUser}) => {
-        console.log(`${newUser} wants to join ${groupId}`)
-      });
-    }
+    //   socket.on("newPendingUser", ({groupId, newUser}) => {
+    //     console.log(`${newUser} wants to join ${groupId}`)
+    //   });
+    // }
 
-    useEffect(() => {
-      if (socket) {
-        socket2();
-      }
-    }, [socket]);
+    // useEffect(() => {
+    //   console.log(socket);
+    //   if (socket) {
+    //     socket2();
+    //   }
+    // }, [socket]);
 
     async function startup() {
-      setSocket(io(SOCKET_SERVER));
+      // setSocket(io(SOCKET_SERVER));
       const data = await fetchValidation();
       console.log(data ? "Validation Success." : "Validation Error.");
 
@@ -218,9 +221,9 @@ export default function Root() {
     useEffect(() => {
       startup();
       return () => {
-        if (socket) {
-          socket.disconnect();
-        }
+        // if (socket) {
+        //   socket.disconnect();
+        // }
         if (responseListener) {
           Notifications.removeNotificationSubscription(responseListener);
         }
