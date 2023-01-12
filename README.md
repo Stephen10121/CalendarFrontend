@@ -26,5 +26,5 @@ eas build -p android --profile preview
     - [ ] Chat section.
       - [ ] Overall chat with everyone in the group.
       - [ ] Chat with the job issuer.
-  - [ ] Job title text overflow.
+  - [x] Job title text overflow.
   - [x] Remove the unavailable jobs from the available jobs section.
