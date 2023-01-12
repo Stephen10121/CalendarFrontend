@@ -18,7 +18,7 @@ export default function HomeSection({ name }: {name: string}) {
 
     function jobClicked(job: JobType, myJob?: boolean) {
         console.log(job);
-        setShowSlideUp({ show: true, header: job.jobTitle, children: <JobInfo myJob={myJob} close={() => setCloseInternal(true)} info={job}/>, border: job.taken ? "red" : "blue" });
+        setShowSlideUp({ show: true, header: job.jobTitle, children: <JobInfo myJob={myJob} close={() => setCloseInternal(true)} baseInfo={job}/>, border: job.taken ? "red" : "blue" });
     }
 
     function filterMyJobs() {
@@ -71,7 +71,12 @@ export default function HomeSection({ name }: {name: string}) {
             {availableJobs.length !== 0 ? <View style={styles.available}>
                 <Text style={styles.title}>Available</Text>
                 <View style={styles.comingUpList}>
-                    {availableJobs.map((job) => <HomeJob key={`job${job.groupId}${job.ID}`} name={job.jobTitle} client={job.client ? job.client : "No Client"} time={dateMaker(job)} id={job.ID} click={()=>jobClicked(job)}/>)}
+                    {availableJobs.map((job) => {
+                        if (job.taken) {
+                            return null;
+                        }
+                        return <HomeJob key={`job${job.groupId}${job.ID}`} name={job.jobTitle} client={job.client ? job.client : "No Client"} time={dateMaker(job)} id={job.ID} click={()=>jobClicked(job)}/>
+                    })}
                 </View>
             </View> : null}
             {availableJobs.length === 0 && myJobs.length===0 ? <View style={styles.noJobs}><Text style={styles.noJobText}>No jobs.</Text></View> : null}
