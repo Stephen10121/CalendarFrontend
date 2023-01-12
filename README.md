@@ -8,7 +8,7 @@ eas build -p android --profile preview
 
 ### PRIORITY
 
-- [ ] Fix state delete bug.
+- [x] Fix state delete bug.
 
 ### END PRIORITY
 

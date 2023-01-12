@@ -29,44 +29,6 @@ export default function LoggedIn() {
   const win = Dimensions.get('window');
   const dispatch = useDispatch();
 
-  async function fetcher() {
-    const data = await fetchGroups(token)
-    console.log("Fetched Groups");
-    if (data.error != ""|| !data.data) {
-        setError(data.error);
-        return
-    }
-    if (data.data.groups !== null) {
-      let userJobs: UserJobsStore[] = [];
-      let allJobs: JobType[] = [];
-      for (let i=0;i<data.data.groups.length;i++) {
-        const data2 = await getJobs(token, data.data.groups[i].groupId);
-        console.log(`Fetched Jobs from ${data.data.groups[i].groupId}`);
-        if (data2.error) {
-          console.log(data2.error);
-          return
-        }
-        if (data2.jobs) {
-          allJobs.push(...data2.jobs);
-          userJobs.push({ groupId: data.data.groups[i].groupId, jobs: data2.jobs });
-        }
-      }
-      dispatch(setUserAllJobs(allJobs));
-      dispatch(setUserJobs(userJobs));
-      dispatch(setUserGroups(data.data.groups));
-    }
-    if (data.data.pendingGroups) {
-      dispatch(setUserPendingGroups(data.data.pendingGroups));
-    }
-  }
-
-  useEffect(() => {
-    console.log(data, error, status);
-    // fetcher().then(() => {
-    //   console.log("Done Fetching.")
-    // });
-  }, []);
-
  async function setGroupsAndJobs() {
   if (data.data.groups !== null) {
     let userJobs: UserJobsStore[] = [];

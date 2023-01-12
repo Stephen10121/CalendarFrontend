@@ -4,7 +4,7 @@ import HomeJob from '../homeJob/HomeJob';
 import { useSelector } from 'react-redux';
 import { dateMaker } from '../../functions/dateConversion';
 import { JobType } from '../../functions/jobFetch';
-import JobInfo from '../JobInfo';
+import JobInfo, { VolunteerType } from '../JobInfo';
 import SlideUp, { SlideUpData } from '../SlideUp';
 import { Store } from '../../redux/types';
 
@@ -16,9 +16,9 @@ export default function HomeSection({ name }: {name: string}) {
     const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null, border:"black"});
     const [closeInternal, setCloseInternal] = useState(false);
 
-    function jobClicked(job: JobType) {
+    function jobClicked(job: JobType, myJob?: boolean) {
         console.log(job);
-        setShowSlideUp({ show: true, header: job.jobTitle, children: <JobInfo close={() => setCloseInternal(true)} info={job}/>, border: job.taken ? "red" : "blue" });
+        setShowSlideUp({ show: true, header: job.jobTitle, children: <JobInfo myJob={myJob} close={() => setCloseInternal(true)} info={job}/>, border: job.taken ? "red" : "blue" });
     }
 
     function filterMyJobs() {
@@ -26,10 +26,15 @@ export default function HomeSection({ name }: {name: string}) {
         const prevAvailableJobs = [];
         for (let i=0;i<userAllJobs.length;i++) {
             if (userAllJobs[i].volunteer.length !== 0) {
-                const volunteer: number[] = JSON.parse(userAllJobs[i].volunteer);
-                if (volunteer) {
-                    if (volunteer.includes(userData.ID)) {
-                        console.log(userData);
+                const volunteers: VolunteerType[] = JSON.parse(userAllJobs[i].volunteer);
+                if (volunteers) {
+                    let mine = false;
+                    for (let b=0;b<volunteers.length;b++) {
+                        if (volunteers[b].userId === userData.ID) {
+                            mine=true
+                        }
+                    }
+                    if (mine) {
                         prevJobs.push(userAllJobs[i]);
                     } else {
                         prevAvailableJobs.push(userAllJobs[i]);
@@ -60,7 +65,7 @@ export default function HomeSection({ name }: {name: string}) {
             {myJobs.length !== 0 ? <View style={styles.comingUp}>
                 <Text style={styles.title}>Coming up</Text>
                 <View style={styles.comingUpList}>
-                    {myJobs.map((job) => <HomeJob key={`job${job.groupId}${job.ID}`} name={job.jobTitle} client={job.client ? job.client : "No Client"} time={dateMaker(job)} id={job.ID} click={()=>jobClicked(job)}/>)}
+                    {myJobs.map((job) => <HomeJob key={`job${job.groupId}${job.ID}`} name={job.jobTitle} client={job.client ? job.client : "No Client"} time={dateMaker(job)} id={job.ID} click={()=>jobClicked(job, true)}/>)}
                 </View>
             </View> : null}
             {availableJobs.length !== 0 ? <View style={styles.available}>
