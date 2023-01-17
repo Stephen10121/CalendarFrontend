@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: "700",
         color: "#000000",
-        fontFamily: "Poppins-SemiBold"
+        fontFamily: "Poppins-SemiBold",
     },
     closeButton: {
       width: 30,
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
         transform: [{translateY: fadeAnim}]
       }]}>
         <View style={styles.header}>
-            <Text style={styles.headerTitle}>{header}</Text>
+            <Text style={styles.headerTitle} numberOfLines={1}>{header}</Text>
             <TouchableOpacity style={styles.closeButton} onPress={closeIt}>
               <Image style={styles.image} source={require('../assets/closecircle.png')} />
             </TouchableOpacity>

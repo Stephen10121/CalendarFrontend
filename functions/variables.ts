@@ -1,3 +1,4 @@
+// export const POST_SERVER = 'http://localhost:9090';
 export const POST_SERVER = 'https://pi.gruzservices.com';
 export const SOCKET_SERVER = "https://socket.gruzservices.com";
 export const EXPO_CLIENT_ID = "664653035536-rskmjba0jmich63i4g8omtk4u66lvbjq.apps.googleusercontent.com";

@@ -6,12 +6,6 @@ eas build -p android --profile preview
 
 ## TODO
 
-### PRIORITY
-
-- [x] Fix state delete bug.
-
-### END PRIORITY
-
 - [ ] Overall.
   - [x] Add backup revalidation in case the socket client/server is experiencing trouble.
   - [ ] Revalidate the jobs.

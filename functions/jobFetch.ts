@@ -128,3 +128,28 @@ export async function getJobs(token: string, groupId: string): Promise<GetJobsRe
       return {error: "Error Fetching Jobs"};
     }
 }
+
+interface GetJobsByDateResponse {
+  jobs?: JobType[];
+  error?: string;
+}
+
+export async function getJobsByDate(token: string, month: number, year: number): Promise<GetJobsByDateResponse> {
+  const groups = await fetch(`${POST_SERVER}/getAllJobsByMonthYear`, {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+    },
+    credentials: "omit",
+    body: JSON.stringify({
+        "month": month,
+        "year": year
+    })
+  })
+  const groupsJson = await groups.json();
+  if (groupsJson.error) {
+    return {error: groupsJson.error}
+  }
+  return {jobs: groupsJson.jobs}
+}

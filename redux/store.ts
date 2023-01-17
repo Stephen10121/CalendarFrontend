@@ -8,7 +8,7 @@ const initialState = {
     groups: [],
     pendingGroups: [],
     error: { show: false, message: "N/A" },
-    selected: "groups",
+    selected: "home",
     clickGroup: null,
     userJobs: [],
     userAllJobs: []

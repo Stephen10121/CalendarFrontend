@@ -7,7 +7,7 @@ import { fetchGroups, FetchGroupsResponse } from '../../functions/backendFetch';
 import Account from '../Account';
 import { useDispatch, useSelector } from 'react-redux';
 import AddJobSection from '../AddJobSection';
-import { getJobs, JobType } from '../../functions/jobFetch';
+import { getJobs, getJobsByDate, GetJobsResponse, JobType } from '../../functions/jobFetch';
 import { Store, UserJobsStore } from '../../redux/types';
 import { setUserAllJobs, setUserGroups, setUserJobs, setUserPendingGroups } from '../../redux/actions';
 import { useQuery } from "react-query";
@@ -20,6 +20,12 @@ export default function LoggedIn() {
   const token = useSelector((state: Store) => state.token);
   const { status, error, data } = useQuery<FetchGroupsResponse, Error>(["groups"], () => {
     return fetchGroups(token);
+  }, {
+    staleTime: 30000,
+    refetchInterval: 30000
+  });
+  const data2 = useQuery<GetJobsResponse, Error>(["groupstest"], () => {
+    return getJobsByDate(token, 1, 2023);
   }, {
     staleTime: 30000,
     refetchInterval: 30000
@@ -62,6 +68,10 @@ export default function LoggedIn() {
       setGroupsAndJobs();
     }
   }, [status, data]);
+
+  useEffect(() => {
+    console.log(data2);
+  }, [data2.status, data2.data]);
 
   const styles = StyleSheet.create({
     main: {

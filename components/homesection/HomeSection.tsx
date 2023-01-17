@@ -7,6 +7,7 @@ import { JobType } from '../../functions/jobFetch';
 import JobInfo, { VolunteerType } from '../JobInfo';
 import SlideUp, { SlideUpData } from '../SlideUp';
 import { Store } from '../../redux/types';
+import { Temporal } from '@js-temporal/polyfill';
 
 export default function HomeSection({ name }: {name: string}) {
     const userAllJobs = useSelector((state: Store) => state.userAllJobs);
@@ -15,6 +16,8 @@ export default function HomeSection({ name }: {name: string}) {
     const [availableJobs, setAvailableJobs] = useState<JobType[]>([]);
     const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null, border:"black"});
     const [closeInternal, setCloseInternal] = useState(false);
+    const now = Temporal.Now.plainDateTimeISO();
+    const month = now.month;
 
     function jobClicked(job: JobType, myJob?: boolean) {
         console.log(job);
