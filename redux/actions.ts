@@ -1,7 +1,7 @@
 import { Selected } from "../components/navigation/Navigation";
 import { GoogleLoginData, GroupsType, PendingGroupsType } from "../functions/backendFetch";
 import { JobType } from "../functions/jobFetch";
-import { UserJobsStore } from "./types";
+import { JobsStruct, UserJobsStore } from "./types";
 
 export type ErrorType = "alert" | "success" | "default";
 export interface Error {
@@ -20,6 +20,7 @@ export const SET_CLICK_GROUP = "SET_CLICK_GROUP";
 export const SET_USER_JOBS = "SET_USER_JOBS";
 export const SET_USER_ALL_JOBS = "SET_USER_ALL_JOBS";
 export const SET_LOGOUT = "SET_LOGOUT";
+export const SET_JOB = "SET_JOB";
 
 export type ActionTypes = 
 { type: typeof SET_USER_TOKEN; payload: string } | 
@@ -30,6 +31,7 @@ export type ActionTypes =
 { type: typeof SET_SELECTED; payload: Selected } |
 { type: typeof SET_CLICK_GROUP; payload: string } |
 { type: typeof SET_USER_JOBS; payload: UserJobsStore[] } |
+{ type: typeof SET_JOB; payload: JobsStruct[] } |
 { type: typeof SET_USER_ALL_JOBS; payload: JobType[] } |
 { type: typeof SET_LOGOUT };
 
@@ -43,3 +45,4 @@ export const setSelected = (selected: Selected): ActionTypes => ({ type: SET_SEL
 export const setClickGroup = (clickGroup: string): ActionTypes => ({ type: SET_CLICK_GROUP, payload: clickGroup });
 export const setUserJobs = (userJobs: UserJobsStore[]): ActionTypes => ({ type: SET_USER_JOBS, payload: userJobs });
 export const setUserAllJobs = (userAllJobs: JobType[]): ActionTypes => ({ type: SET_USER_ALL_JOBS, payload: userAllJobs });
+export const setJobs = (jobs: JobsStruct[]): ActionTypes => ({ type: SET_JOB, payload: jobs });

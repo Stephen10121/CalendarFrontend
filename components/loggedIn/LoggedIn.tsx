@@ -1,5 +1,5 @@
 import { Dimensions, StyleSheet, View, Text } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import Navigation from '../navigation/Navigation';
 import HomeSection from '../homesection/HomeSection';
 import GroupSection from '../GroupSection';
@@ -8,34 +8,34 @@ import Account from '../Account';
 import { useDispatch, useSelector } from 'react-redux';
 import AddJobSection from '../AddJobSection';
 import { getJobs, getJobsByDate, GetJobsResponse, JobType } from '../../functions/jobFetch';
-import { Store, UserJobsStore } from '../../redux/types';
-import { setUserAllJobs, setUserGroups, setUserJobs, setUserPendingGroups } from '../../redux/actions';
+import { JobMonths, Store, UserJobsStore } from '../../redux/types';
+import { setJobs, setUserAllJobs, setUserGroups, setUserJobs, setUserPendingGroups } from '../../redux/actions';
 import { useQuery } from "react-query";
+import { Temporal } from '@js-temporal/polyfill';
+import addJobMonth from '../../functions/addJob';
 
 export type RemoveGroup = (groupId: string) => void;
 export type RemovePendingGroup = (pendingGroupId: string) => void;
 
 export default function LoggedIn() {
+  // Redux Stores
   const userData = useSelector((state: Store) => state.userData);
   const token = useSelector((state: Store) => state.token);
-  const { status, error, data } = useQuery<FetchGroupsResponse, Error>(["groups"], () => {
-    return fetchGroups(token);
-  }, {
-    staleTime: 30000,
-    refetchInterval: 30000
-  });
-  const data2 = useQuery<GetJobsResponse, Error>(["groupstest"], () => {
-    return getJobsByDate(token, 1, 2023);
-  }, {
-    staleTime: 30000,
-    refetchInterval: 30000
-  });
   const selected = useSelector((state: Store) => state.selected);
-  const [error2, setError] = useState("");
+  const jobs = useSelector((state: Store) => state.jobs);
+
+  // Other Variables
+  const now = Temporal.Now.plainDateTimeISO();
+  const month = now.month;
+  const year = now.year;
   const win = Dimensions.get('window');
   const dispatch = useDispatch();
 
- async function setGroupsAndJobs() {
+  // Group Fetch
+  const groupFetch = useQuery<FetchGroupsResponse, Error>(["groups"], () => fetchGroups(token), { staleTime: 30000, refetchInterval: 30000 });
+  const thisMonthJobs = useQuery<GetJobsResponse, Error>([`jobFetch${month}${year}`], () => getJobsByDate(token, month, year), { staleTime: 30000, refetchInterval: 30000 });
+
+ async function setGroupsAndJobs(data: FetchGroupsResponse) {
   if (data.data.groups !== null) {
     let userJobs: UserJobsStore[] = [];
     let allJobs: JobType[] = [];
@@ -63,15 +63,23 @@ export default function LoggedIn() {
  }
 
   useEffect(() => {
-    console.log(data, error, status);
+    const { data, status } = groupFetch;
     if (status === "success") {
-      setGroupsAndJobs();
+      setGroupsAndJobs(data);
     }
-  }, [status, data]);
+  }, [groupFetch.status, groupFetch.data]);
 
   useEffect(() => {
-    console.log(data2);
-  }, [data2.status, data2.data]);
+    const { data, status } = thisMonthJobs;
+    if (status !== "success") return
+    if (data.jobs) {
+      const monthJob: JobMonths = {
+        month,
+        jobs: data.jobs
+      }
+      dispatch(setJobs(addJobMonth(jobs, year, monthJob)));
+    }
+  }, [thisMonthJobs.status, thisMonthJobs.data]);
 
   const styles = StyleSheet.create({
     main: {
@@ -128,7 +136,7 @@ export default function LoggedIn() {
           <Text>{JSON.stringify(userData)}</Text>
         </View>
         <View style={styles.sectionGroup}>
-          <GroupSection error={error2}/>
+          <GroupSection />
         </View>
         <View style={styles.sectionJob}>
           <AddJobSection />

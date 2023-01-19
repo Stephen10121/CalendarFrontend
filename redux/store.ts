@@ -1,5 +1,5 @@
 import { legacy_createStore as createStore } from "redux";
-import { ActionTypes, SET_CLICK_GROUP, SET_ERROR, SET_LOGOUT, SET_SELECTED, SET_USER_ALL_JOBS, SET_USER_DATA, SET_USER_GROUPS, SET_USER_JOBS, SET_USER_PENDING_GROUPS, SET_USER_TOKEN } from "./actions";
+import { ActionTypes, SET_CLICK_GROUP, SET_ERROR, SET_JOB, SET_LOGOUT, SET_SELECTED, SET_USER_ALL_JOBS, SET_USER_DATA, SET_USER_GROUPS, SET_USER_JOBS, SET_USER_PENDING_GROUPS, SET_USER_TOKEN } from "./actions";
 import { Store } from "./types";
 
 const initialState = {
@@ -11,11 +11,11 @@ const initialState = {
     selected: "home",
     clickGroup: null,
     userJobs: [],
-    userAllJobs: []
+    userAllJobs: [],
+    jobs: []
 } as Store;
 
 function userReducer(state: Store = initialState, action: ActionTypes): Store {
-    console.log({state, action});
     switch(action.type) {
         case SET_USER_DATA:
             return {...state, userData: action.payload}
@@ -35,6 +35,8 @@ function userReducer(state: Store = initialState, action: ActionTypes): Store {
             return {...state, userJobs: action.payload}
         case SET_USER_ALL_JOBS:
             return {...state, userAllJobs: action.payload}
+        case SET_JOB:
+            return {...state, jobs: action.payload}
         case SET_LOGOUT:
             return { 
                 token: null,
@@ -45,7 +47,8 @@ function userReducer(state: Store = initialState, action: ActionTypes): Store {
                 selected: "home",
                 clickGroup: null,
                 userJobs: [],
-                userAllJobs: []
+                userAllJobs: [],
+                jobs: []
             }
         default:
             return state;

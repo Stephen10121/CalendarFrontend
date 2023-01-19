@@ -7,7 +7,6 @@ import { JobType } from '../../functions/jobFetch';
 import JobInfo, { VolunteerType } from '../JobInfo';
 import SlideUp, { SlideUpData } from '../SlideUp';
 import { Store } from '../../redux/types';
-import { Temporal } from '@js-temporal/polyfill';
 
 export default function HomeSection({ name }: {name: string}) {
     const userAllJobs = useSelector((state: Store) => state.userAllJobs);
@@ -15,9 +14,12 @@ export default function HomeSection({ name }: {name: string}) {
     const [myJobs, setMyJobs] = useState<JobType[]>([]);
     const [availableJobs, setAvailableJobs] = useState<JobType[]>([]);
     const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null, border:"black"});
+    const jobs = useSelector((state: Store) => state.jobs);
     const [closeInternal, setCloseInternal] = useState(false);
-    const now = Temporal.Now.plainDateTimeISO();
-    const month = now.month;
+
+    useEffect(() => {
+        console.log(jobs);
+    }, [jobs]);
 
     function jobClicked(job: JobType, myJob?: boolean) {
         console.log(job);
@@ -64,6 +66,17 @@ export default function HomeSection({ name }: {name: string}) {
             <View style={styles.greeting}>
                 <Text style={styles.welcome}>Welcome</Text>
                 <Text style={styles.name}>{name}</Text>
+            </View>
+            <View style={styles.comingUp}>
+            {jobs.map((jobYear) => {
+                return jobYear.months.map((jobMonths) => {
+                    return jobMonths.jobs.map((job) => {
+                        return(
+                            <HomeJob key={`job${job.groupId}${job.ID}`} name={job.jobTitle} client={job.client ? job.client : "No Client"} time={dateMaker(job)} id={job.ID} click={()=>jobClicked(job, true)}/>
+                        );
+                    });
+                });
+            })}
             </View>
             {myJobs.length !== 0 ? <View style={styles.comingUp}>
                 <Text style={styles.title}>Coming up</Text>

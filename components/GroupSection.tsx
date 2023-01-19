@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Store } from "../redux/types";
 import { setClickGroup } from "../redux/actions";
 
-export default function GroupSection({ error }: { error: any }) {
+export default function GroupSection() {
     const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null, border:"black"});
     const groups = useSelector((state: Store) => state.groups);
     const clickGroup = useSelector((state: Store) => state.clickGroup);
@@ -51,7 +51,6 @@ export default function GroupSection({ error }: { error: any }) {
             <ScrollView style={styles.home2}>
                 <View style={styles.greeting}>
                     <Text style={styles.welcome}>Groups</Text>
-                    {error.length !== 0 ? <View style={styles.error}><Text style={styles.errorText}>{error}</Text></View> : null}
                 </View>
                 <View style={styles.comingUp}>
                     <Text style={styles.title}>Joined/Created</Text>
