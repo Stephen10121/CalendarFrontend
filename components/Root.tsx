@@ -15,8 +15,6 @@ import NotLogged from './NotLogged';
 import PopDown from './PopDown';
 
 export default function Root() {
-    // const groups = useSelector((state: Store) => state.groups);
-    const pendingGroups = useSelector((state: Store) => state.pendingGroups);
     const userData = useSelector((state: Store) => state.userData);
     const error = useSelector((state: Store) => state.error);
     const token = useSelector((state: Store) => state.token);
@@ -69,152 +67,41 @@ export default function Root() {
       }
     }
 
-    // useEffect(() => {
-    //   if (token && userData && socket) {
-    //     socket.emit("init", token);
-    //   }
-    // }, [token, userData, socket]);
-
-    useEffect(() => {
-      console.log(pendingGroups);
-    }, [pendingGroups]);
-
-    // function socket2() {
-    //   socket.on("deleted", (data) => {
-    //     let newGroups = [];
-    //     let groupName: string;
-    //     for (let i=0;i<groups.length;i++) {
-    //       if (groups[i].groupId!=data) {
-    //         newGroups.push(groups[i]);
-    //       } else {
-    //         groupName = groups[i].groupName;
-    //       }
-    //     }
-    //     dispatch(setError({message: `The group: "${groupName}" was deleted`, type: "default", show: true}));
-    //     dispatch(setUserGroups(newGroups));
-    //   });
-  
-    //   socket.on("pendingDeleted", (data) => {
-    //     let newPendingGroups = [];
-    //     let groupName: string;
-    //     for (let i=0;i<pendingGroups.length;i++) {
-    //       if (pendingGroups[i].groupId != data) {
-    //         newPendingGroups.push(pendingGroups[i]);
-    //       } else {
-    //         groupName = pendingGroups[i].groupName;
-    //       }
-    //     }
-    //     dispatch(setError({message: `The group: "${groupName}" was deleted`, type: "default", show: true}));
-    //     dispatch(setUserPendingGroups(newPendingGroups));
-    //   });
-  
-    //   socket.on("groupAccepted", (data) => {
-    //     console.log("Group Accepted");
-    //     const { groupId, owner, othersCanAdd } = data;
-    //     let currentGroup: GroupsType;
-    //     let newPendingGroups: PendingGroupsType[] = [];
-    //     console.log(pendingGroups);
-    //     for (let i=0;i<pendingGroups.length;i++) {
-    //       console.log(pendingGroups[i].groupId, groupId);
-    //       if (pendingGroups[i].groupId === groupId) {
-    //         currentGroup = {...pendingGroups[i], groupOwner: owner, othersCanAdd, youOwn: false, notification: true};
-    //         continue
-    //       }
-    //       newPendingGroups.push(pendingGroups[i]);
-    //     }
-    //     dispatch(setUserPendingGroups(newPendingGroups));
-    //     dispatch(setUserGroups([...groups, currentGroup]));
-    //     dispatch(setError({message: `You're now part of "${currentGroup.groupName}".`, type: "success", show: true}));
-    //   });
-  
-    //   socket.on("groupRemove", (data: string) => {
-    //     console.log(groups);
-    //     let newGroups = [];
-    //     let groupName: string;
-    //     for (let i=0;i<groups.length;i++) {
-    //       if (groups[i].groupId!=data) {
-    //         newGroups.push(groups[i]);
-    //       } else {
-    //         groupName = groups[i].groupName;
-    //       }
-    //     }
-    //     dispatch(setError({message: `You're not in "${groupName}" anymore.`, type: "default", show: true}));
-    //     dispatch(setUserGroups(newGroups));
-    //   });
-  
-    //   socket.on("pendingGroupRemove", (data) => {
-    //     let newGroups = [];
-    //     let groupName: string;
-    //     for (let i=0;i<pendingGroups.length;i++) {
-    //       if (pendingGroups[i].groupId!=data) {
-    //         newGroups.push(pendingGroups[i]);
-    //       } else {
-    //         groupName = pendingGroups[i].groupName;
-    //       }
-    //     }
-    //     dispatch(setError({message: `You are not pending in "${groupName}" anymore.`, type: "default", show: true}));
-    //     dispatch(setUserPendingGroups(newGroups));
-    //   });
-
-    //   socket.on("newGroupOwner", ({groupId, newOwner}) => {
-    //     let newGroups: GroupsType[] = [];
-    //     let groupName: string;
-    //     for (let i=0;i<groups.length;i++) {
-    //       if (groups[i].groupId==groupId) {
-    //         const newGroup2 = Object.create(groups[i]);
-    //         groupName = groups[i].groupName;
-    //         newGroup2.groupOwner = newOwner;
-    //         newGroups.push(newGroup2);
-    //       } else {
-    //         newGroups.push(groups[i]);
-    //       }
-    //     }
-    //     dispatch(setError({message: `${newOwner} is the new owner of ${groupName}`, type: "success", show: true}));
-    //     dispatch(setUserGroups(newGroups));
-    //   });
-  
-    //   socket.on("newPendingUser", ({groupId, newUser}) => {
-    //     console.log(`${newUser} wants to join ${groupId}`)
-    //   });
-    // }
-
-    // useEffect(() => {
-    //   console.log(socket);
-    //   if (socket) {
-    //     socket2();
-    //   }
-    // }, [socket]);
-
     async function startup() {
+      if (Platform.OS !== "web") {
+        Notifications.setNotificationHandler({
+          handleNotification: async () => ({
+            shouldShowAlert: true,
+            shouldPlaySound: true,
+            shouldSetBadge: true
+          }),
+        });
+
+        console.log("Setting the notification response.")
+        const handleNotificationResponse = (response: Notifications.NotificationResponse) => {
+            const data: { type?: "join" | "job", groupId?:string, jobId?: string, jobTitle?: string} = response.notification.request.content.data;
+            console.log({msg: "Notification responder.", data});
+            if (data.type === "join" && data.groupId) {
+                dispatch(setSelected("groups"));
+                setTimeout(() => {
+                  dispatch(setClickGroup(data.groupId))
+                }, 100);
+            } else if (data.type === "job" && data.jobId && data.jobTitle) {
+              console.log("Setting the job selected.");
+              dispatch(setJobSelect(data.jobTitle, parseInt(data.jobId)));
+            }
+        }
+        setResponseListener(Notifications.addNotificationResponseReceivedListener(handleNotificationResponse));
+      }
+
       // setSocket(io(SOCKET_SERVER));
       const data = await fetchValidation();
       console.log(data ? "Validation Success." : "Validation Error.");
-
-      if (Platform.OS === "web") {
-        return;
-      }
-
-      Notifications.setNotificationHandler({
-        handleNotification: async () => ({
-          shouldShowAlert: true,
-          shouldPlaySound: true,
-          shouldSetBadge: true
-        }),
-      });
-
-      const handleNotificationResponse = (response: Notifications.NotificationResponse) => {
-          const data: { type?: "join" | "job", groupId?:string, jobId?: string, jobTitle?: string} = response.notification.request.content.data;
-          if (data.type === "join" && data.groupId) {
-              dispatch(setSelected("groups"));
-              setTimeout(() => {
-                dispatch(setClickGroup(data.groupId))
-              }, 100);
-          } else if (data.type === "job" && data.jobId && data.jobTitle) {
-            dispatch(setJobSelect(data.jobTitle, parseInt(data.jobId)));
-          }
-      }
-      setResponseListener(Notifications.addNotificationResponseReceivedListener(handleNotificationResponse));
     }
+
+    useEffect(() => {
+      console.log(responseListener);
+    }, [responseListener]);
 
     useEffect(() => {
       startup();

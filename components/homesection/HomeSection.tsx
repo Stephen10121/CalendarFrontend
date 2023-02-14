@@ -21,7 +21,9 @@ export default function HomeSection({ name }: {name: string}) {
     }, [jobs]);
 
     useEffect(() => {
+        console.log("Checking if job selected.")
         if (jobSelected) {
+            console.log("Job is selected.");
             setShowSlideUp({ show: true, header: jobSelected.title, children: <JobInfo id={jobSelected.id} myJob={false} close={() => setCloseInternal(true)}/>, border: "blue" });
         }
     }, [jobSelected]);
