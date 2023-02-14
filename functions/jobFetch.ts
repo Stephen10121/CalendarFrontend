@@ -135,6 +135,12 @@ interface GetJobsByDateResponse {
 }
 
 export async function getJobsByDate(token: string, month: number, year: number): Promise<GetJobsByDateResponse> {
+  if (month < 1) {
+    return { error: "Month out of range." }
+  }
+  if (month > 12) {
+    return { error: "Month out of range." }
+  }
   const groups = await fetch(`${POST_SERVER}/getAllJobsByMonthYear`, {
     method: "POST",
     headers: {

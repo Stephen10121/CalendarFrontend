@@ -1,21 +1,18 @@
 import { StyleSheet, StatusBar, View, ActivityIndicator, Platform } from "react-native";
+import { setClickGroup, setSelected, setToken, setUserData } from "../redux/actions";
+import { addNotification, validate } from '../functions/backendFetch';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useNotifications } from '../functions/useNotifications';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as Notifications from "expo-notifications";
-import { useFonts } from 'expo-font';
-import { addNotification, fetchGroups, GroupsType, PendingGroupsType, validate } from '../functions/backendFetch';
-import { useNotifications } from '../functions/useNotifications';
 import { storeData } from '../functions/localstorage';
+import * as Notifications from "expo-notifications";
 import LoggedIn from './loggedIn/LoggedIn';
+import { Store } from "../redux/types";
+import { useFonts } from 'expo-font';
 import NotLogged from './NotLogged';
 import PopDown from './PopDown';
-import { Store, UserJobsStore } from "../redux/types";
-import { setClickGroup, setError, setSelected, setToken, setUserAllJobs, setUserData, setUserGroups, setUserJobs, setUserPendingGroups } from "../redux/actions";
-// import { io, Socket } from "socket.io-client";
-import { SOCKET_SERVER } from "../functions/variables";
-import { getJobs, JobType } from "../functions/jobFetch";
 
 export default function Root() {
     // const groups = useSelector((state: Store) => state.groups);

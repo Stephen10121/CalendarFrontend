@@ -7,11 +7,10 @@ import { fetchGroups, FetchGroupsResponse } from '../../functions/backendFetch';
 import Account from '../Account';
 import { useDispatch, useSelector } from 'react-redux';
 import AddJobSection from '../AddJobSection';
-import { getJobs, getJobsByDate, GetJobsResponse, JobType } from '../../functions/jobFetch';
-import { JobMonths, Store, UserJobsStore } from '../../redux/types';
-import { setJobs, setUserAllJobs, setUserGroups, setUserJobs, setUserPendingGroups } from '../../redux/actions';
+import { getJobsByDate, GetJobsResponse } from '../../functions/jobFetch';
+import { JobMonths, Store } from '../../redux/types';
+import { setJobs, setUserGroups, setUserPendingGroups } from '../../redux/actions';
 import { useQuery } from "react-query";
-import { Temporal } from '@js-temporal/polyfill';
 import addJobMonth from '../../functions/addJob';
 
 export type RemoveGroup = (groupId: string) => void;
@@ -25,34 +24,20 @@ export default function LoggedIn() {
   const jobs = useSelector((state: Store) => state.jobs);
 
   // Other Variables
-  const now = Temporal.Now.plainDateTimeISO();
-  const month = now.month;
-  const year = now.year;
+  const now = new Date();;
+  const month = now.getUTCMonth() + 1;
+  const year = now.getUTCFullYear();
   const win = Dimensions.get('window');
   const dispatch = useDispatch();
 
   // Group Fetch
   const groupFetch = useQuery<FetchGroupsResponse, Error>(["groups"], () => fetchGroups(token), { staleTime: 30000, refetchInterval: 30000 });
+  const lastMonthJobs = useQuery<GetJobsResponse, Error>([`jobFetch${month-1}${year}`], () => getJobsByDate(token, month-1, year), { staleTime: 30000, refetchInterval: 30000 });
+  const nextMonthJobs = useQuery<GetJobsResponse, Error>([`jobFetch${month+1}${year}`], () => getJobsByDate(token, month+1, year), { staleTime: 30000, refetchInterval: 30000 });
   const thisMonthJobs = useQuery<GetJobsResponse, Error>([`jobFetch${month}${year}`], () => getJobsByDate(token, month, year), { staleTime: 30000, refetchInterval: 30000 });
 
  async function setGroupsAndJobs(data: FetchGroupsResponse) {
   if (data.data.groups !== null) {
-    let userJobs: UserJobsStore[] = [];
-    let allJobs: JobType[] = [];
-    for (let i=0;i<data.data.groups.length;i++) {
-      const data2 = await getJobs(token, data.data.groups[i].groupId);
-      console.log(`Fetched Jobs from ${data.data.groups[i].groupId}`);
-      if (data2.error) {
-        console.log(data2.error);
-        return
-      }
-      if (data2.jobs) {
-        allJobs.push(...data2.jobs);
-        userJobs.push({ groupId: data.data.groups[i].groupId, jobs: data2.jobs });
-      }
-    }
-    dispatch(setUserAllJobs(allJobs));
-    dispatch(setUserJobs(userJobs));
     dispatch(setUserGroups(data.data.groups));
   }
   if (data.data.pendingGroups) {
@@ -70,8 +55,22 @@ export default function LoggedIn() {
   }, [groupFetch.status, groupFetch.data]);
 
   useEffect(() => {
+    const { data, status } = lastMonthJobs;
+    if (status !== "success") return
+    console.log("Fetched last months jobs.");
+    if (data.jobs) {
+      const monthJob: JobMonths = {
+        month: month-1,
+        jobs: data.jobs
+      }
+      dispatch(setJobs(addJobMonth(jobs, year, monthJob)));
+    }
+  }, [lastMonthJobs.status, lastMonthJobs.data]);
+
+  useEffect(() => {
     const { data, status } = thisMonthJobs;
     if (status !== "success") return
+    console.log("Fetched this months jobs.");
     if (data.jobs) {
       const monthJob: JobMonths = {
         month,
@@ -80,6 +79,19 @@ export default function LoggedIn() {
       dispatch(setJobs(addJobMonth(jobs, year, monthJob)));
     }
   }, [thisMonthJobs.status, thisMonthJobs.data]);
+
+  useEffect(() => {
+    const { data, status } = nextMonthJobs;
+    if (status !== "success") return
+    console.log("Fetched this months jobs.");
+    if (data.jobs) {
+      const monthJob: JobMonths = {
+        month: month+1,
+        jobs: data.jobs
+      }
+      dispatch(setJobs(addJobMonth(jobs, year, monthJob)));
+    }
+  }, [nextMonthJobs.status, nextMonthJobs.data]);
 
   const styles = StyleSheet.create({
     main: {

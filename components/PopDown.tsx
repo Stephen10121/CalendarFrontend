@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
 import { useDispatch } from "react-redux";
 import { setError } from "../redux/actions";
@@ -7,9 +7,16 @@ export type MessageType = "alert" | "default" | "success";
 
 export default function PopDown({ message, type }: { message: string, type?: MessageType }) {
   const dispatch = useDispatch();
+  useEffect(() => {
+    console.log({
+      message,
+      type
+    })
+  }, []);
   const styles = StyleSheet.create({
     cover: {
-      position: "relative"
+      position: "relative",
+      zIndex: 200
     },
     box: {
       width: "100%",
@@ -17,7 +24,6 @@ export default function PopDown({ message, type }: { message: string, type?: Mes
       position: "absolute",
       flex: 1,
       top: 20,
-      zIndex: 500,
       left: 0
     },
     innerBox: {

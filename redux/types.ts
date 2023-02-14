@@ -16,8 +16,6 @@ export interface JobMonths {
 export type JobsStruct = { year: number, months: JobMonths[] }
 
 export interface Store {
-    userJobs: UserJobsStore[];
-    userAllJobs: JobType[];
     jobs: JobsStruct[];
     token: null | string;
     userData: GoogleLoginData | null;

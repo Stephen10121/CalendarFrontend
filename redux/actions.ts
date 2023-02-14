@@ -30,9 +30,7 @@ export type ActionTypes =
 { type: typeof SET_ERROR; payload: Error } |
 { type: typeof SET_SELECTED; payload: Selected } |
 { type: typeof SET_CLICK_GROUP; payload: string } |
-{ type: typeof SET_USER_JOBS; payload: UserJobsStore[] } |
 { type: typeof SET_JOB; payload: JobsStruct[] } |
-{ type: typeof SET_USER_ALL_JOBS; payload: JobType[] } |
 { type: typeof SET_LOGOUT };
 
 export const setLogout = (): ActionTypes => ({ type: SET_LOGOUT });
@@ -43,6 +41,4 @@ export const setUserPendingGroups = (userPendingGroups: PendingGroupsType[]): Ac
 export const setError = (error: Error): ActionTypes => ({ type: SET_ERROR, payload: error });
 export const setSelected = (selected: Selected): ActionTypes => ({ type: SET_SELECTED, payload: selected });
 export const setClickGroup = (clickGroup: string): ActionTypes => ({ type: SET_CLICK_GROUP, payload: clickGroup });
-export const setUserJobs = (userJobs: UserJobsStore[]): ActionTypes => ({ type: SET_USER_JOBS, payload: userJobs });
-export const setUserAllJobs = (userAllJobs: JobType[]): ActionTypes => ({ type: SET_USER_ALL_JOBS, payload: userAllJobs });
 export const setJobs = (jobs: JobsStruct[]): ActionTypes => ({ type: SET_JOB, payload: jobs });

@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import React from "react";
-import { View, StyleSheet, Text, TouchableOpacity, ScrollView } from "react-native";
+import { View, StyleSheet, Text, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
 import { JobType } from "../functions/jobFetch";
 import Counter from "./Counter";
 import SliderToggle from "./SliderToggle";
 import { dayToLetter, monthToLetter } from "../functions/dateConversion";
 import { useQuery, useQueryClient } from "react-query";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { POST_SERVER } from "../functions/variables";
 import { Store } from "../redux/types";
+import { setError } from "../redux/actions";
 
 export interface VolunteerType {
     positions: number;
@@ -16,11 +17,13 @@ export interface VolunteerType {
     userId: number;
 }
 
-export default function JobInfo({ baseInfo, close, myJob }: { baseInfo: JobType, close: () => any, myJob?: boolean }) {
+export default function JobInfo({ id, baseInfo, close, myJob }: { id: number, baseInfo: JobType | undefined, close: () => any, myJob?: boolean }) {
     const token = useSelector((state: Store) => state.token);
+    const dispatch = useDispatch();
     const queryClient = useQueryClient()
     const [info, setInfo] = useState(baseInfo);
     const [dateString, setDateString] = useState("N/A");
+    const [updating, setUpdating] = useState(true);
     const [volunteerPositions, setVolunteerPositions] = useState<VolunteerType[]>([]);
     const [positionsTaken, setPositionsTaken] = useState(0);
     const { status, data, refetch } = useQuery<JobType, Error>(["jobInfo"], async () => {
@@ -32,7 +35,7 @@ export default function JobInfo({ baseInfo, close, myJob }: { baseInfo: JobType,
             },
             credentials: "omit",
             body: JSON.stringify({
-                "jobId": baseInfo.ID,
+                "jobId": id,
             })
           })
           return await groups.json();
@@ -83,6 +86,7 @@ export default function JobInfo({ baseInfo, close, myJob }: { baseInfo: JobType,
               })
               console.log(await groups.json());
               refetch();
+              queryClient.invalidateQueries({ queryKey: [`jobFetch${info.month}${info.year}`] });
         } catch (err) {
             console.error(err);
         }
@@ -91,6 +95,11 @@ export default function JobInfo({ baseInfo, close, myJob }: { baseInfo: JobType,
     useEffect(() => {
         if (status === "success") {
             setInfo(data);
+            setUpdating(false);
+        }
+        if (status === "error") {
+            dispatch(setError({ type: "alert", show: true, message: "Cannot Update Job." }));
+            setUpdating(false);
         }
     }, [status, data]);
 
@@ -99,6 +108,12 @@ export default function JobInfo({ baseInfo, close, myJob }: { baseInfo: JobType,
             <View style={styles.toggleSection}>
                 <SliderToggle width={150} height={35} selected={(a) => setComments(a===1)}/>
             </View>
+            {updating ? 
+            <View style={styles.updatingSection}>
+                <Text style={styles.updatingSectionText}>Updating.</Text>
+                <ActivityIndicator size="small" color="#3A9FE9" />
+            </View>
+            : null}
             {comments ? null :
                 <View>
                     <View style={styles.infoList}>
@@ -148,6 +163,19 @@ const styles = StyleSheet.create({
         width: "100%",
         height: "100%",
         position: "relative"
+    },
+    updatingSection: {
+        alignItems: "center",
+        justifyContent: "center",
+        flexDirection: "row",
+        marginTop: 10,
+    },
+    updatingSectionText: {
+        fontSize: 10,
+        fontWeight: "600",
+        color: "#6f6f6f",
+        fontFamily: "Poppins-SemiBold",
+        marginRight: 10
     },
     info: {
         fontSize: 20,

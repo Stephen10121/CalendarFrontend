@@ -74,7 +74,7 @@ export default function SliderToggle({ width, height, selected }: { width: numbe
                 duration: 100,
                 useNativeDriver: Platform.OS === "web" ? false : true
               }).start();
-        }}><Text style={styles.text2}>Comments</Text></TouchableOpacity>
+        }}><Text style={styles.text2}>Chat</Text></TouchableOpacity>
     </View>
   );
 }

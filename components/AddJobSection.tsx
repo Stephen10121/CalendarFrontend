@@ -7,14 +7,16 @@ import DropDown from "./DropDown";
 import Counter from "./Counter";
 import { useDispatch, useSelector } from "react-redux";
 import { addJob } from "../functions/jobFetch";
-import { Store } from "../redux/types";
-import { setError, setUserAllJobs, setUserJobs } from "../redux/actions";
+import { JobMonths, JobsStruct, Store } from "../redux/types";
+import { setError, setJobs } from "../redux/actions";
+import { useQuery, useQueryClient } from 'react-query';
 
 export default function AddJobSection() {
+    const queryClient = useQueryClient()
+
     const groups = useSelector((state: Store) => state.groups);
     const token = useSelector((state: Store) => state.token);
-    const userAllJobs = useSelector((state: Store) => state.userAllJobs);
-    const userJobs = useSelector((state: Store) => state.userJobs);
+    const jobs = useSelector((state: Store) => state.jobs);
     const [group, setGroup] = useState("");
     let validGroups: {value: string, label: string}[] = [{value: "", label: " "}];
     for(let i=0;i<groups.length;i++) {
@@ -37,6 +39,35 @@ export default function AddJobSection() {
     const win = Dimensions.get('window');
     const width = (win.width - (16 + 16 + 23 + 23)) / 3;
     const dispatch = useDispatch();
+
+    async function sendJob() {
+        let convertData: { month: number; day: number; year: number; hour: number; minute: number; };
+        try {
+            convertData = {
+                month: parseInt(month),
+                day: parseInt(day),
+                year: parseInt(year),
+                hour: parseInt(hour),
+                minute: parseInt(minute)
+            };
+        } catch (err) {
+            dispatch(setError({ show: true, type: "alert", message: "Invalid Date or Time."}));
+            return;
+        }
+        console.log({group, client, job, instructions, address, date: {month, day, year}, time: {hour, minute, PM}, positions, notification})
+        const results = await addJob(token, {group, client, jobTitle: job, instructions, address, month: convertData.month, day: convertData.day, year: convertData.year, hour: convertData.hour, minute: convertData.minute, pm: PM, positions, notifications: notification});
+        if (results.error) {
+            dispatch(setError({ show: true, type: "alert", message: results.error}));
+            return;
+        }
+        if (results.message) {
+            dispatch(setError({ show: true, type: "success", message: results.message}));
+        }
+        if (results.return) {
+            const job2 = results.return;
+            queryClient.invalidateQueries({ queryKey: [`jobFetch${job2.month}${job2.year}`] });
+        }
+    }
 
     const view2 = <View style={styles.home}>
         <View style={styles.greeting}>
@@ -70,49 +101,6 @@ export default function AddJobSection() {
             </TouchableOpacity>
         </View>
     </View>
-
-    async function sendJob() {
-        let convertData: { month: number; day: number; year: number; hour: number; minute: number; };
-        try {
-            convertData = {
-                month: parseInt(month),
-                day: parseInt(day),
-                year: parseInt(year),
-                hour: parseInt(hour),
-                minute: parseInt(minute)
-            };
-        } catch (err) {
-            dispatch(setError({ show: true, type: "alert", message: "Invalid Date or Time."}));
-            return;
-        }
-        console.log({group, client, job, instructions, address, date: {month, day, year}, time: {hour, minute, PM}, positions, notification})
-        const results = await addJob(token, {group, client, jobTitle: job, instructions, address, month: convertData.month, day: convertData.day, year: convertData.year, hour: convertData.hour, minute: convertData.minute, pm: PM, positions, notifications: notification});
-        if (results.error) {
-            dispatch(setError({ show: true, type: "alert", message: results.error}));
-            return;
-        }
-        if (results.message) {
-            dispatch(setError({ show: true, type: "success", message: results.message}));
-        }
-        if (results.return) {
-            const job = results.return;
-            const allJobs = userAllJobs;
-            allJobs.push(job);
-            const userJobs2 = [];
-            for (let i=0;i<userJobs.length;i++) {
-                if(userJobs[i].groupId === job.groupId) {
-                    const newUserJobs = userJobs[i];
-                    newUserJobs.jobs.push(job);
-                    userJobs2.push(newUserJobs);
-                } else {
-                    userJobs2.push(userJobs[i]);
-                }
-            }
-            dispatch(setUserAllJobs(allJobs));
-            dispatch(setUserJobs(userJobs2))
-            console.log(job);
-        }
-    }
 
     if (Platform.OS === "web") {
         return (

@@ -1,105 +1,55 @@
-import { View, StyleSheet, ScrollView, Text } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import HomeJob from '../homeJob/HomeJob';
-import { useSelector } from 'react-redux';
-import { dateMaker } from '../../functions/dateConversion';
+import { View, StyleSheet, ScrollView, Text } from 'react-native';
+import RenderAvailableJobs from '../RenderAvailableJobs';
+import React, { useEffect, useState } from 'react';
 import { JobType } from '../../functions/jobFetch';
-import JobInfo, { VolunteerType } from '../JobInfo';
 import SlideUp, { SlideUpData } from '../SlideUp';
+import RenderMyJobs from '../RenderMyJobs';
+import { useSelector } from 'react-redux';
 import { Store } from '../../redux/types';
+import JobInfo from '../JobInfo';
 
 export default function HomeSection({ name }: {name: string}) {
-    const userAllJobs = useSelector((state: Store) => state.userAllJobs);
     const userData = useSelector((state: Store) => state.userData);
-    const [myJobs, setMyJobs] = useState<JobType[]>([]);
-    const [availableJobs, setAvailableJobs] = useState<JobType[]>([]);
-    const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null, border:"black"});
     const jobs = useSelector((state: Store) => state.jobs);
+    const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null, border:"black"});
     const [closeInternal, setCloseInternal] = useState(false);
 
     useEffect(() => {
+        console.log("Jobs Changed");
         console.log(jobs);
     }, [jobs]);
 
     function jobClicked(job: JobType, myJob?: boolean) {
-        console.log(job);
-        setShowSlideUp({ show: true, header: job.jobTitle, children: <JobInfo myJob={myJob} close={() => setCloseInternal(true)} baseInfo={job}/>, border: job.taken ? "red" : "blue" });
+        setShowSlideUp({ show: true, header: job.jobTitle, children: <JobInfo id={job.ID} myJob={myJob} close={() => setCloseInternal(true)} baseInfo={job}/>, border: job.taken ? "red" : "blue" });
     }
 
-    function filterMyJobs() {
-        const prevJobs = [];
-        const prevAvailableJobs = [];
-        for (let i=0;i<userAllJobs.length;i++) {
-            if (userAllJobs[i].volunteer.length !== 0) {
-                const volunteers: VolunteerType[] = JSON.parse(userAllJobs[i].volunteer);
-                if (volunteers) {
-                    let mine = false;
-                    for (let b=0;b<volunteers.length;b++) {
-                        if (volunteers[b].userId === userData.ID) {
-                            mine=true
-                        }
-                    }
-                    if (mine) {
-                        prevJobs.push(userAllJobs[i]);
-                    } else {
-                        prevAvailableJobs.push(userAllJobs[i]);
-                    }
-                } else {
-                    prevAvailableJobs.push(userAllJobs[i]);
-                }
-            } else {
-                prevAvailableJobs.push(userAllJobs[i]);
-            }
-        }
-        setAvailableJobs(prevAvailableJobs);
-        setMyJobs(prevJobs);
-    }
-
-    useEffect(() => {
-        console.log("UserAllJobs length changed.");
-        filterMyJobs();
-    }, [userAllJobs.length]);
-
-  return (
-    <View style={styles.home}>
-        <ScrollView style={styles.home2}>
-            <View style={styles.greeting}>
-                <Text style={styles.welcome}>Welcome</Text>
-                <Text style={styles.name}>{name}</Text>
-            </View>
-            <View style={styles.comingUp}>
-            {jobs.map((jobYear) => {
-                return jobYear.months.map((jobMonths) => {
-                    return jobMonths.jobs.map((job) => {
-                        return(
-                            <HomeJob key={`job${job.groupId}${job.ID}`} name={job.jobTitle} client={job.client ? job.client : "No Client"} time={dateMaker(job)} id={job.ID} click={()=>jobClicked(job, true)}/>
-                        );
-                    });
-                });
-            })}
-            </View>
-            {myJobs.length !== 0 ? <View style={styles.comingUp}>
-                <Text style={styles.title}>Coming up</Text>
-                <View style={styles.comingUpList}>
-                    {myJobs.map((job) => <HomeJob key={`job${job.groupId}${job.ID}`} name={job.jobTitle} client={job.client ? job.client : "No Client"} time={dateMaker(job)} id={job.ID} click={()=>jobClicked(job, true)}/>)}
+    return (
+        <View style={styles.home}>
+            <ScrollView style={styles.home2}>
+                <View style={styles.greeting}>
+                    <Text style={styles.welcome}>Welcome</Text>
+                    <Text style={styles.name}>{name}</Text>
                 </View>
-            </View> : null}
-            {availableJobs.length !== 0 ? <View style={styles.available}>
-                <Text style={styles.title}>Available</Text>
-                <View style={styles.comingUpList}>
-                    {availableJobs.map((job) => {
-                        if (job.taken) {
-                            return null;
-                        }
-                        return <HomeJob key={`job${job.groupId}${job.ID}`} name={job.jobTitle} client={job.client ? job.client : "No Client"} time={dateMaker(job)} id={job.ID} click={()=>jobClicked(job)}/>
-                    })}
+                <View style={styles.comingUp}>
+                    <Text style={styles.title}>Coming up</Text>
+                    <View style={styles.comingUpList}>
+                        <RenderMyJobs jobs={jobs} jobClicked={jobClicked} userId={userData.ID} />
+                    </View>
                 </View>
-            </View> : null}
-            {availableJobs.length === 0 && myJobs.length===0 ? <View style={styles.noJobs}><Text style={styles.noJobText}>No jobs.</Text></View> : null}
-        </ScrollView>
-        {showSlideUp.show ? <SlideUp closeInternal={closeInternal} border={showSlideUp.border} close={() => {setShowSlideUp({...showSlideUp, show: false}),setCloseInternal(false)}} header={showSlideUp.header}>{showSlideUp.children}</SlideUp> : null}
-    </View>
-  )
+                <View style={styles.available}>
+                    <Text style={styles.title}>Available</Text>
+                    <View style={styles.comingUpList}>
+                        <RenderAvailableJobs jobs={jobs} jobClicked={jobClicked} userId={userData.ID} />
+                    </View>
+                </View>
+            </ScrollView>
+            {showSlideUp.show ? 
+                <SlideUp closeInternal={closeInternal} border={showSlideUp.border} close={() => {setShowSlideUp({...showSlideUp, show: false}),setCloseInternal(false)}} header={showSlideUp.header}>
+                    {showSlideUp.children}
+                </SlideUp>
+            : null}
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
