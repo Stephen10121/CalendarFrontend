@@ -1,5 +1,5 @@
 import { StyleSheet, StatusBar, View, ActivityIndicator, Platform } from "react-native";
-import { setClickGroup, setSelected, setToken, setUserData } from "../redux/actions";
+import { setClickGroup, setJobSelect, setSelected, setToken, setUserData } from "../redux/actions";
 import { addNotification, validate } from '../functions/backendFetch';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -203,13 +203,14 @@ export default function Root() {
       });
 
       const handleNotificationResponse = (response: Notifications.NotificationResponse) => {
-          const data: { type?: string, groupId?:string} = response.notification.request.content.data;
+          const data: { type?: "join" | "job", groupId?:string, jobId?: string, jobTitle?: string} = response.notification.request.content.data;
           if (data.type === "join" && data.groupId) {
               dispatch(setSelected("groups"));
               setTimeout(() => {
                 dispatch(setClickGroup(data.groupId))
               }, 100);
-
+          } else if (data.type === "job" && data.jobId && data.jobTitle) {
+            dispatch(setJobSelect(data.jobTitle, parseInt(data.jobId)));
           }
       }
       setResponseListener(Notifications.addNotificationResponseReceivedListener(handleNotificationResponse));

@@ -1,4 +1,4 @@
-import { View, StyleSheet, ScrollView, Text } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
 import RenderAvailableJobs from '../RenderAvailableJobs';
 import React, { useEffect, useState } from 'react';
 import { JobType } from '../../functions/jobFetch';
@@ -11,6 +11,7 @@ import JobInfo from '../JobInfo';
 export default function HomeSection({ name }: {name: string}) {
     const userData = useSelector((state: Store) => state.userData);
     const jobs = useSelector((state: Store) => state.jobs);
+    const jobSelected = useSelector((state: Store) => state.jobSelected);
     const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null, border:"black"});
     const [closeInternal, setCloseInternal] = useState(false);
 
@@ -18,6 +19,12 @@ export default function HomeSection({ name }: {name: string}) {
         console.log("Jobs Changed");
         console.log(jobs);
     }, [jobs]);
+
+    useEffect(() => {
+        if (jobSelected) {
+            setShowSlideUp({ show: true, header: jobSelected.title, children: <JobInfo id={jobSelected.id} myJob={false} close={() => setCloseInternal(true)}/>, border: "blue" });
+        }
+    }, [jobSelected]);
 
     function jobClicked(job: JobType, myJob?: boolean) {
         setShowSlideUp({ show: true, header: job.jobTitle, children: <JobInfo id={job.ID} myJob={myJob} close={() => setCloseInternal(true)} baseInfo={job}/>, border: job.taken ? "red" : "blue" });

@@ -17,7 +17,7 @@ export interface VolunteerType {
     userId: number;
 }
 
-export default function JobInfo({ id, baseInfo, close, myJob }: { id: number, baseInfo: JobType | undefined, close: () => any, myJob?: boolean }) {
+export default function JobInfo({ id, baseInfo, close, myJob }: { id: number, baseInfo?: JobType, close: () => any, myJob?: boolean }) {
     const token = useSelector((state: Store) => state.token);
     const dispatch = useDispatch();
     const queryClient = useQueryClient()
@@ -116,6 +116,8 @@ export default function JobInfo({ id, baseInfo, close, myJob }: { id: number, ba
             : null}
             {comments ? null :
                 <View>
+                    {info !== undefined ?
+                    <>
                     <View style={styles.infoList}>
                         <Text style={styles.li}>• Group: <Text style={styles.span}>{info.groupName}</Text></Text>
                         <Text style={styles.li}>• Issued By: <Text style={styles.span}>{info.issuerName}</Text></Text>
@@ -143,6 +145,8 @@ export default function JobInfo({ id, baseInfo, close, myJob }: { id: number, ba
                             <Text style={styles.getJobButtonText}>{myJob ? "Add Position" : "Take Job"}</Text>
                         </TouchableOpacity>
                     </View> : null }
+                    </>
+                    : null}
                 </View>
             }
         </ScrollView>
