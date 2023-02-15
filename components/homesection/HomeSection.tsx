@@ -1,4 +1,4 @@
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView, Text } from 'react-native';
 import RenderAvailableJobs from '../RenderAvailableJobs';
 import React, { useEffect, useState } from 'react';
 import { JobType } from '../../functions/jobFetch';

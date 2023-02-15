@@ -12,6 +12,7 @@ import { JobMonths, Store } from '../../redux/types';
 import { setJobs, setUserGroups, setUserPendingGroups } from '../../redux/actions';
 import { useQuery } from "react-query";
 import addJobMonth from '../../functions/addJob';
+import CalendarSection from '../CalendarSection';
 
 export type RemoveGroup = (groupId: string) => void;
 export type RemovePendingGroup = (pendingGroupId: string) => void;
@@ -144,8 +145,7 @@ export default function LoggedIn() {
           <HomeSection name={userData.name}/>
         </View>
         <View style={styles.sectionCal}>
-          <Text>Calendar</Text>
-          <Text>{JSON.stringify(userData)}</Text>
+          <CalendarSection />
         </View>
         <View style={styles.sectionGroup}>
           <GroupSection />
