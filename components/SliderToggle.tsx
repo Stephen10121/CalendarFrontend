@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Platform } from 'react-native';
 import React, { useRef } from 'react';
 
-export default function SliderToggle({ width, height, selected }: { width: number, height: number, selected: (arg0: any) => any }) {
+export default function SliderToggle({ width, height, selected, option1, option2 }: { width: number, height: number, selected: (arg0: any) => any, option1?: string, option2?: string }) {
     const singleWidth = (width - 4) / 2;
     const fadeAnim = useRef(new Animated.Value(2)).current;
 
@@ -66,7 +66,7 @@ export default function SliderToggle({ width, height, selected }: { width: numbe
                 duration: 100,
                 useNativeDriver: Platform.OS === "web" ? false : true
               }).start();
-        }}><Text style={styles.text1}>Info</Text></TouchableOpacity>
+        }}><Text style={styles.text1}>{option1 ? option1 : "Info"}</Text></TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={() => {
             selected(1);
             Animated.timing(fadeAnim, {
@@ -74,7 +74,7 @@ export default function SliderToggle({ width, height, selected }: { width: numbe
                 duration: 100,
                 useNativeDriver: Platform.OS === "web" ? false : true
               }).start();
-        }}><Text style={styles.text2}>Chat</Text></TouchableOpacity>
+        }}><Text style={styles.text2}>{option2 ? option2 : "Chat"}</Text></TouchableOpacity>
     </View>
   );
 }

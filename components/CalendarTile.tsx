@@ -1,13 +1,17 @@
-import { View, Text, StyleSheet, Dimensions } from 'react-native'
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native'
 import React from 'react'
 
-export default function CalendarTile({ number, tiles }: { number?: number, tiles?: ("taken" | "available" | "partial")[] }) {
+export default function CalendarTile({ number, tiles }: { number: number, tiles?: ("taken" | "available" | "partial")[] }) {
     const windowWidth = Dimensions.get('window').width;
+
+    function tileClicked() {
+      console.log(`Tile ${number} clicked.`)
+    }
 
     const styles = StyleSheet.create({
         tile: {
             width: windowWidth / 7,
-            height: 65,
+            minHeight: 65,
             borderWidth: 0,
             borderLeftWidth: 1,
             borderBottomWidth: 1,
@@ -24,36 +28,35 @@ export default function CalendarTile({ number, tiles }: { number?: number, tiles
             fontFamily: "Poppins-SemiBold"
         },
         jobTiles: {
-          marginTop: 15,
+          marginTop: 20,
+          paddingHorizontal: 5
+        },
+        jobTile: {
+          marginBottom: 5,
+          width: "100%",
+          height: 10,
+          borderRadius: 5
         },
         partial: {
-          width: 10,
-          height: 10,
           backgroundColor: "#f2e903"
         },
         taken: {
-          width: 10,
-          height: 10,
           backgroundColor: "#EE3F3F"
         },
         available: {
-          width: 10,
-          height: 10,
           backgroundColor: "#3A9FE9"
         }
     });
   return (
-    <View style={styles.tile}>
-      <Text style={styles.date}>{number ? number : "1"}</Text>
+    <TouchableOpacity style={styles.tile} onPress={tileClicked}>
+      <Text style={styles.date}>{number}</Text>
       <View style={styles.jobTiles}>
         {Array.isArray(tiles) ?
           <>
-          {tiles.map((tile, index) => {
-            return <View key={`jobTile${tile}${index}w${number}`} style={styles[tile]}></View>
-          })}
+            {tiles.map((tile, index) => <View key={`jobTile${tile}${index}w${number}`} style={{...styles.jobTile, ...styles[tile]}}></View>)}
           </>
         : null}
       </View>
-    </View>
+    </TouchableOpacity>
   )
 }
