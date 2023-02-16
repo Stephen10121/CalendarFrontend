@@ -13,6 +13,7 @@ import { setJobs, setUserGroups, setUserPendingGroups } from '../../redux/action
 import { useQuery } from "react-query";
 import addJobMonth from '../../functions/addJob';
 import CalendarSection from '../CalendarSection';
+import LoadingIcon from '../LoadingIcon';
 
 export type RemoveGroup = (groupId: string) => void;
 export type RemovePendingGroup = (pendingGroupId: string) => void;
@@ -23,6 +24,7 @@ export default function LoggedIn() {
   const token = useSelector((state: Store) => state.token);
   const selected = useSelector((state: Store) => state.selected);
   const jobs = useSelector((state: Store) => state.jobs);
+  const loading = useSelector((state: Store) => state.loading);
 
   // Other Variables
   const now = new Date();;
@@ -98,7 +100,8 @@ export default function LoggedIn() {
     main: {
         width: "100%",
         height: "100%",
-        backgroundColor: "#dfdfdf"
+        backgroundColor: "#dfdfdf",
+        position: "relative"
     },
     body: {
       height: selected !== "account" ? win.height - 70 : 0,
@@ -155,6 +158,7 @@ export default function LoggedIn() {
         </View>
       </View>
       {selected !== "account" ? <Navigation selected={selected} profilePic={userData.picture}/> : <Account />}
+      {loading ? <LoadingIcon>{loading}</LoadingIcon> : null}
     </View>
   );
 }

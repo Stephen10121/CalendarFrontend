@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import React from "react";
-import { View, StyleSheet, Text, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
+import { View, StyleSheet, Text, TouchableOpacity, ScrollView } from "react-native";
 import { JobType } from "../functions/jobFetch";
 import Counter from "./Counter";
 import SliderToggle from "./SliderToggle";
@@ -9,7 +9,7 @@ import { useQuery, useQueryClient } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { POST_SERVER } from "../functions/variables";
 import { Store } from "../redux/types";
-import { setError } from "../redux/actions";
+import { setError, setLoading } from "../redux/actions";
 
 export interface VolunteerType {
     positions: number;
@@ -23,7 +23,6 @@ export default function JobInfo({ id, baseInfo, close, myJob }: { id: number, ba
     const queryClient = useQueryClient()
     const [info, setInfo] = useState(baseInfo);
     const [dateString, setDateString] = useState("N/A");
-    const [updating, setUpdating] = useState(true);
     const [volunteerPositions, setVolunteerPositions] = useState<VolunteerType[]>([]);
     const [positionsTaken, setPositionsTaken] = useState(0);
     const { status, data, refetch } = useQuery<JobType, Error>(["jobInfo"], async () => {
@@ -95,25 +94,23 @@ export default function JobInfo({ id, baseInfo, close, myJob }: { id: number, ba
     useEffect(() => {
         if (status === "success") {
             setInfo(data);
-            setUpdating(false);
+            dispatch(setLoading(null));
         }
         if (status === "error") {
             dispatch(setError({ type: "alert", show: true, message: "Cannot Update Job." }));
-            setUpdating(false);
+            dispatch(setLoading(null));
         }
     }, [status, data]);
+
+    useEffect(() => {
+        dispatch(setLoading("Updating"));
+    }, []);
 
     return(
         <ScrollView style={styles.groupInfo}>
             <View style={styles.toggleSection}>
                 <SliderToggle width={150} height={35} selected={(a) => setComments(a===1)}/>
             </View>
-            {updating ? 
-            <View style={styles.updatingSection}>
-                <Text style={styles.updatingSectionText}>Updating.</Text>
-                <ActivityIndicator size="small" color="#3A9FE9" />
-            </View>
-            : null}
             {comments ? null :
                 <View>
                     {info !== undefined ?
@@ -167,19 +164,6 @@ const styles = StyleSheet.create({
         width: "100%",
         height: "100%",
         position: "relative"
-    },
-    updatingSection: {
-        alignItems: "center",
-        justifyContent: "center",
-        flexDirection: "row",
-        marginTop: 10,
-    },
-    updatingSectionText: {
-        fontSize: 10,
-        fontWeight: "600",
-        color: "#6f6f6f",
-        fontFamily: "Poppins-SemiBold",
-        marginRight: 10
     },
     info: {
         fontSize: 20,

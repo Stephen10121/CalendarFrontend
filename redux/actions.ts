@@ -22,6 +22,7 @@ export const SET_USER_ALL_JOBS = "SET_USER_ALL_JOBS";
 export const SET_LOGOUT = "SET_LOGOUT";
 export const SET_JOB = "SET_JOB";
 export const SET_JOB_SELECT = "SET_JOB_SELECT";
+export const SET_LOADING = "SET_LOADING";
 
 export type ActionTypes = 
 { type: typeof SET_USER_TOKEN; payload: string } | 
@@ -33,6 +34,7 @@ export type ActionTypes =
 { type: typeof SET_CLICK_GROUP; payload: string } |
 { type: typeof SET_JOB; payload: JobsStruct[] } |
 { type: typeof SET_JOB_SELECT; payload: {id: number, title: string} } |
+{ type: typeof SET_LOADING; payload: null | string } |
 { type: typeof SET_LOGOUT };
 
 export const setLogout = (): ActionTypes => ({ type: SET_LOGOUT });
@@ -45,3 +47,4 @@ export const setSelected = (selected: Selected): ActionTypes => ({ type: SET_SEL
 export const setClickGroup = (clickGroup: string): ActionTypes => ({ type: SET_CLICK_GROUP, payload: clickGroup });
 export const setJobs = (jobs: JobsStruct[]): ActionTypes => ({ type: SET_JOB, payload: jobs });
 export const setJobSelect = (title: string, jobId: number): ActionTypes => ({ type: SET_JOB_SELECT, payload: {id: jobId, title: title} });
+export const setLoading = (value: null | string): ActionTypes => ({ type: SET_LOADING, payload: value });

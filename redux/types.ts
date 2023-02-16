@@ -25,4 +25,5 @@ export interface Store {
     selected: Selected;
     clickGroup: string;
     jobSelected: {id: number, title: string} | null;
+    loading: null | string;
 }
