@@ -34,7 +34,7 @@ function userReducer(state: Store = initialState, action: ActionTypes): Store {
         case SET_JOB:
             return {...state, jobs: action.payload}
         case SET_JOB_SELECT:
-            return {...state, jobSelected: action.payload}
+            return {...state, selected: "home", jobSelected: action.payload}
         case SET_LOADING:
             return {...state, loading: action.payload}
         case SET_LOGOUT:
