@@ -32,12 +32,12 @@ export default function BigDate() {
                         </View>
                         <View style={styles.tileList}>
                             <ScrollView style={styles.tileListInner}>
-                                <BigDateTile client='Galina Shapoval' jobTitle='BabySitting' time='11:30 AM' click={console.log} type="taken" />
-                                <BigDateTile client='Tanya Gruzin' jobTitle='Food Delivery' time='1:00 PM' click={console.log} type="available" />
-                                <BigDateTile client='Galina Shapoval' jobTitle='BabySitting' time='11:30 AM' click={console.log} type="almostTaken" />
-                                <BigDateTile client='Tanya Gruzin' jobTitle='Food Delivery' time='1:00 PM' click={console.log} type="available" />
-                                <BigDateTile client='Galina Shapoval' jobTitle='BabySitting' time='11:30 AM' click={console.log} type="available" />
-                                <BigDateTile client='Tanya Gruzin' jobTitle='Food Delivery' time='1:00 PM' click={console.log} type="taken" />
+                                <BigDateTile client='Jeff Jeffins' jobTitle='BabySitting' time='11:30 AM' click={console.log} type="taken" />
+                                <BigDateTile client='Jeff Jeffins' jobTitle='Food Delivery' time='1:00 PM' click={console.log} type="available" />
+                                <BigDateTile client='Jeff Jeffins' jobTitle='BabySitting' time='11:30 AM' click={console.log} type="almostTaken" />
+                                <BigDateTile client='Jeff Jeffins' jobTitle='Food Delivery' time='1:00 PM' click={console.log} type="available" />
+                                <BigDateTile client='Jeff Jeffins' jobTitle='BabySitting' time='11:30 AM' click={console.log} type="available" />
+                                <BigDateTile client='Jeff Jeffins' jobTitle='Food Delivery' time='1:00 PM' click={console.log} type="taken" />
                             </ScrollView>
                         </View>
                         <View style={styles.keyTiles}>
