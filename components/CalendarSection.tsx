@@ -70,11 +70,14 @@ export default function CalendarSection() {
 
     useEffect(changeDateArray, [year, month]);
 
+    function clicked(day: number) {
+        console.log(`Tile ${day} clicked.`);
+    }
 
     return (
         <View style={{width: "100%",height:"100%"}}>
             {/* <BigDate /> */}
-            <Calendar changeMonth={changeMonth} dateArray={dateArray} year={year} month={monthToLetterFull[month]} monthJobs={monthJobs} />
+            <Calendar changeMonth={changeMonth} dateArray={dateArray} year={year} month={monthToLetterFull[month]} monthIndex={month} monthJobs={monthJobs} clicked={clicked}/>
         </View>
     )
 }

@@ -5,12 +5,7 @@ import { JobType } from '../functions/jobFetch';
 
 export type DateArray = {day: number, month: number}[];
 
-export default function Calendar({ month, year, dateArray, changeMonth, monthJobs }: { month: string, year: number, dateArray: DateArray, changeMonth: (direction: "left" | "right") => void, monthJobs: JobType[] }) {
-
-    function clicked(month: number, day: number) {
-        console.log(`tile ${month}${day} clicked`);
-    }
-
+export default function Calendar({ monthIndex, month, year, dateArray, changeMonth, monthJobs, clicked }: { monthIndex: number, month: string, year: number, dateArray: DateArray, changeMonth: (direction: "left" | "right") => void, monthJobs: JobType[], clicked: (day: number) => any }) {
     return (
     <View style={styles.calendar}>
         <View style={styles.calendarHeader}>
@@ -32,33 +27,33 @@ export default function Calendar({ month, year, dateArray, changeMonth, monthJob
         {dateArray.length===42 || dateArray.length===35 ? <>
             <View style={styles.calendarRow}>
                 {dateArray.slice(0,7).map((val) => {
-                    return <CalendarTile key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={monthJobs.filter((job) => job.day === val.day && job.month === val.month).map((data) => data.taken ? "taken" : "available")} clicked={() => clicked(val.month, val.day)} />
+                    return <CalendarTile gray={val.month!==monthIndex} key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={monthJobs.filter((job) => job.day === val.day && job.month === val.month).map((data) => data.taken ? "taken" : "available")} clicked={() => clicked(val.day)} />
                 })}
             </View>
             <View style={styles.calendarRow}>
                 {dateArray.slice(7,15).map((val) => {
-                    return <CalendarTile key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={monthJobs.filter((job) => job.day === val.day && job.month === val.month).map((data) => data.taken ? "taken" : "available")} clicked={() => clicked(val.month, val.day)} />
+                    return <CalendarTile gray={val.month!==monthIndex} key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={monthJobs.filter((job) => job.day === val.day && job.month === val.month).map((data) => data.taken ? "taken" : "available")} clicked={() => clicked(val.day)} />
                 })}
             </View>
             <View style={styles.calendarRow}>
                 {dateArray.slice(14,22).map((val) => {
-                    return <CalendarTile key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={monthJobs.filter((job) => job.day === val.day && job.month === val.month).map((data) => data.taken ? "taken" : "available")} clicked={() => clicked(val.month, val.day)} />
+                    return <CalendarTile gray={val.month!==monthIndex} key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={monthJobs.filter((job) => job.day === val.day && job.month === val.month).map((data) => data.taken ? "taken" : "available")} clicked={() => clicked(val.day)} />
                 })}
             </View>
             <View style={styles.calendarRow}>
                 {dateArray.slice(21,29).map((val) => {
-                    return <CalendarTile key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={monthJobs.filter((job) => job.day === val.day && job.month === val.month).map((data) => data.taken ? "taken" : "available")} clicked={() => clicked(val.month, val.day)} />
+                    return <CalendarTile gray={val.month!==monthIndex} key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={monthJobs.filter((job) => job.day === val.day && job.month === val.month).map((data) => data.taken ? "taken" : "available")} clicked={() => clicked(val.day)} />
                 })}
             </View>
             <View style={styles.calendarRow}>
                 {dateArray.slice(28,35).map((val) => {
-                    return <CalendarTile key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={monthJobs.filter((job) => job.day === val.day && job.month === val.month).map((data) => data.taken ? "taken" : "available")} clicked={() => clicked(val.month, val.day)} />
+                    return <CalendarTile gray={val.month!==monthIndex} key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={monthJobs.filter((job) => job.day === val.day && job.month === val.month).map((data) => data.taken ? "taken" : "available")} clicked={() => clicked(val.day)} />
                 })}
             </View>
             {dateArray.length===42 ? 
                 <View style={styles.calendarRow}>
                     {dateArray.slice(35,42).map((val) => {
-                    return <CalendarTile key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={monthJobs.filter((job) => job.day === val.day && job.month === val.month).map((data) => data.taken ? "taken" : "available")} clicked={() => clicked(val.month, val.day)} />
+                    return <CalendarTile gray={val.month!==monthIndex} key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={monthJobs.filter((job) => job.day === val.day && job.month === val.month).map((data) => data.taken ? "taken" : "available")} clicked={() => clicked(val.day)} />
                 })}
                 </View>
             : null}

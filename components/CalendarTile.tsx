@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native'
 import React from 'react'
 
-export default function CalendarTile({ number, tiles, clicked }: { number: number, tiles?: ("taken" | "available" | "partial")[], clicked: () => any }) {
+export default function CalendarTile({ number, tiles, clicked, gray }: { number: number, tiles?: ("taken" | "available" | "partial")[], clicked: () => any, gray?: boolean }) {
     const windowWidth = Dimensions.get('window').width;
 
     const styles = StyleSheet.create({
@@ -23,7 +23,6 @@ export default function CalendarTile({ number, tiles, clicked }: { number: numbe
             right: 4,
             fontSize: 15 ,
             fontWeight: "900",
-            color: "#000000",
             fontFamily: "Poppins-SemiBold"
         },
         jobTiles: {
@@ -48,8 +47,8 @@ export default function CalendarTile({ number, tiles, clicked }: { number: numbe
     });
   return (
     <View style={styles.tile}>
-      <TouchableOpacity style={styles.clickableTile} onPress={clicked}>
-        <Text style={styles.date}>{number}</Text>
+      <TouchableOpacity style={styles.clickableTile} onPress={clicked} disabled={gray}>
+        <Text style={{...styles.date, color: gray ? "gray" : "#000000"}}>{number}</Text>
         <View style={styles.jobTiles}>
           {Array.isArray(tiles) ?
             <>
