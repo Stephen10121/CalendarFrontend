@@ -92,18 +92,19 @@ export default function JobInfo({ id, baseInfo, close, myJob }: { id: number, ba
     }
 
     useEffect(() => {
+        if (status !== "loading") {
+            dispatch(setLoading(null));
+        }
         if (status === "success") {
             setInfo(data);
-            dispatch(setLoading(null));
         }
         if (status === "error") {
             dispatch(setError({ type: "alert", show: true, message: "Cannot Update Job." }));
-            dispatch(setLoading(null));
         }
     }, [status, data]);
 
     useEffect(() => {
-        dispatch(setLoading("Updating"));
+        dispatch(setLoading("Updating Job"));
     }, []);
 
     return(

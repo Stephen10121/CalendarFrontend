@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native'
 import React from 'react'
 import SliderToggle from './SliderToggle';
 import BigDateTile from './BigDateTile';
@@ -12,13 +12,25 @@ export default function BigDate() {
                 <View style={styles.theRestCover}>
                     <Text style={styles.monthText}>November</Text>
                     <View style={styles.calendarTile}>
+                        <TouchableOpacity style={styles.rightClickButton}>
+                            <Image style={styles.rightClick}
+                                source={require('../assets/rightarrow.png')}
+                            />
+                        </TouchableOpacity>
                         <View style={styles.dayView}>
                             <Text style={styles.dayText}>Friday</Text>
                             <Text style={styles.numText}>18</Text>
                         </View>
-                        <ScrollView style={styles.tileList}>
-                            <BigDateTile />
-                        </ScrollView>
+                        <View style={styles.tileList}>
+                            <ScrollView style={styles.tileListInner}>
+                                <BigDateTile client='Galina Shapoval' jobTitle='BabySitting' time='11:30 AM' click={console.log} type="taken" />
+                                <BigDateTile client='Tanya Gruzin' jobTitle='Food Delivery' time='1:00 PM' click={console.log} type="available" />
+                                <BigDateTile client='Galina Shapoval' jobTitle='BabySitting' time='11:30 AM' click={console.log} type="almostTaken" />
+                                <BigDateTile client='Tanya Gruzin' jobTitle='Food Delivery' time='1:00 PM' click={console.log} type="available" />
+                                <BigDateTile client='Galina Shapoval' jobTitle='BabySitting' time='11:30 AM' click={console.log} type="available" />
+                                <BigDateTile client='Tanya Gruzin' jobTitle='Food Delivery' time='1:00 PM' click={console.log} type="taken" />
+                            </ScrollView>
+                        </View>
                         <View style={styles.keyTiles}>
                             <View style={styles.keyTile}>
                                 <View style={{...styles.keyTileBox, ...styles.keyTileBoxNotBooked}} />
@@ -112,8 +124,10 @@ const styles = StyleSheet.create({
     },
     tileList: {
         width: "100%",
-        height: 200,
-        backgroundColor: "red"
+        height: "77%",
+    },
+    tileListInner: {
+        paddingHorizontal: 25
     },
     keyTiles: {
         position: "absolute",
@@ -147,4 +161,24 @@ const styles = StyleSheet.create({
     keyTileBoxAlmostBooked: {
         backgroundColor: "#f2e903"
     },
+    rightClickButton: {
+        width: 50,
+        zIndex: 20,
+        height: 50,
+        backgroundColor: "#D4D4D4",
+        borderColor: "#DFDFDF",
+        borderWidth: 5,
+        borderRadius: 100,
+        alignItems: "center",
+        justifyContent: "center",
+        paddingRight: 3,
+        position: "absolute",
+        top: "50%",
+        left: 0,
+        transform: [ {translateY: -25}]
+    },
+    rightClick: {
+        width: 18,
+        height: 18
+    }
 });

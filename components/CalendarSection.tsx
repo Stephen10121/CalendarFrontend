@@ -58,9 +58,10 @@ export default function CalendarSection() {
         const { data, status } = nextMonthJobs;
         if (status === "loading") {
             dispatch(setLoading("Loading"));
+        } else {
+            dispatch(setLoading(null));
         }
         if (status !== "success") return
-        dispatch(setLoading(null));
         console.log(`Fetched jobs for ${month}, ${year}.`);
         if (data.jobs) {
             setMonthJobs(data.jobs);
@@ -72,7 +73,7 @@ export default function CalendarSection() {
 
     return (
         <View style={{width: "100%",height:"100%"}}>
-            {/* <BigDate /> */}
+            <BigDate />
             <Calendar changeMonth={changeMonth} dateArray={dateArray} year={year} month={monthToLetterFull[month]} monthJobs={monthJobs} />
         </View>
     )
