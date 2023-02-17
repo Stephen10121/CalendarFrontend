@@ -1,12 +1,8 @@
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native'
 import React from 'react'
 
-export default function CalendarTile({ number, tiles }: { number: number, tiles?: ("taken" | "available" | "partial")[] }) {
+export default function CalendarTile({ number, tiles, clicked }: { number: number, tiles?: ("taken" | "available" | "partial")[], clicked: () => any }) {
     const windowWidth = Dimensions.get('window').width;
-
-    function tileClicked() {
-      console.log(`Tile ${number} clicked.`)
-    }
 
     const styles = StyleSheet.create({
         tile: {
@@ -16,7 +12,10 @@ export default function CalendarTile({ number, tiles }: { number: number, tiles?
             borderLeftWidth: 1,
             borderBottomWidth: 1,
             borderColor: "#000000",
-            position: "relative"
+        },
+        clickableTile: {
+          width: "100%",
+          position: "relative"
         },
         date: {
             position: "absolute",
@@ -48,15 +47,17 @@ export default function CalendarTile({ number, tiles }: { number: number, tiles?
         }
     });
   return (
-    <TouchableOpacity style={styles.tile} onPress={tileClicked}>
-      <Text style={styles.date}>{number}</Text>
-      <View style={styles.jobTiles}>
-        {Array.isArray(tiles) ?
-          <>
-            {tiles.map((tile, index) => <View key={`jobTile${tile}${index}w${number}`} style={{...styles.jobTile, ...styles[tile]}}></View>)}
-          </>
-        : null}
-      </View>
-    </TouchableOpacity>
+    <View style={styles.tile}>
+      <TouchableOpacity style={styles.clickableTile} onPress={clicked}>
+        <Text style={styles.date}>{number}</Text>
+        <View style={styles.jobTiles}>
+          {Array.isArray(tiles) ?
+            <>
+              {tiles.map((tile, index) => <View key={`jobTile${tile}${index}w${number}`} style={{...styles.jobTile, ...styles[tile]}}></View>)}
+            </>
+          : null}
+        </View>
+      </TouchableOpacity>
+    </View>
   )
 }
