@@ -3,11 +3,9 @@ import React from 'react'
 
 export default function CalendarTile({ number, tiles, clicked, gray }: { number: number, tiles?: ("taken" | "available" | "partial")[], clicked: () => any, gray?: boolean }) {
     const windowWidth = Dimensions.get('window').width;
-
     const styles = StyleSheet.create({
         tile: {
             width: windowWidth / 7,
-            minHeight: 65,
             borderWidth: 0,
             borderLeftWidth: 1,
             borderBottomWidth: 1,
@@ -15,6 +13,7 @@ export default function CalendarTile({ number, tiles, clicked, gray }: { number:
         },
         clickableTile: {
           width: "100%",
+          minHeight: 65,
           position: "relative"
         },
         date: {

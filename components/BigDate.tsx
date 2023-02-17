@@ -1,43 +1,62 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import SliderToggle from './SliderToggle';
 import BigDateTile from './BigDateTile';
+import { dayToLetterFull, monthToLetterFull } from '../functions/dateConversion';
+import { JobType } from '../functions/jobFetch';
+import { useSelector } from 'react-redux';
+import { Store } from '../redux/types';
 
-export default function BigDate() {
+export default function BigDate({ clicked, close, month, day, year, left, right, jobs }: { clicked: (job: JobType) => any, close: () => any, month: number, day: number, year: number, left: () => any, right: () => any, jobs: JobType[] }) {
+    const userData = useSelector((state: Store) => state.userData);
+    const [dayWord, setDayWord] = useState(null);
+    const [myDates, setMyDates] = useState(false);
+    useEffect(() => {
+        const date = new Date(year, month-1, day);
+        setDayWord(dayToLetterFull[date.getDay()]);
+    });
+
+    function myDateFilter(job: JobType) {
+        if (!myDates) return true;
+        const volunteers = JSON.parse(job.volunteer);
+        if (!Array.isArray(volunteers)) return false;
+        let iminit = false;
+        for (let i=0;i<volunteers.length;i++) {
+            if (volunteers[i].userId === userData.ID) {
+                iminit=true;
+            }
+        }
+        return iminit
+    }
     return (
         <View style={styles.bigDate}>
-            <SliderToggle width={150} height={35} selected={console.log} option1="All dates" option2='My dates'/>
-            <TouchableOpacity style={styles.goBack}><Text style={styles.goBackText}>Go Back</Text></TouchableOpacity>
+            <SliderToggle width={150} height={35} selected={(data) => data===1?setMyDates(true):setMyDates(false)} option1="All dates" option2='My dates'/>
+            <TouchableOpacity onPress={close} style={styles.goBack}><Text style={styles.goBackText}>Go Back</Text></TouchableOpacity>
             <View style={styles.theRest}>
                 <View style={styles.theRestCover}>
-                    <Text style={styles.monthText}>November</Text>
+                    <Text style={styles.monthText}>{monthToLetterFull[month]}</Text>
                     <View style={styles.calendarTile}>
                         <View style={{...styles.leftClickButtonView,...styles.buttonView}}>
-                            <TouchableOpacity style={styles.clickButton}>
+                            <TouchableOpacity style={styles.clickButton} onPress={left}>
                                 <Image style={styles.rightClick}
                                     source={require('../assets/rightarrow.png')}
                                 />
                             </TouchableOpacity>
                         </View>
                         <View style={{...styles.rightClickButtonView,...styles.buttonView}}>
-                            <TouchableOpacity style={{...styles.clickButton, ...styles.rightClickButton}}>
+                            <TouchableOpacity style={{...styles.clickButton, ...styles.rightClickButton}} onPress={right}>
                                 <Image style={styles.rightClick}
                                     source={require('../assets/rightarrow.png')}
                                 />
                             </TouchableOpacity>
                         </View>
                         <View style={styles.dayView}>
-                            <Text style={styles.dayText}>Friday</Text>
-                            <Text style={styles.numText}>18</Text>
+                            <Text style={styles.dayText}>{dayWord}</Text>
+                            <Text style={styles.numText}>{day}</Text>
                         </View>
                         <View style={styles.tileList}>
                             <ScrollView style={styles.tileListInner}>
-                                <BigDateTile client='Jeff Jeffins' jobTitle='BabySitting' time='11:30 AM' click={console.log} type="taken" />
-                                <BigDateTile client='Jeff Jeffins' jobTitle='Food Delivery' time='1:00 PM' click={console.log} type="available" />
-                                <BigDateTile client='Jeff Jeffins' jobTitle='BabySitting' time='11:30 AM' click={console.log} type="almostTaken" />
-                                <BigDateTile client='Jeff Jeffins' jobTitle='Food Delivery' time='1:00 PM' click={console.log} type="available" />
-                                <BigDateTile client='Jeff Jeffins' jobTitle='BabySitting' time='11:30 AM' click={console.log} type="available" />
-                                <BigDateTile client='Jeff Jeffins' jobTitle='Food Delivery' time='1:00 PM' click={console.log} type="taken" />
+                                {jobs.filter(myDateFilter).map((job) => <BigDateTile volunteersNeeded={job.positions} key={`bigDateJob${job.month}${job.day}${job.ID}`} client={job.client.length > 0 ? job.client : "No Client Specified"} jobTitle={job.jobTitle} time={`${job.hour}:${job.minute.toString().length===1?"0":""}${job.minute} ${job.pm ? "PM" : "AM"}`} click={() => clicked(job)} type={JSON.parse(job.volunteer)} />)}
                             </ScrollView>
                         </View>
                         <View style={styles.keyTiles}>

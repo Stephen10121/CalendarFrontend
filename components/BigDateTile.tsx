@@ -1,9 +1,24 @@
 import { Text, StyleSheet, TouchableOpacity } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
-export default function BigDateTile({ jobTitle, client, time, click, type }: { jobTitle: string, client: string, time: string, click: () => any, type: "taken" | "available" | "almostTaken" }) {
+export default function BigDateTile({ jobTitle, client, time, click, type, volunteersNeeded }: { jobTitle: string, client: string, time: string, click: () => any, type: any, volunteersNeeded: number }) {
+	const [taken, setTaken] = useState<"taken"|"available"|"almost">("almost");
+	useEffect(() => {
+		if (Array.isArray(type)) {
+			let positions = 0;
+			for (let i=0;i<type.length;i++) {
+				//@ts-ignore
+				positions+=type[i].positions;
+			}
+			if (positions === volunteersNeeded) {
+				setTaken("taken")
+			}
+		} else {
+			setTaken("available")
+		}
+	}, [type]);
   return (
-    <TouchableOpacity onPress={click} style={{...styles.tile, borderColor: type==="taken"?"#EE3F3F":type==="available"?"#3A9FE9":"#f2e903"}}>
+    <TouchableOpacity onPress={click} style={{...styles.tile, borderColor: taken==="taken"?"#EE3F3F":taken==="available"?"#3A9FE9":"#f2e903"}}>
 		<Text style={styles.jobTitle}>{jobTitle}</Text>
 		<Text style={styles.client}>{client}</Text>
 		<Text style={styles.time}>{time}</Text>

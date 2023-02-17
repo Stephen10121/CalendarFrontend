@@ -1,6 +1,7 @@
 import { JobType } from "./jobFetch";
 
 export const dayToLetter = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+export const dayToLetterFull = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 export const monthToLetter = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 export const monthToLetterFull = ["N/A", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
