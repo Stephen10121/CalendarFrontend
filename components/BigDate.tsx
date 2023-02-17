@@ -12,11 +12,20 @@ export default function BigDate() {
                 <View style={styles.theRestCover}>
                     <Text style={styles.monthText}>November</Text>
                     <View style={styles.calendarTile}>
-                        <TouchableOpacity style={styles.rightClickButton}>
-                            <Image style={styles.rightClick}
-                                source={require('../assets/rightarrow.png')}
-                            />
-                        </TouchableOpacity>
+                        <View style={{...styles.leftClickButtonView,...styles.buttonView}}>
+                            <TouchableOpacity style={styles.clickButton}>
+                                <Image style={styles.rightClick}
+                                    source={require('../assets/rightarrow.png')}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                        <View style={{...styles.rightClickButtonView,...styles.buttonView}}>
+                            <TouchableOpacity style={{...styles.clickButton, ...styles.rightClickButton}}>
+                                <Image style={styles.rightClick}
+                                    source={require('../assets/rightarrow.png')}
+                                />
+                            </TouchableOpacity>
+                        </View>
                         <View style={styles.dayView}>
                             <Text style={styles.dayText}>Friday</Text>
                             <Text style={styles.numText}>18</Text>
@@ -161,9 +170,24 @@ const styles = StyleSheet.create({
     keyTileBoxAlmostBooked: {
         backgroundColor: "#f2e903"
     },
-    rightClickButton: {
+    buttonView: {
         width: 50,
         zIndex: 20,
+        height: 50,
+        position: "absolute",
+        backgroundColor: "#DFDFDF",
+        top: "50%",
+    },
+    rightClickButtonView: {
+        right: 0,
+        transform: [{translateX: 25},{translateY: -25}]
+    },
+    leftClickButtonView: {
+        left: 0,
+        transform: [{translateX: -25},{translateY: -25}]
+    },
+    clickButton: {
+        width: 50,
         height: 50,
         backgroundColor: "#D4D4D4",
         borderColor: "#DFDFDF",
@@ -172,10 +196,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         paddingRight: 3,
-        position: "absolute",
-        top: "50%",
-        left: 0,
-        transform: [ {translateY: -25}]
+    },
+    rightClickButton: {
+        transform: [{rotate: "180deg"}]
     },
     rightClick: {
         width: 18,

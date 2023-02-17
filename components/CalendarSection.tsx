@@ -73,7 +73,7 @@ export default function CalendarSection() {
 
     return (
         <View style={{width: "100%",height:"100%"}}>
-            <BigDate />
+            {/* <BigDate /> */}
             <Calendar changeMonth={changeMonth} dateArray={dateArray} year={year} month={monthToLetterFull[month]} monthJobs={monthJobs} />
         </View>
     )
