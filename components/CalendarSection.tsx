@@ -8,7 +8,7 @@ import { Store } from '../redux/types';
 import Calendar, { DateArray } from './Calendar';
 import { setLoading } from '../redux/actions';
 import BigDate from './BigDate';
-import SlideUp, { SlideUpData } from './SlideUp';
+import SlideUp, { Border, SlideUpData } from './SlideUp';
 import JobInfo from './JobInfo';
 
 export default function CalendarSection() {
@@ -20,8 +20,10 @@ export default function CalendarSection() {
     const [day, setDay] = useState(1);
     const [daysInMonth, setDaysInMonth] = useState(null);
     const [jobForDay, setJobForDay] = useState<JobType[]>([]);
-    const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null, border:"black"});
+    const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null});
+    const [slideUpBorderColor, setSlideUpBorderColor] = useState<Border>("black");
     const [closeInternal, setCloseInternal] = useState(false);
+    const [onlyMyJobs, setOnlyMyJobs] = useState(false);
 
     const dispatch = useDispatch();
 
@@ -112,15 +114,35 @@ export default function CalendarSection() {
     }
 
     function jobClicked(job: JobType, myJob?: boolean) {
-        setShowSlideUp({ show: true, header: job.jobTitle, children: <JobInfo id={job.ID} myJob={myJob} close={() => setCloseInternal(true)} baseInfo={job}/>, border: job.taken ? "red" : "blue" });
+        const type = JSON.parse(job.volunteer);
+        let color: Border = "yellow";
+        if (Array.isArray(type)) {
+			let positions = 0;
+			for (let i=0;i<type.length;i++) {
+				//@ts-ignore
+				positions+=type[i].positions;
+			}
+			if (positions === job.positions) {
+				color = "red";
+			}
+		} else {
+            color = "blue";
+		}
+        setSlideUpBorderColor(color);
+        setShowSlideUp({ show: true, header: job.jobTitle, children: <JobInfo changeBorder={borderChange} id={job.ID} myJob={myJob} close={() => setCloseInternal(true)} baseInfo={job}/> });
+    }
+
+    function borderChange(color: Border) {
+        console.log("Changing color to "+ color);
+        setSlideUpBorderColor(color);
     }
 
     return (
         <View style={{width: "100%",height:"100%"}}>
-            {showBig ? <BigDate clicked={jobClicked} close={() => setShowBig(false)} month={month} day={day} year={year} left={yesterday} right={tomorrow} jobs={jobForDay} /> : null}
-            <Calendar changeMonth={changeMonth} dateArray={dateArray} year={year} month={monthToLetterFull[month]} monthIndex={month} monthJobs={monthJobs} clicked={clicked}/>
+            {showBig ? <BigDate myJobToggle={setOnlyMyJobs} myJobShow={onlyMyJobs} clicked={jobClicked} close={() => setShowBig(false)} month={month} day={day} year={year} left={yesterday} right={tomorrow} jobs={jobForDay} /> : null}
+            <Calendar myJobToggle={setOnlyMyJobs} myJobShow={onlyMyJobs} changeMonth={changeMonth} dateArray={dateArray} year={year} month={monthToLetterFull[month]} monthIndex={month} monthJobs={monthJobs} clicked={clicked}/>
             {showSlideUp.show ? 
-                <SlideUp closeInternal={closeInternal} border={showSlideUp.border} close={() => {setShowSlideUp({...showSlideUp, show: false}),setCloseInternal(false)}} header={showSlideUp.header}>
+                <SlideUp closeInternal={closeInternal} border={slideUpBorderColor} close={() => {setShowSlideUp({...showSlideUp, show: false}),setCloseInternal(false)}} header={showSlideUp.header}>
                     {showSlideUp.children}
                 </SlideUp>
             : null}

@@ -10,6 +10,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { POST_SERVER } from "../functions/variables";
 import { Store } from "../redux/types";
 import { setError, setLoading } from "../redux/actions";
+import { Border } from "./SlideUp";
+import getJobState from "../functions/getJobState";
 
 export interface VolunteerType {
     positions: number;
@@ -17,7 +19,7 @@ export interface VolunteerType {
     userId: number;
 }
 
-export default function JobInfo({ id, baseInfo, close, myJob }: { id: number, baseInfo?: JobType, close: () => any, myJob?: boolean }) {
+export default function JobInfo({ id, baseInfo, close, myJob, changeBorder }: { id: number, baseInfo?: JobType, close: () => any, myJob?: boolean, changeBorder?: (color: Border) => any}) {
     const token = useSelector((state: Store) => state.token);
     const dispatch = useDispatch();
     const queryClient = useQueryClient()
@@ -83,7 +85,7 @@ export default function JobInfo({ id, baseInfo, close, myJob }: { id: number, ba
                     "positions": positions
                 })
               })
-              console.log(await groups.json());
+              await groups.json();
               refetch();
               queryClient.invalidateQueries({ queryKey: [`jobFetch${info.month}${info.year}`] });
         } catch (err) {
@@ -96,9 +98,16 @@ export default function JobInfo({ id, baseInfo, close, myJob }: { id: number, ba
             dispatch(setLoading(null));
         }
         if (status === "success") {
+            dispatch(setLoading(null));
             setInfo(data);
+            if (changeBorder !== undefined) {
+                console.log(data)
+                const jobState = getJobState(data.volunteer, data.positions);
+                changeBorder(jobState === "almost" ? "yellow" : jobState === "available" ? "blue" : "red");
+            }
         }
         if (status === "error") {
+            dispatch(setLoading(null));
             dispatch(setError({ type: "alert", show: true, message: "Cannot Update Job." }));
         }
     }, [status, data]);

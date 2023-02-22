@@ -1,13 +1,12 @@
 import React, { useEffect, useRef } from "react";
 import { StyleSheet, Text, TouchableOpacity, View, Image, Dimensions, Animated, Easing, Platform } from "react-native";
 
-type Border = "black" | "red" | "blue";
+export type Border = "black" | "red" | "blue" | "yellow";
 
 export interface SlideUpData {
   show: boolean;
   header: string;
   children: any;
-  border: Border;
 }
 
 export default function SlideUp({ header, children, close, border, closeInternal }: { header: string, children: any, close: () => void, border: Border, closeInternal: boolean}) {
@@ -38,6 +37,10 @@ export default function SlideUp({ header, children, close, border, closeInternal
         setTimeout(close, 300);
     }
 
+    useEffect(() => {
+        console.log("the border changed")
+    }, [border]);
+
     // style={{ top, border: `2px solid ${borderColor}` }}
 const styles = StyleSheet.create({
     cover: {
@@ -56,7 +59,7 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 35,
         borderWidth: 2,
         borderStyle: "solid",
-        borderColor: border === "red" ? "#EE3F3f" : border === "blue" ? "#3A9FE9" : "#000000",
+        borderColor: border === "red" ? "#EE3F3f" : border === "blue" ? "#3A9FE9" : border === "yellow" ? "#ffbc00" : "#000000",
         borderBottomWidth: 0,
         position: "absolute",
         left: 0,

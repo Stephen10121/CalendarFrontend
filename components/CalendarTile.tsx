@@ -35,7 +35,7 @@ export default function CalendarTile({ number, tiles, clicked, gray }: { number:
           borderRadius: 5
         },
         partial: {
-          backgroundColor: "#f2e903"
+          backgroundColor: "#ffbc00"
         },
         taken: {
           backgroundColor: "#EE3F3F"

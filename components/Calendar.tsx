@@ -1,15 +1,17 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import CalendarTile from './CalendarTile';
 import { JobType } from '../functions/jobFetch';
 import { useSelector } from 'react-redux';
 import { Store } from '../redux/types';
 import SliderToggle from './SliderToggle';
+import { dayToLetter } from '../functions/dateConversion';
 
 export type DateArray = {day: number, month: number}[];
 
-export default function Calendar({ monthIndex, month, year, dateArray, changeMonth, monthJobs, clicked }: { monthIndex: number, month: string, year: number, dateArray: DateArray, changeMonth: (direction: "left" | "right") => void, monthJobs: JobType[], clicked: (day: number) => any }) {
+export default function Calendar({ myJobShow, myJobToggle, monthIndex, month, year, dateArray, changeMonth, monthJobs, clicked }: { myJobShow: boolean, myJobToggle: (arg0: boolean) => any, monthIndex: number, month: string, year: number, dateArray: DateArray, changeMonth: (direction: "left" | "right") => void, monthJobs: JobType[], clicked: (day: number) => any }) {
     const userData = useSelector((state: Store) => state.userData);
+    const windowWidth = Dimensions.get('window').width;
     const [myDates, setMyDates] = useState(false);
     const [newMonthJobs, setNewMonthJobs] = useState(monthJobs);
 
@@ -54,7 +56,7 @@ export default function Calendar({ monthIndex, month, year, dateArray, changeMon
 
     return (
     <View style={styles.calendar}>
-        <SliderToggle width={150} height={35} selected={(data) => data===1?setMyDates(true):setMyDates(false)} option1="All dates" option2='My dates'/>
+        <SliderToggle option2Selected={myJobShow} width={150} height={35} selected={(data) => {myJobToggle(data===1);setMyDates(data===1)}} option1="All dates" option2='My dates'/>
         <View style={styles.calendarHeader}>
             <TouchableOpacity style={styles.clicker} onPress={()=>changeMonth("right")}>
                     <Image style={styles.leftClick}
@@ -70,6 +72,11 @@ export default function Calendar({ monthIndex, month, year, dateArray, changeMon
                     source={require('../assets/left.png')}
                 />
             </TouchableOpacity>
+        </View>
+        <View style={styles.calendarRow}>
+                {dayToLetter.map((day) => <View key={`daysForCalendar${day}`} style={{...styles.tile, width: windowWidth / 7}}>
+                    <Text style={styles.tileText}>{day}</Text>
+                </View>)}
         </View>
         {dateArray.length===42 || dateArray.length===35 ? <>
             <View style={styles.calendarRow}>
@@ -156,5 +163,19 @@ const styles = StyleSheet.create({
     },
     calendarRow: {
         flexDirection: "row",
+    },
+    tile: {
+        height: 25,
+        alignItems: "center",
+        justifyContent: "center",
+        borderWidth: 0,
+        borderLeftWidth: 1,
+        borderBottomWidth: 1,
+        borderColor: "#000000",
+    },
+    tileText: {
+        fontSize: 15 ,
+        fontWeight: "900",
+        fontFamily: "Poppins-SemiBold"
     }
 });

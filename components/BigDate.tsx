@@ -7,14 +7,19 @@ import { JobType } from '../functions/jobFetch';
 import { useSelector } from 'react-redux';
 import { Store } from '../redux/types';
 
-export default function BigDate({ clicked, close, month, day, year, left, right, jobs }: { clicked: (job: JobType) => any, close: () => any, month: number, day: number, year: number, left: () => any, right: () => any, jobs: JobType[] }) {
+export default function BigDate({ myJobShow, myJobToggle, clicked, close, month, day, year, left, right, jobs }: { myJobShow: boolean, myJobToggle: (arg0: boolean) => any, clicked: (job: JobType) => any, close: () => any, month: number, day: number, year: number, left: () => any, right: () => any, jobs: JobType[] }) {
     const userData = useSelector((state: Store) => state.userData);
     const [dayWord, setDayWord] = useState(null);
     const [myDates, setMyDates] = useState(false);
+    const [newJobs, setNewJobs] = useState<JSX.Element[]>([]);
     useEffect(() => {
         const date = new Date(year, month-1, day);
         setDayWord(dayToLetterFull[date.getDay()]);
     });
+
+    useEffect(() => {
+        setNewJobs(jobs.filter(myDateFilter).map((job) => <BigDateTile volunteersNeeded={job.positions} key={`bigDateJob${job.month}${job.day}${job.ID}`} client={job.client.length > 0 ? job.client : "No Client Specified"} jobTitle={job.jobTitle} time={`${job.hour}:${job.minute.toString().length===1?"0":""}${job.minute} ${job.pm ? "PM" : "AM"}`} click={() => clicked(job)} type={job.volunteer} />));
+    }, [jobs, myDates]);
 
     function myDateFilter(job: JobType) {
         if (!myDates) return true;
@@ -30,7 +35,7 @@ export default function BigDate({ clicked, close, month, day, year, left, right,
     }
     return (
         <View style={styles.bigDate}>
-            <SliderToggle width={150} height={35} selected={(data) => data===1?setMyDates(true):setMyDates(false)} option1="All dates" option2='My dates'/>
+            <SliderToggle option2Selected={myJobShow} width={150} height={35} selected={(data) => {myJobToggle(data===1);setMyDates(data===1)}} option1="All dates" option2='My dates'/>
             <TouchableOpacity onPress={close} style={styles.goBack}><Text style={styles.goBackText}>Go Back</Text></TouchableOpacity>
             <View style={styles.theRest}>
                 <View style={styles.theRestCover}>
@@ -56,7 +61,7 @@ export default function BigDate({ clicked, close, month, day, year, left, right,
                         </View>
                         <View style={styles.tileList}>
                             <ScrollView style={styles.tileListInner}>
-                                {jobs.filter(myDateFilter).map((job) => <BigDateTile volunteersNeeded={job.positions} key={`bigDateJob${job.month}${job.day}${job.ID}`} client={job.client.length > 0 ? job.client : "No Client Specified"} jobTitle={job.jobTitle} time={`${job.hour}:${job.minute.toString().length===1?"0":""}${job.minute} ${job.pm ? "PM" : "AM"}`} click={() => clicked(job)} type={JSON.parse(job.volunteer)} />)}
+                                {newJobs}
                             </ScrollView>
                         </View>
                         <View style={styles.keyTiles}>
@@ -187,7 +192,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#3A9FE9"
     },
     keyTileBoxAlmostBooked: {
-        backgroundColor: "#f2e903"
+        backgroundColor: "#ffbc00"
     },
     buttonView: {
         width: 50,

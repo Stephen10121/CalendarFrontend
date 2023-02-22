@@ -2,7 +2,7 @@ import { View, StyleSheet, ScrollView, Text } from 'react-native';
 import RenderAvailableJobs from '../RenderAvailableJobs';
 import React, { useEffect, useState } from 'react';
 import { JobType } from '../../functions/jobFetch';
-import SlideUp, { SlideUpData } from '../SlideUp';
+import SlideUp, { Border, SlideUpData } from '../SlideUp';
 import RenderMyJobs from '../RenderMyJobs';
 import { useSelector } from 'react-redux';
 import { Store } from '../../redux/types';
@@ -12,7 +12,8 @@ export default function HomeSection({ name }: {name: string}) {
     const userData = useSelector((state: Store) => state.userData);
     const jobs = useSelector((state: Store) => state.jobs);
     const jobSelected = useSelector((state: Store) => state.jobSelected);
-    const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null, border:"black"});
+    const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null});
+    const [slideUpBorderColor, setSlideUpBorderColor] = useState<Border>("black");
     const [closeInternal, setCloseInternal] = useState(false);
 
     useEffect(() => {
@@ -23,13 +24,18 @@ export default function HomeSection({ name }: {name: string}) {
     useEffect(() => {
         console.log("Checking if job selected.")
         if (jobSelected) {
-            console.log("Job is selected.");
-            setShowSlideUp({ show: true, header: jobSelected.title, children: <JobInfo id={jobSelected.id} myJob={false} close={() => setCloseInternal(true)}/>, border: "blue" });
+            setShowSlideUp({ show: true, header: jobSelected.title, children: <JobInfo changeBorder={borderChange} id={jobSelected.id} myJob={false} close={() => setCloseInternal(true)}/>});
+            setSlideUpBorderColor("blue");
         }
     }, [jobSelected]);
 
+    function borderChange(color: Border) {
+        setSlideUpBorderColor(color);
+    }
+
     function jobClicked(job: JobType, myJob?: boolean) {
-        setShowSlideUp({ show: true, header: job.jobTitle, children: <JobInfo id={job.ID} myJob={myJob} close={() => setCloseInternal(true)} baseInfo={job}/>, border: job.taken ? "red" : "blue" });
+        setShowSlideUp({ show: true, header: job.jobTitle, children: <JobInfo changeBorder={borderChange} id={job.ID} myJob={myJob} close={() => setCloseInternal(true)} baseInfo={job}/> });
+        setSlideUpBorderColor(job.taken ? "red" : "blue");
     }
 
     return (
@@ -53,7 +59,7 @@ export default function HomeSection({ name }: {name: string}) {
                 </View>
             </ScrollView>
             {showSlideUp.show ? 
-                <SlideUp closeInternal={closeInternal} border={showSlideUp.border} close={() => {setShowSlideUp({...showSlideUp, show: false}),setCloseInternal(false)}} header={showSlideUp.header}>
+                <SlideUp closeInternal={closeInternal} border={slideUpBorderColor} close={() => {setShowSlideUp({...showSlideUp, show: false}),setCloseInternal(false)}} header={showSlideUp.header}>
                     {showSlideUp.children}
                 </SlideUp>
             : null}

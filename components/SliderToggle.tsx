@@ -1,9 +1,9 @@
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Platform } from 'react-native';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
-export default function SliderToggle({ width, height, selected, option1, option2 }: { width: number, height: number, selected: (arg0: any) => any, option1?: string, option2?: string }) {
+export default function SliderToggle({ width, height, selected, option1, option2, option2Selected }: { width: number, height: number, selected: (arg0: any) => any, option1?: string, option2?: string, option2Selected?: boolean }) {
     const singleWidth = (width - 4) / 2;
-    const fadeAnim = useRef(new Animated.Value(2)).current;
+    const fadeAnim = useRef(new Animated.Value(option2Selected ? singleWidth+2 : 2)).current;
 
     const styles = StyleSheet.create({
         toggler: {
@@ -51,6 +51,32 @@ export default function SliderToggle({ width, height, selected, option1, option2
             textAlign: "center"
         }
     });
+
+    function option1Pressed() {
+        selected(0);
+        Animated.timing(fadeAnim, {
+            toValue: 2,
+            duration: 100,
+            useNativeDriver: Platform.OS === "web" ? false : true
+        }).start();
+    }
+
+    function option2Pressed() {
+        selected(1);
+        Animated.timing(fadeAnim, {
+            toValue: singleWidth+2,
+            duration: 100,
+            useNativeDriver: Platform.OS === "web" ? false : true
+          }).start();
+    }
+
+    useEffect(() => {
+        if (option2Selected) {
+            option2Pressed();
+            return
+        }
+        option1Pressed();
+    }, [option2Selected]);
   return (
     <View style={styles.toggler}>
         <Animated.View style={[
@@ -59,22 +85,8 @@ export default function SliderToggle({ width, height, selected, option1, option2
                 transform: [{translateX: fadeAnim}]
             }
         ]}></Animated.View>
-        <TouchableOpacity style={styles.button} onPress={() => {
-            selected(0);
-            Animated.timing(fadeAnim, {
-                toValue: 2,
-                duration: 100,
-                useNativeDriver: Platform.OS === "web" ? false : true
-              }).start();
-        }}><Text style={styles.text1}>{option1 ? option1 : "Info"}</Text></TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => {
-            selected(1);
-            Animated.timing(fadeAnim, {
-                toValue: singleWidth+2,
-                duration: 100,
-                useNativeDriver: Platform.OS === "web" ? false : true
-              }).start();
-        }}><Text style={styles.text2}>{option2 ? option2 : "Chat"}</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={option1Pressed}><Text style={styles.text1}>{option1 ? option1 : "Info"}</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={option2Pressed}><Text style={styles.text2}>{option2 ? option2 : "Chat"}</Text></TouchableOpacity>
     </View>
   );
 }
