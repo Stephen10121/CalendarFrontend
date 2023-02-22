@@ -1,11 +1,14 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import { storeData } from '../functions/localstorage';
 import { useDispatch } from 'react-redux';
 import { setLogout, setSelected } from '../redux/actions';
+import ToggleSwitch from './ToggleSwitch';
 
 export default function Account() {
+    const [toggleSwitch, setToggleSwitch] = useState(false);
     const dispatch = useDispatch();
+
     return (
         <View style={styles.home}>
             <ScrollView style={styles.home2}>
@@ -30,6 +33,7 @@ export default function Account() {
                         <Text style={styles.goHomeButtonText}>Delete Account</Text>
                     </TouchableOpacity>
                     <Text>Allow Notification.</Text>
+                    <ToggleSwitch onChange={setToggleSwitch} checked={toggleSwitch}/>
                 </View>
             </ScrollView>
         </View>

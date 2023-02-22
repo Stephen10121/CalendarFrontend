@@ -8,10 +8,10 @@ eas build -p android --profile preview
 
 - [ ] Overall.
   - [x] Add backup revalidation in case the socket client/server is experiencing trouble.
-  - [ ] Revalidate the jobs.
+  - [x] Revalidate the jobs.
   - [ ] Add the notification toggle button in settings.
 - [ ] Job section.
-  - [ ] Convert the jobs store to job store by date.
+  - [x] Convert the jobs store to job store by date.
   - [x] When group deleted or removed, remove the groups jobs.
   - [x] Notify other particapants when job is posted.
   - [ ] Job information slideup.
