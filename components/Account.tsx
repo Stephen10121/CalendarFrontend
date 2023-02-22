@@ -29,6 +29,7 @@ export default function Account() {
                     <TouchableOpacity style={styles.deleteButton} onPress={() => dispatch(setSelected("home"))}>
                         <Text style={styles.goHomeButtonText}>Delete Account</Text>
                     </TouchableOpacity>
+                    <Text>Allow Notification.</Text>
                 </View>
             </ScrollView>
         </View>

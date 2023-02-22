@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { Store } from '../redux/types';
 import SliderToggle from './SliderToggle';
 import { dayToLetter } from '../functions/dateConversion';
+import Key from './Key';
 
 export type DateArray = {day: number, month: number}[];
 
@@ -57,69 +58,75 @@ export default function Calendar({ myJobShow, myJobToggle, monthIndex, month, ye
     return (
     <View style={styles.calendar}>
         <SliderToggle option2Selected={myJobShow} width={150} height={35} selected={(data) => {myJobToggle(data===1);setMyDates(data===1)}} option1="All dates" option2='My dates'/>
-        <View style={styles.calendarHeader}>
-            <TouchableOpacity style={styles.clicker} onPress={()=>changeMonth("right")}>
-                    <Image style={styles.leftClick}
-                    source={require('../assets/left.png')}
-                />
-            </TouchableOpacity>
-            <View style={styles.locationSection}>
-                <Text style={styles.currentLocation}>{month}</Text>
-                <Text style={styles.currentLocationBlue}>{year}</Text>
-            </View>
-            <TouchableOpacity style={styles.clicker} onPress={() => changeMonth("left")}>
-                    <Image style={styles.rightClick}
-                    source={require('../assets/left.png')}
-                />
-            </TouchableOpacity>
-        </View>
-        <View style={styles.calendarRow}>
-                {dayToLetter.map((day) => <View key={`daysForCalendar${day}`} style={{...styles.tile, width: windowWidth / 7}}>
-                    <Text style={styles.tileText}>{day}</Text>
-                </View>)}
-        </View>
-        {dateArray.length===42 || dateArray.length===35 ? <>
-            <View style={styles.calendarRow}>
-                {dateArray.slice(0,7).map((val) => {
-                    return <CalendarTile gray={val.month!==monthIndex} key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={newMonthJobs.filter((job) => job.day === val.day && job.month === val.month).map(setType)} clicked={() => clicked(val.day)} />
-                })}
-            </View>
-            <View style={styles.calendarRow}>
-                {dateArray.slice(7,15).map((val) => {
-                    return <CalendarTile gray={val.month!==monthIndex} key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={newMonthJobs.filter((job) => job.day === val.day && job.month === val.month).map(setType)} clicked={() => clicked(val.day)} />
-                })}
-            </View>
-            <View style={styles.calendarRow}>
-                {dateArray.slice(14,22).map((val) => {
-                    return <CalendarTile gray={val.month!==monthIndex} key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={newMonthJobs.filter((job) => job.day === val.day && job.month === val.month).map(setType)} clicked={() => clicked(val.day)} />
-                })}
-            </View>
-            <View style={styles.calendarRow}>
-                {dateArray.slice(21,29).map((val) => {
-                    return <CalendarTile gray={val.month!==monthIndex} key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={newMonthJobs.filter((job) => job.day === val.day && job.month === val.month).map(setType)} clicked={() => clicked(val.day)} />
-                })}
-            </View>
-            <View style={styles.calendarRow}>
-                {dateArray.slice(28,35).map((val) => {
-                    return <CalendarTile gray={val.month!==monthIndex} key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={newMonthJobs.filter((job) => job.day === val.day && job.month === val.month).map(setType)} clicked={() => clicked(val.day)} />
-                })}
-            </View>
-            {dateArray.length===42 ? 
-                <View style={styles.calendarRow}>
-                    {dateArray.slice(35,42).map((val) => {
-                    return <CalendarTile gray={val.month!==monthIndex} key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={newMonthJobs.filter((job) => job.day === val.day && job.month === val.month).map(setType)} clicked={() => clicked(val.day)} />
-                })}
+        <View style={{width: "100%", marginTop: 25, marginBottom: 10}}>
+            <View style={styles.calendarHeader}>
+                <TouchableOpacity style={styles.clicker} onPress={()=>changeMonth("right")}>
+                        <Image style={styles.leftClick}
+                        source={require('../assets/left.png')}
+                    />
+                </TouchableOpacity>
+                <View style={styles.locationSection}>
+                    <Text style={styles.currentLocation}>{month}</Text>
+                    <Text style={styles.currentLocationBlue}>{year}</Text>
                 </View>
-            : null}
-        </> : null}
-      <Text>Calendar</Text>
+                <TouchableOpacity style={styles.clicker} onPress={() => changeMonth("left")}>
+                        <Image style={styles.rightClick}
+                        source={require('../assets/left.png')}
+                    />
+                </TouchableOpacity>
+            </View>
+            <View style={styles.calendarRow}>
+                    {dayToLetter.map((day) => <View key={`daysForCalendar${day}`} style={{...styles.tile, width: windowWidth / 7}}>
+                        <Text style={styles.tileText}>{day}</Text>
+                    </View>)}
+            </View>
+            {dateArray.length===42 || dateArray.length===35 ? <>
+                <View style={styles.calendarRow}>
+                    {dateArray.slice(0,7).map((val) => {
+                        return <CalendarTile gray={val.month!==monthIndex} key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={newMonthJobs.filter((job) => job.day === val.day && job.month === val.month).map(setType)} clicked={() => clicked(val.day)} />
+                    })}
+                </View>
+                <View style={styles.calendarRow}>
+                    {dateArray.slice(7,15).map((val) => {
+                        return <CalendarTile gray={val.month!==monthIndex} key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={newMonthJobs.filter((job) => job.day === val.day && job.month === val.month).map(setType)} clicked={() => clicked(val.day)} />
+                    })}
+                </View>
+                <View style={styles.calendarRow}>
+                    {dateArray.slice(14,22).map((val) => {
+                        return <CalendarTile gray={val.month!==monthIndex} key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={newMonthJobs.filter((job) => job.day === val.day && job.month === val.month).map(setType)} clicked={() => clicked(val.day)} />
+                    })}
+                </View>
+                <View style={styles.calendarRow}>
+                    {dateArray.slice(21,29).map((val) => {
+                        return <CalendarTile gray={val.month!==monthIndex} key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={newMonthJobs.filter((job) => job.day === val.day && job.month === val.month).map(setType)} clicked={() => clicked(val.day)} />
+                    })}
+                </View>
+                <View style={styles.calendarRow}>
+                    {dateArray.slice(28,35).map((val) => {
+                        return <CalendarTile gray={val.month!==monthIndex} key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={newMonthJobs.filter((job) => job.day === val.day && job.month === val.month).map(setType)} clicked={() => clicked(val.day)} />
+                    })}
+                </View>
+                {dateArray.length===42 ? 
+                    <View style={styles.calendarRow}>
+                        {dateArray.slice(35,42).map((val) => {
+                        return <CalendarTile gray={val.month!==monthIndex} key={`calendartile${val.day}m${val.month}`} number={val.day} tiles={newMonthJobs.filter((job) => job.day === val.day && job.month === val.month).map(setType)} clicked={() => clicked(val.day)} />
+                    })}
+                    </View>
+                : null}
+            </> : null}
+        </View>
+        <Key notAbsolute={true} />
     </View>
   )
 }
 
 const styles = StyleSheet.create({
     calendar: {
-        
+        width: "100%",
+        height: "100%",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        paddingTop: 25
     },
     calendarHeader: {
         width: "100%",

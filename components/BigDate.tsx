@@ -6,6 +6,7 @@ import { dayToLetterFull, monthToLetterFull } from '../functions/dateConversion'
 import { JobType } from '../functions/jobFetch';
 import { useSelector } from 'react-redux';
 import { Store } from '../redux/types';
+import Key from './Key';
 
 export default function BigDate({ myJobShow, myJobToggle, clicked, close, month, day, year, left, right, jobs }: { myJobShow: boolean, myJobToggle: (arg0: boolean) => any, clicked: (job: JobType) => any, close: () => any, month: number, day: number, year: number, left: () => any, right: () => any, jobs: JobType[] }) {
     const userData = useSelector((state: Store) => state.userData);
@@ -64,20 +65,7 @@ export default function BigDate({ myJobShow, myJobToggle, clicked, close, month,
                                 {newJobs}
                             </ScrollView>
                         </View>
-                        <View style={styles.keyTiles}>
-                            <View style={styles.keyTile}>
-                                <View style={{...styles.keyTileBox, ...styles.keyTileBoxNotBooked}} />
-                                <Text style={styles.keyTileText}>Available</Text>
-                            </View>
-                            <View style={styles.keyTile}>
-                                <View style={{...styles.keyTileBox, ...styles.keyTileBoxBooked}} />
-                                <Text style={styles.keyTileText}>Taken</Text>
-                            </View>
-                            <View style={styles.keyTile}>
-                                <View style={{...styles.keyTileBox, ...styles.keyTileBoxAlmostBooked}} />
-                                <Text style={styles.keyTileText}>Almost</Text>
-                            </View>
-                        </View>
+                        <Key />
                     </View>
                 </View>
             </View>
@@ -161,38 +149,6 @@ const styles = StyleSheet.create({
     },
     tileListInner: {
         paddingHorizontal: 25
-    },
-    keyTiles: {
-        position: "absolute",
-        bottom: 2,
-        left: 0,
-        flexDirection: "row"
-    },
-    keyTile: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginHorizontal: 5
-    },
-    keyTileText: {
-        fontSize: 12,
-        fontWeight: "900",
-        color: "#000000",
-        fontFamily: "Poppins-SemiBold",
-        marginLeft: 2
-    },
-    keyTileBox: {
-        width: 20,
-        height: 20,
-        borderRadius: 6,
-    },
-    keyTileBoxBooked: {
-        backgroundColor: "#EE3F3F"
-    },
-    keyTileBoxNotBooked: {
-        backgroundColor: "#3A9FE9"
-    },
-    keyTileBoxAlmostBooked: {
-        backgroundColor: "#ffbc00"
     },
     buttonView: {
         width: 50,
