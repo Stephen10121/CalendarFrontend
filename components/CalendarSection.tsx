@@ -23,6 +23,7 @@ export default function CalendarSection() {
     const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null});
     const [slideUpBorderColor, setSlideUpBorderColor] = useState<Border>("black");
     const [closeInternal, setCloseInternal] = useState(false);
+    const userData = useSelector((state: Store) => state.userData);
     const [onlyMyJobs, setOnlyMyJobs] = useState(false);
 
     const dispatch = useDispatch();
@@ -113,14 +114,18 @@ export default function CalendarSection() {
         setDay(day+1);
     }
 
-    function jobClicked(job: JobType, myJob?: boolean) {
+    function jobClicked(job: JobType) {
         const type = JSON.parse(job.volunteer);
         let color: Border = "yellow";
+        let myJob = false;
         if (Array.isArray(type)) {
 			let positions = 0;
 			for (let i=0;i<type.length;i++) {
 				//@ts-ignore
 				positions+=type[i].positions;
+                if (type[i].userId === userData.ID) {
+                    myJob = true;
+                }
 			}
 			if (positions === job.positions) {
 				color = "red";
