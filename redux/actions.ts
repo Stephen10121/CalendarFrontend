@@ -1,4 +1,4 @@
-import { Selected } from "../components/navigation/Navigation";
+import { Selected } from "../components/Navigation";
 import { GoogleLoginData, GroupsType, PendingGroupsType } from "../functions/backendFetch";
 import { JobType } from "../functions/jobFetch";
 import { JobsStruct, UserJobsStore } from "./types";

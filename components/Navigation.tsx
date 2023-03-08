@@ -1,7 +1,7 @@
 import { View, StyleSheet, Image, TouchableOpacity, Platform } from 'react-native'
 import React from 'react'
 import { useDispatch } from 'react-redux';
-import { setSelected } from '../../redux/actions';
+import { setSelected } from '../redux/actions';
 
 export type Selected = "home" | "calendar" | "groups" | "addJob" | "account";
 
@@ -65,22 +65,22 @@ export default function Navigation({ selected, profilePic }: { selected: Selecte
     <View style={styles.navigation}>
       <TouchableOpacity style={styles.button} onPress={() => clicked("home")}>
         <Image style={styles.imageHome}
-            source={require('../../assets/navigation/home.png')}
+            source={require('../assets/navigation/home.png')}
         />
       </TouchableOpacity>
       <TouchableOpacity style={styles.button} onPress={() => clicked("calendar")}>
         <Image style={styles.imageCal}
-            source={require('../../assets/navigation/calendar.png')}
+            source={require('../assets/navigation/calendar.png')}
         />
       </TouchableOpacity>
       <TouchableOpacity style={styles.button} onPress={() => clicked("groups")}>
         <Image style={styles.imageGroup}
-            source={require('../../assets/navigation/groups.png')}
+            source={require('../assets/navigation/groups.png')}
         />
       </TouchableOpacity>
       <TouchableOpacity style={styles.button} onPress={() => clicked("addJob")}>
         <Image style={styles.imageJob}
-            source={require('../../assets/navigation/addjob.png')}
+            source={require('../assets/navigation/addjob.png')}
         />
       </TouchableOpacity>
       <TouchableOpacity onPress={() => clicked("account")}>

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Store } from '../redux/types'
 import { VolunteerType } from './JobInfo';
-import HomeJob from './homeJob/HomeJob';
+import HomeJob from './HomeJob';
 import { dateMaker } from '../functions/dateConversion';
 import { JobType } from '../functions/jobFetch';
 import { View, Text, StyleSheet } from 'react-native';

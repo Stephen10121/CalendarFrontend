@@ -1,12 +1,12 @@
 import { View, StyleSheet, ScrollView, Text } from 'react-native';
-import RenderAvailableJobs from '../RenderAvailableJobs';
+import RenderAvailableJobs from './RenderAvailableJobs';
 import React, { useEffect, useState } from 'react';
-import { JobType } from '../../functions/jobFetch';
-import SlideUp, { Border, SlideUpData } from '../SlideUp';
-import RenderMyJobs from '../RenderMyJobs';
+import { JobType } from '../functions/jobFetch';
+import SlideUp, { Border, SlideUpData } from './SlideUp';
+import RenderMyJobs from './RenderMyJobs';
 import { useSelector } from 'react-redux';
-import { Store } from '../../redux/types';
-import JobInfo from '../JobInfo';
+import { Store } from '../redux/types';
+import JobInfo from './JobInfo';
 
 export default function HomeSection({ name }: {name: string}) {
     const userData = useSelector((state: Store) => state.userData);

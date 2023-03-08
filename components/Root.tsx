@@ -8,7 +8,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { storeData } from '../functions/localstorage';
 import * as Notifications from "expo-notifications";
-import LoggedIn from './loggedIn/LoggedIn';
+import LoggedIn from './LoggedIn';
 import { Store } from "../redux/types";
 import { useFonts } from 'expo-font';
 import NotLogged from './NotLogged';
