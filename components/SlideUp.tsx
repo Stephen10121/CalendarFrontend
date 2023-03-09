@@ -11,7 +11,7 @@ export interface SlideUpData {
 
 export default function SlideUp({ header, children, close, border, closeInternal, fullHeight }: { header: string, children: any, close: () => void, border: Border, closeInternal: boolean, fullHeight?: boolean}) {
     const win = Dimensions.get('window');
-    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const fadeAnim = useRef(new Animated.Value(70)).current;
 
 
     function changeTiming(toValue: number) {
@@ -34,7 +34,7 @@ export default function SlideUp({ header, children, close, border, closeInternal
     }, [closeInternal]);
 
     function closeIt() {
-        changeTiming(0);
+        changeTiming(70);
         setTimeout(close, 300);
     }
   return (

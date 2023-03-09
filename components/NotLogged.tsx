@@ -57,6 +57,11 @@ export default function NotLogged({ loading }: { loading: (arg0: boolean) => any
             return true;
         }
 
+        // storeData(res2.data.token);
+        // loading(false);
+        // dispatch(setToken(res2.data.token));
+        // dispatch(setUserData(res2.data.userData));
+        // return true;
         const token2 = await registerForPushNotificationAsync();
 
         if (!token2) {
