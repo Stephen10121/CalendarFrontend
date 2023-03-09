@@ -8,13 +8,10 @@ import { useSelector } from 'react-redux';
 import { Store } from '../redux/types';
 import JobInfo from './JobInfo';
 
-export default function HomeSection({ name }: {name: string}) {
+export default function HomeSection({ name, setShowSlideUp, setSlideUpBorderColor, setCloseInternal }: { name: string, setShowSlideUp: React.Dispatch<React.SetStateAction<SlideUpData>>, setSlideUpBorderColor: React.Dispatch<React.SetStateAction<Border>>, setCloseInternal: React.Dispatch<React.SetStateAction<boolean>> }) {
     const userData = useSelector((state: Store) => state.userData);
     const jobs = useSelector((state: Store) => state.jobs);
     const jobSelected = useSelector((state: Store) => state.jobSelected);
-    const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null});
-    const [slideUpBorderColor, setSlideUpBorderColor] = useState<Border>("black");
-    const [closeInternal, setCloseInternal] = useState(false);
 
     useEffect(() => {
         console.log("Checking if job selected.")
@@ -53,11 +50,6 @@ export default function HomeSection({ name }: {name: string}) {
                     </View>
                 </View>
             </ScrollView>
-            {showSlideUp.show ? 
-                <SlideUp closeInternal={closeInternal} border={slideUpBorderColor} close={() => {setShowSlideUp({...showSlideUp, show: false}),setCloseInternal(false)}} header={showSlideUp.header}>
-                    {showSlideUp.children}
-                </SlideUp>
-            : null}
         </View>
     );
 }

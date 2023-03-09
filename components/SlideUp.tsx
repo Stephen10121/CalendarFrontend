@@ -9,7 +9,7 @@ export interface SlideUpData {
   children: any;
 }
 
-export default function SlideUp({ header, children, close, border, closeInternal }: { header: string, children: any, close: () => void, border: Border, closeInternal: boolean}) {
+export default function SlideUp({ header, children, close, border, closeInternal, fullHeight }: { header: string, children: any, close: () => void, border: Border, closeInternal: boolean, fullHeight?: boolean}) {
     const win = Dimensions.get('window');
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -40,7 +40,7 @@ export default function SlideUp({ header, children, close, border, closeInternal
   return (
     <Animated.View style={[styles.main, {
         borderColor: border === "red" ? "#EE3F3f" : border === "blue" ? "#3A9FE9" : border === "yellow" ? "#ffbc00" : "#000000",
-        height: win.height - 90,
+        height: win.height - (fullHeight ? 20 : 90),
         top: win.height-70,
         transform: [{translateY: fadeAnim}]
       }]}>
@@ -50,7 +50,7 @@ export default function SlideUp({ header, children, close, border, closeInternal
               <Image style={styles.image} source={require('../assets/closecircle.png')} />
             </TouchableOpacity>
         </View>
-        <View style={[styles.main2, {height: win.height - 140}]}>
+        <View style={[styles.main2, {height: win.height - (fullHeight ? 70 : 140)}]}>
             {children}
         </View>
     </Animated.View>
@@ -91,8 +91,7 @@ const styles = StyleSheet.create({
       justifyContent: "center"
     },
     main2: {
-        width: "100%",
-        paddingBottom: 10
+        width: "100%"
     },
     image: {
         width: 20,

@@ -8,17 +8,23 @@ import CalendarSection from './CalendarSection';
 import addJobMonth from '../functions/addJob';
 import AddJobSection from './AddJobSection';
 import GroupSection from './GroupSection';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import LoadingIcon from './LoadingIcon';
 import HomeSection from './HomeSection';
 import { useQuery } from "react-query";
 import Navigation from './Navigation';
 import Account from './Account';
+import SlideUp, { Border, SlideUpData } from './SlideUp';
 
 export type RemoveGroup = (groupId: string) => void;
 export type RemovePendingGroup = (pendingGroupId: string) => void;
 
 export default function LoggedIn() {
+  // SlideUp Info
+  const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null});
+  const [slideUpBorderColor, setSlideUpBorderColor] = useState<Border>("black");
+  const [closeInternal, setCloseInternal] = useState(false);
+
   // Redux Stores
   const userData = useSelector((state: Store) => state.userData);
   const token = useSelector((state: Store) => state.token);
@@ -82,7 +88,7 @@ export default function LoggedIn() {
       height: selected !== "account" ? win.height - 70 : 0,
       display: 'flex',
       flexDirection: "row",
-      overflow: 'hidden'
+      overflow: "hidden"
     },
     section: {
       width: "100%",
@@ -120,10 +126,10 @@ export default function LoggedIn() {
     <View style={styles.main}>
       <View style={styles.body}>
         <View style={styles.sectionHome}>
-          <HomeSection name={userData.name}/>
+          <HomeSection name={userData.name} setShowSlideUp={setShowSlideUp} setSlideUpBorderColor={setSlideUpBorderColor} setCloseInternal={setCloseInternal}/>
         </View>
         <View style={styles.sectionCal}>
-          <CalendarSection />
+          <CalendarSection setShowSlideUp={setShowSlideUp} setSlideUpBorderColor={setSlideUpBorderColor} setCloseInternal={setCloseInternal} />
         </View>
         <View style={styles.sectionGroup}>
           <GroupSection />
@@ -132,6 +138,11 @@ export default function LoggedIn() {
           <AddJobSection />
         </View>
       </View>
+      {showSlideUp.show ? 
+        <SlideUp fullHeight={true} closeInternal={closeInternal} border={slideUpBorderColor} close={() => {setShowSlideUp({...showSlideUp, show: false}),setCloseInternal(false)}} header={showSlideUp.header}>
+          {showSlideUp.children}
+        </SlideUp>
+      : null}
       {selected !== "account" ? <Navigation selected={selected} profilePic={userData.picture}/> : <Account />}
       {loading ? <LoadingIcon>{loading}</LoadingIcon> : null}
     </View>

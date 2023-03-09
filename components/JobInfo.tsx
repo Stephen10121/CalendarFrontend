@@ -48,6 +48,8 @@ export default function JobInfo({ id, baseInfo, close, myJob, changeBorder }: { 
     const [positions, setPositions] = useState(1);
     const [comments, setComments] = useState(false);
 
+    console.log("Job information", {id});
+
     useEffect(() => {
         if (!info) {
             return

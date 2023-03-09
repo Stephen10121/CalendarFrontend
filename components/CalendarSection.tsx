@@ -11,7 +11,7 @@ import BigDate from './BigDate';
 import SlideUp, { Border, SlideUpData } from './SlideUp';
 import JobInfo from './JobInfo';
 
-export default function CalendarSection() {
+export default function CalendarSection({ setShowSlideUp, setSlideUpBorderColor, setCloseInternal }: { setShowSlideUp: React.Dispatch<React.SetStateAction<SlideUpData>>, setSlideUpBorderColor: React.Dispatch<React.SetStateAction<Border>>, setCloseInternal: React.Dispatch<React.SetStateAction<boolean>> }) {
     const [year, setYear] = useState(2023);
     const [month, setMonth] = useState(2);
     const [dateArray, setDateArray] = useState<DateArray>([]);
@@ -20,9 +20,6 @@ export default function CalendarSection() {
     const [day, setDay] = useState(1);
     const [daysInMonth, setDaysInMonth] = useState(null);
     const [jobForDay, setJobForDay] = useState<JobType[]>([]);
-    const [showSlideUp, setShowSlideUp] = useState<SlideUpData>({show: false, header: "N/A", children: null});
-    const [slideUpBorderColor, setSlideUpBorderColor] = useState<Border>("black");
-    const [closeInternal, setCloseInternal] = useState(false);
     const userData = useSelector((state: Store) => state.userData);
     const [onlyMyJobs, setOnlyMyJobs] = useState(false);
 
@@ -146,11 +143,6 @@ export default function CalendarSection() {
         <View style={{width: "100%",height:"100%"}}>
             {showBig ? <BigDate myJobToggle={setOnlyMyJobs} myJobShow={onlyMyJobs} clicked={jobClicked} close={() => setShowBig(false)} month={month} day={day} year={year} left={yesterday} right={tomorrow} jobs={jobForDay} /> : null}
             <Calendar myJobToggle={setOnlyMyJobs} myJobShow={onlyMyJobs} changeMonth={changeMonth} dateArray={dateArray} year={year} month={monthToLetterFull[month]} monthIndex={month} monthJobs={monthJobs} clicked={clicked}/>
-            {showSlideUp.show ? 
-                <SlideUp closeInternal={closeInternal} border={slideUpBorderColor} close={() => {setShowSlideUp({...showSlideUp, show: false}),setCloseInternal(false)}} header={showSlideUp.header}>
-                    {showSlideUp.children}
-                </SlideUp>
-            : null}
         </View>
     )
 }
