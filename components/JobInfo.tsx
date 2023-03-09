@@ -97,9 +97,10 @@ export default function JobInfo({ id, baseInfo, close, myJob, changeBorder }: { 
     useEffect(() => {
         if (status !== "loading") {
             dispatch(setLoading(null));
+        } else {
+            dispatch(setLoading("Updating Job"));
         }
         if (status === "success") {
-            dispatch(setLoading(null));
             setInfo(data);
             if (changeBorder !== undefined) {
                 console.log(data)
@@ -108,14 +109,9 @@ export default function JobInfo({ id, baseInfo, close, myJob, changeBorder }: { 
             }
         }
         if (status === "error") {
-            dispatch(setLoading(null));
             dispatch(setError({ type: "alert", show: true, message: "Cannot Update Job." }));
         }
     }, [status, data]);
-
-    useEffect(() => {
-        dispatch(setLoading("Updating Job"));
-    }, []);
 
     return(
         <ScrollView style={styles.groupInfo}>
