@@ -1,19 +1,19 @@
-import { Dimensions, StyleSheet, View, Text } from 'react-native';
-import React, { useEffect } from 'react';
-import Navigation from './Navigation';
-import HomeSection from './HomeSection';
-import GroupSection from './GroupSection';
-import { fetchGroups, FetchGroupsResponse } from '../functions/backendFetch';
-import Account from './Account';
-import { useDispatch, useSelector } from 'react-redux';
-import AddJobSection from './AddJobSection';
-import { getJobsByDate, GetJobsResponse } from '../functions/jobFetch';
-import { JobMonths, Store } from '../redux/types';
+import { getJobsByDates, GetJobsByDatesResponse, JobType } from '../functions/jobFetch';
 import { setJobs, setUserGroups, setUserPendingGroups } from '../redux/actions';
-import { useQuery } from "react-query";
-import addJobMonth from '../functions/addJob';
+import { fetchGroups, FetchGroupsResponse } from '../functions/backendFetch';
+import { Dimensions, StyleSheet, View } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { JobMonths, Store } from '../redux/types';
 import CalendarSection from './CalendarSection';
+import addJobMonth from '../functions/addJob';
+import AddJobSection from './AddJobSection';
+import GroupSection from './GroupSection';
+import React, { useEffect } from 'react';
 import LoadingIcon from './LoadingIcon';
+import HomeSection from './HomeSection';
+import { useQuery } from "react-query";
+import Navigation from './Navigation';
+import Account from './Account';
 
 export type RemoveGroup = (groupId: string) => void;
 export type RemovePendingGroup = (pendingGroupId: string) => void;
@@ -35,19 +35,11 @@ export default function LoggedIn() {
 
   // Group Fetch
   const groupFetch = useQuery<FetchGroupsResponse, Error>(["groups"], () => fetchGroups(token), { staleTime: 30000, refetchInterval: 30000 });
-  const lastMonthJobs = useQuery<GetJobsResponse, Error>([`jobFetch${month-1}${year}`], () => getJobsByDate(token, month-1, year), { staleTime: 30000, refetchInterval: 30000 });
-  const nextMonthJobs = useQuery<GetJobsResponse, Error>([`jobFetch${month+1}${year}`], () => getJobsByDate(token, month+1, year), { staleTime: 30000, refetchInterval: 30000 });
-  const thisMonthJobs = useQuery<GetJobsResponse, Error>([`jobFetch${month}${year}`], () => getJobsByDate(token, month, year), { staleTime: 30000, refetchInterval: 30000 });
+  const threeMonthJobs = useQuery<GetJobsByDatesResponse, Error>([`jobFetchMonths${month}${year}`], () => getJobsByDates(token, [month-1, month, month+1], year), { staleTime: 30000, refetchInterval: 30000 });
 
  async function setGroupsAndJobs(data: FetchGroupsResponse) {
-  if (data.data.groups !== null) {
-    dispatch(setUserGroups(data.data.groups));
-  }
-  if (data.data.pendingGroups) {
-    dispatch(setUserPendingGroups(data.data.pendingGroups));
-  } else {
-    dispatch(setUserPendingGroups([]));
-  }
+  if (data.data.groups !== null) dispatch(setUserGroups(data.data.groups))
+  dispatch(setUserPendingGroups(data.data.pendingGroups ? data.data.pendingGroups: []));
  }
 
   useEffect(() => {
@@ -58,43 +50,26 @@ export default function LoggedIn() {
   }, [groupFetch.status, groupFetch.data]);
 
   useEffect(() => {
-    const { data, status } = lastMonthJobs;
+    const { data, status } = threeMonthJobs;
     if (status !== "success") return
-    console.log("Fetched last months jobs.");
+    console.log("Fetched 3 months jobs.");
+    
     if (data.jobs) {
-      const monthJob: JobMonths = {
-        month: month-1,
-        jobs: data.jobs
+      const jobArray = data.jobs;
+      let newJobsObject = jobs;
+      
+      for (let i=0;i<Object.keys(jobArray).length;i++) {
+        const newJobs = jobArray[Object.keys(jobArray)[i]] as any as JobType[];
+        if (newJobs.length===0) continue
+        const monthJob: JobMonths = {
+          month: parseInt(Object.keys(jobArray)[i]),
+          jobs: newJobs
+        }
+        newJobsObject = addJobMonth(newJobsObject, year, monthJob);
       }
-      dispatch(setJobs(addJobMonth(jobs, year, monthJob)));
+      dispatch(setJobs(newJobsObject));
     }
-  }, [lastMonthJobs.status, lastMonthJobs.data]);
-
-  useEffect(() => {
-    const { data, status } = thisMonthJobs;
-    if (status !== "success") return
-    console.log("Fetched this months jobs.");
-    if (data.jobs) {
-      const monthJob: JobMonths = {
-        month,
-        jobs: data.jobs
-      }
-      dispatch(setJobs(addJobMonth(jobs, year, monthJob)));
-    }
-  }, [thisMonthJobs.status, thisMonthJobs.data]);
-
-  useEffect(() => {
-    const { data, status } = nextMonthJobs;
-    if (status !== "success") return
-    console.log("Fetched this months jobs.");
-    if (data.jobs) {
-      const monthJob: JobMonths = {
-        month: month+1,
-        jobs: data.jobs
-      }
-      dispatch(setJobs(addJobMonth(jobs, year, monthJob)));
-    }
-  }, [nextMonthJobs.status, nextMonthJobs.data]);
+  }, [threeMonthJobs.status, threeMonthJobs.data]);
 
   const styles = StyleSheet.create({
     main: {

@@ -159,3 +159,28 @@ export async function getJobsByDate(token: string, month: number, year: number):
   }
   return {jobs: groupsJson.jobs}
 }
+
+export interface GetJobsByDatesResponse {
+  jobs?: any;
+  error?: string;
+}
+
+export async function getJobsByDates(token: string, months: number[], year: number): Promise<GetJobsByDatesResponse> {
+  const groups = await fetch(`${POST_SERVER}/allJobsByMonthsYear`, {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+    },
+    credentials: "omit",
+    body: JSON.stringify({
+        "months": JSON.stringify(months),
+        "year": year
+    })
+  })
+  const groupsJson = await groups.json();
+  if (groupsJson.error) {
+    return {error: groupsJson.error}
+  }
+  return {jobs: groupsJson.jobs}
+}
