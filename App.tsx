@@ -101,10 +101,6 @@ function Root() {
     }
 
     useEffect(() => {
-      console.log(responseListener);
-    }, [responseListener]);
-
-    useEffect(() => {
       startup();
       return () => {
         if (responseListener) {

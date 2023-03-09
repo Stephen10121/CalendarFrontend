@@ -65,6 +65,7 @@ export default function AddJobSection() {
         }
         if (results.return) {
             const job2 = results.return;
+            queryClient.invalidateQueries({ queryKey: [`initialJobsFetch`] });
             queryClient.invalidateQueries({ queryKey: [`jobFetch${job2.month}${job2.year}`] });
         }
     }

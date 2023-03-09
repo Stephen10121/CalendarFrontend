@@ -87,6 +87,7 @@ export default function JobInfo({ id, baseInfo, close, myJob, changeBorder }: { 
               })
               await groups.json();
               refetch();
+              queryClient.invalidateQueries({ queryKey: [`initialJobsFetch`] });
               queryClient.invalidateQueries({ queryKey: [`jobFetch${info.month}${info.year}`] });
         } catch (err) {
             console.error(err);

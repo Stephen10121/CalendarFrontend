@@ -28,14 +28,14 @@ export default function LoggedIn() {
 
   // Other Variables
   const now = new Date();;
-  const month = now.getUTCMonth() + 1;
+  const month = 2//now.getUTCMonth() + 1;
   const year = now.getUTCFullYear();
   const win = Dimensions.get('window');
   const dispatch = useDispatch();
 
   // Group Fetch
   const groupFetch = useQuery<FetchGroupsResponse, Error>(["groups"], () => fetchGroups(token), { staleTime: 30000, refetchInterval: 30000 });
-  const threeMonthJobs = useQuery<GetJobsByDatesResponse, Error>([`jobFetchMonths${month}${year}`], () => getJobsByDates(token, [month-1, month, month+1], year), { staleTime: 30000, refetchInterval: 30000 });
+  const threeMonthJobs = useQuery<GetJobsByDatesResponse, Error>([`initialJobsFetch`], () => getJobsByDates(token, [month-1, month, month+1], year), { staleTime: 30000, refetchInterval: 30000 });
 
  async function setGroupsAndJobs(data: FetchGroupsResponse) {
   if (data.data.groups !== null) dispatch(setUserGroups(data.data.groups))

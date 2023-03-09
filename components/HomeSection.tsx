@@ -17,11 +17,6 @@ export default function HomeSection({ name }: {name: string}) {
     const [closeInternal, setCloseInternal] = useState(false);
 
     useEffect(() => {
-        console.log("Jobs Changed");
-        console.log(jobs);
-    }, [jobs]);
-
-    useEffect(() => {
         console.log("Checking if job selected.")
         if (jobSelected) {
             setShowSlideUp({ show: true, header: jobSelected.title, children: <JobInfo changeBorder={borderChange} id={jobSelected.id} myJob={false} close={() => setCloseInternal(true)}/>});
