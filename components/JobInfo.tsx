@@ -12,6 +12,7 @@ import { Store } from "../redux/types";
 import { setError, setLoading } from "../redux/actions";
 import { Border } from "./SlideUp";
 import getJobState from "../functions/getJobState";
+import EditPosition from "./EditPosition";
 
 export interface VolunteerType {
     positions: number;
@@ -21,12 +22,14 @@ export interface VolunteerType {
 
 export default function JobInfo({ id, baseInfo, close, myJob, changeBorder }: { id: number, baseInfo?: JobType, close: () => any, myJob?: boolean, changeBorder?: (color: Border) => any}) {
     const token = useSelector((state: Store) => state.token);
+    const userData = useSelector((state: Store) => state.userData);
     const dispatch = useDispatch();
     const queryClient = useQueryClient()
     const [info, setInfo] = useState(baseInfo);
     const [dateString, setDateString] = useState("N/A");
     const [volunteerPositions, setVolunteerPositions] = useState<VolunteerType[]>([]);
     const [positionsTaken, setPositionsTaken] = useState(0);
+    const [editPositions, setEditPositions] = useState(false);
     const { status, data, refetch } = useQuery<JobType, Error>(["jobInfo"], async () => {
         const groups = await fetch(`${POST_SERVER}/jobInfo`, {
             method: "POST",
@@ -48,7 +51,6 @@ export default function JobInfo({ id, baseInfo, close, myJob, changeBorder }: { 
     const [positions, setPositions] = useState(1);
     const [comments, setComments] = useState(false);
 
-    console.log("Job information", {id});
 
     useEffect(() => {
         if (!info) {
@@ -131,9 +133,16 @@ export default function JobInfo({ id, baseInfo, close, myJob, changeBorder }: { 
                         <Text style={styles.li}>• Address: <Text style={styles.span}>{info.address.length > 0 ? info.address : "Address not given."}</Text></Text>
                         <Text style={styles.li}>• Volunteer{volunteerPositions.length > 1 ? "s" : null}: {volunteerPositions.length!==0 ? null: <Text style={styles.span}>No Volunteers</Text>}</Text>
                         {volunteerPositions.length!==0 ? <View style={styles.volunteerList}>
-                            {volunteerPositions.map((volunteer2) => <View style={styles.volunteerListItem} key={`volunteerlist${volunteer2.userId}`}>
+                            {volunteerPositions.map((volunteer2) => <View style={{...styles.volunteerListItem, width: "110%"}} key={`volunteerlist${volunteer2.userId}`}>
                             <Text style={styles.span}>{volunteer2.fullName}</Text>
-                            <Text style={styles.positionsBox}>{volunteer2.positions} Positions</Text></View>)}
+                            <View style={styles.editPositionsView}>
+                            {editPositions ? <EditPosition close={() => setEditPositions(false)}/> : volunteer2.userId === userData.ID ?
+                            <TouchableOpacity style={styles.positionsBox} onPress={() => setEditPositions(true)}>
+                                <Text style={styles.positionsBox2}>{volunteer2.positions} Position{volunteer2.positions > 1 ? "s" : ""}</Text>
+                            </TouchableOpacity>
+                            : <Text style={styles.positionsBox2}>{volunteer2.positions} Position{volunteer2.positions > 1 ? "s" : ""}</Text>}
+                            </View>
+                        </View>)}
                         </View>: null}
                         <Text style={styles.li}>• Time: <Text style={styles.span}>{info.hour}:{info.minute}{info.pm ? "PM":"AM"}</Text></Text>
                         <Text style={styles.li}>• Date: <Text style={styles.span}>{dateString}</Text></Text>
@@ -144,6 +153,7 @@ export default function JobInfo({ id, baseInfo, close, myJob, changeBorder }: { 
                     <View style={styles.infoList}>
                         <Text style={styles.li}>{info.instructions}</Text>
                     </View>
+                    
                     {!info.taken ?
                     <View style={styles.getJob}>
                         <Counter value={positions} title="Positions" change={setPositions} minLimit={1} maxLimit={info.positions-positionsTaken}/>
@@ -184,7 +194,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         marginTop: 11
     },
-    volunteerList: {
+        volunteerList: {
         width: "100%",
     },
     volunteerListItem: {
@@ -195,14 +205,19 @@ const styles = StyleSheet.create({
         flexDirection: "row"
     },
     positionsBox: {
-        color: "#646464",
         marginTop: 5,
-        fontSize: 15,
-        fontWeight: "700",
-        fontFamily: "Poppins-SemiBold",
         backgroundColor: "#dfdfdf",
         padding: 5,
         borderRadius: 5
+    },
+    editPositionsView: {
+        flexDirection: "row"
+    },
+    positionsBox2: {
+        color: "#646464",
+        fontSize: 15,
+        fontWeight: "700",
+        fontFamily: "Poppins-SemiBold",
     },
     li: {
         marginTop: 10,
